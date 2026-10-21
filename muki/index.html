@@ -1,0 +1,942 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ムキムキ育成ジム</title>
+<meta name="description" content="筋トレメニューを組んでキャラを12日間育てるミニゲーム。偏った筋トレをすると体も偏って育つ。きれいな体も、おもしろい体も作れる。">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="ムキムキ育成ジム">
+<meta property="og:description" content="筋トレメニューを組んでキャラを12日間育てるミニゲーム。偏った筋トレをすると体も偏って育つ。きれいな体も、おもしろい体も作れる。">
+<meta property="og:url" content="https://takase-00.github.io/games/muki/">
+<meta property="og:image" content="https://takase-00.github.io/games/muki/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ムキムキ育成ジム：ひょろひょろの体が、鍛え方しだいで黄金比ボディにも、ふくらはぎだけ巨大な体にもなる">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💪</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap">
+<style>
+:root{
+  --bg:#EEF0F3;
+  --panel:#FFFFFF;
+  --ink:#16191E;
+  --muted:#5C6470;
+  --line:#D7DCE2;
+  --push:#D7263D;
+  --pull:#1E5AA8;
+  --core:#C99A0E;
+  --legs:#2E9E5B;
+  --push-soft:#FBE3E6;
+  --pull-soft:#E1EAF6;
+  --core-soft:#FBF1D2;
+  --legs-soft:#DFF2E6;
+  --bar:rgba(255,255,255,.94);
+  --btn:#D7263D;
+  --btn-ink:#FFFFFF;
+  --btn2:#FFFFFF;
+  --btn2-ink:#16191E;
+  --off:#C9CFD6;
+  --off-ink:#6B7380;
+  --focus:#2F6BFF;
+  --scrim:rgba(10,12,16,.6);
+  --toast:#16191E;
+  --toast-ink:#FFFFFF;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111317;
+    --panel:#1B1F25;
+    --ink:#ECEFF3;
+    --muted:#9AA3AE;
+    --line:#2C323B;
+    --push:#FF5A6E;
+    --pull:#5B8FE0;
+    --core:#E8B21C;
+    --legs:#4CC27D;
+    --push-soft:#3A1A20;
+    --pull-soft:#16253A;
+    --core-soft:#3A3010;
+    --legs-soft:#16301F;
+    --bar:rgba(27,31,37,.95);
+    --btn:#E0334A;
+    --btn2:#1B1F25;
+    --btn2-ink:#ECEFF3;
+    --off:#2C323B;
+    --off-ink:#7E8794;
+    --focus:#8FB0FF;
+    --toast:#ECEFF3;
+    --toast-ink:#111317;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111317;
+  --panel:#1B1F25;
+  --ink:#ECEFF3;
+  --muted:#9AA3AE;
+  --line:#2C323B;
+  --push:#FF5A6E;
+  --pull:#5B8FE0;
+  --core:#E8B21C;
+  --legs:#4CC27D;
+  --push-soft:#3A1A20;
+  --pull-soft:#16253A;
+  --core-soft:#3A3010;
+  --legs-soft:#16301F;
+  --bar:rgba(27,31,37,.95);
+  --btn:#E0334A;
+  --btn2:#1B1F25;
+  --btn2-ink:#ECEFF3;
+  --off:#2C323B;
+  --off-ink:#7E8794;
+  --focus:#8FB0FF;
+  --toast:#ECEFF3;
+  --toast-ink:#111317;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none !important}
+html{min-height:100%;background:var(--bg);scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic UI","Meiryo",system-ui,sans-serif;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+}
+button{font:inherit;color:inherit}
+button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.app{max-width:520px;margin:0 auto;padding:10px 12px calc(150px + env(safe-area-inset-bottom,0px))}
+
+/* stage */
+.stage{
+  position:relative;height:min(52vh,380px);min-height:290px;border-radius:18px;overflow:hidden;
+  background:
+    radial-gradient(ellipse 60% 70% at 50% -5%,rgba(255,255,255,.22),transparent 70%),
+    linear-gradient(#2B3038,#1B1E24 78%);
+}
+.stage::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:16%;
+  background:repeating-linear-gradient(90deg,#14171B 0 46px,#191C21 46px 48px);
+  border-top:2px solid #0E1013;
+}
+.figure{position:absolute;inset:84px 0 34px;z-index:1}
+.figure svg{display:block;width:100%;height:100%;overflow:visible}
+.figure.pump{animation:pump .5s ease-out}
+@keyframes pump{0%{transform:scale(1)}35%{transform:scale(1.045)}100%{transform:scale(1)}}
+.day{position:absolute;left:14px;top:10px;z-index:2;color:#fff;font-family:"Dela Gothic One",sans-serif;font-size:1.25rem;letter-spacing:.02em}
+.day small{font-size:.8rem;color:rgba(255,255,255,.6);margin-left:2px}
+.mute{position:absolute;right:10px;top:8px;z-index:2;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);cursor:pointer;padding:0;font-size:1rem}
+.now{position:absolute;left:12px;bottom:10px;z-index:2;color:rgba(255,255,255,.75);font-size:.75rem;font-weight:700;background:rgba(0,0,0,.35);padding:3px 8px;border-radius:999px}
+.now b{color:#FFD86B}
+.bubble{
+  position:absolute;left:50%;top:40px;z-index:3;max-width:86%;width:max-content;text-align:center;
+  background:#FFFFFF;color:#16191E;border:3px solid #16191E;border-radius:16px;
+  padding:7px 14px;font-family:"Dela Gothic One",sans-serif;font-size:clamp(.95rem,4.2vw,1.15rem);line-height:1.35;
+  transform:translateX(-50%) rotate(-2deg);box-shadow:4px 4px 0 #16191E;
+}
+.bubble::after{
+  content:"";position:absolute;left:calc(50% - 8px);bottom:-11px;width:16px;height:16px;background:#fff;
+  border-right:3px solid #16191E;border-bottom:3px solid #16191E;transform:rotate(45deg) skew(10deg,10deg);
+}
+.bubble.show{animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{0%{transform:translateX(-50%) rotate(-2deg) scale(.4);opacity:0}100%{transform:translateX(-50%) rotate(-2deg) scale(1);opacity:1}}
+.feedback{min-height:52px;margin:10px 2px 2px;display:flex;align-items:center}
+.gains{display:flex;flex-wrap:wrap;gap:6px}
+.gains-h{font-size:.8125rem;font-weight:900;margin-right:2px;align-self:center}
+.gain{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.8125rem;font-weight:700}
+.gain i{font-style:normal;display:inline-block;width:.6em;height:.6em;border-radius:50%;margin-right:5px;background:var(--c)}
+
+/* exercise list */
+.howto{margin:0;font-size:.875rem;color:var(--muted);line-height:1.6}
+.group{margin-top:14px}
+.group-h{display:flex;align-items:center;gap:8px;margin:0 2px 8px;font-size:.9375rem;font-weight:900}
+.plate{width:14px;height:14px;border-radius:50%;background:var(--g);box-shadow:inset 0 0 0 3px rgba(255,255,255,.35)}
+.group-h small{font-weight:500;color:var(--muted);font-size:.8125rem}
+.exs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ex{
+  position:relative;text-align:left;background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--g);
+  border-radius:10px;padding:9px 10px 10px;cursor:pointer;min-height:64px;display:flex;flex-direction:column;gap:6px;
+}
+.ex:active{transform:translateY(1px)}
+.ex-name{font-weight:900;font-size:.9375rem;line-height:1.3}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-size:.72rem;font-weight:700;padding:1px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.tag.main{background:var(--gs);border-color:transparent;color:var(--ink)}
+.ex-count{position:absolute;right:8px;top:7px;min-width:24px;height:22px;padding:0 6px;border-radius:11px;background:var(--g);color:#fff;font-size:.75rem;font-weight:900;display:grid;place-items:center}
+
+/* bottom bar */
+.bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:4;background:var(--bar);
+  border-top:1px solid var(--line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));
+}
+.bar-in{max-width:520px;margin:0 auto;display:grid;gap:8px}
+.slots-h{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);font-weight:700;margin:0 2px}
+.slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.slot{
+  min-height:40px;border-radius:9px;border:1.5px dashed var(--line);background:transparent;
+  font-size:.8125rem;font-weight:700;padding:0 8px;color:var(--muted);cursor:default;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.slot.on{border:1px solid var(--line);border-left:5px solid var(--g);background:var(--panel);color:var(--ink);cursor:pointer;text-align:left}
+.acts{display:grid;grid-template-columns:1fr 2fr;gap:8px}
+.btn{
+  min-height:50px;border-radius:12px;border:0;cursor:pointer;font-weight:900;font-size:1rem;
+  background:var(--btn);color:var(--btn-ink);box-shadow:0 3px 0 rgba(0,0,0,.25);
+}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.25)}
+.btn[disabled]{background:var(--off);color:var(--off-ink);box-shadow:none;cursor:default;transform:none}
+.btn.sub{background:var(--btn2);color:var(--btn2-ink);border:1.5px solid var(--line);box-shadow:none}
+
+/* overlays */
+.overlay{position:fixed;inset:0;z-index:6;display:grid;place-items:center;padding:20px 16px;background:var(--scrim);overflow:auto}
+.card{width:min(400px,100%);background:var(--panel);color:var(--ink);border-radius:18px;padding:22px 20px}
+.logo{margin:0 0 6px;font-family:"Dela Gothic One",sans-serif;font-size:clamp(1.8rem,8.5vw,2.3rem);line-height:1.2;font-weight:400}
+.lead{margin:0 0 14px;font-size:.9375rem;line-height:1.7}
+.points{margin:0 0 18px;padding:0;list-style:none;font-size:.875rem;line-height:1.6;color:var(--muted)}
+.points li{position:relative;padding-left:22px;margin-top:6px}
+.points li::before{content:"";position:absolute;left:0;top:.3em;width:13px;height:13px;border-radius:50%;background:var(--g);box-shadow:inset 0 0 0 3px rgba(255,255,255,.35)}
+.card .btn{width:100%}
+
+.final{
+  position:fixed;inset:0;z-index:6;overflow:auto;color:#fff;
+  background:
+    radial-gradient(ellipse 55% 45% at 50% 0%,rgba(255,236,170,.28),transparent 70%),
+    linear-gradient(#262A31,#121418);
+  padding:calc(env(safe-area-inset-top,0px) + 14px) 16px calc(env(safe-area-inset-bottom,0px) + 24px);
+}
+.final-in{max-width:440px;margin:0 auto;text-align:center}
+.f-top{font-size:.8125rem;color:rgba(255,255,255,.6);font-weight:700;margin:0}
+.f-fig{height:min(44vh,330px);margin:4px 0 0}
+.f-fig svg{display:block;width:100%;height:100%;overflow:visible}
+.f-title{margin:4px 0 0;font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:clamp(1.7rem,8vw,2.2rem);line-height:1.25;color:#FFD86B}
+.f-desc{margin:6px 0 16px;font-size:.9375rem;line-height:1.6;color:rgba(255,255,255,.82)}
+.meters{display:grid;gap:10px;text-align:left;margin-bottom:16px}
+.meter-h{display:flex;justify-content:space-between;font-weight:900;font-size:.9375rem}
+.meter-h b{font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:1.25rem}
+.track{height:10px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden;margin-top:4px}
+.fill{height:100%;border-radius:5px;background:var(--c);width:0;transition:width .9s ease-out}
+.mus{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;text-align:left;margin-bottom:20px}
+.mu{font-size:.75rem;font-weight:700;color:rgba(255,255,255,.8)}
+.mu .row{display:flex;justify-content:space-between}
+.mu .track{height:6px;margin-top:3px}
+.f-acts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.final .btn.sub{background:transparent;color:#fff;border-color:rgba(255,255,255,.4)}
+
+/* meal management */
+.meal{
+  position:absolute;right:58px;top:11px;z-index:2;min-height:36px;max-width:calc(100% - 176px);padding:0 12px;
+  border-radius:999px;border:0;background:#FFFFFF;color:#16191E;font-weight:900;font-size:.8125rem;cursor:pointer;
+  box-shadow:0 2px 0 rgba(0,0,0,.35);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.meal.set{background:#FFD86B}
+.fat{position:absolute;right:12px;bottom:10px;z-index:2;color:rgba(255,255,255,.75);font-size:.75rem;font-weight:700;background:rgba(0,0,0,.35);padding:3px 8px;border-radius:999px}
+.fat b{color:#fff}
+.overlay.sheet-ov{place-items:end center;padding:0}
+.sheet{
+  width:min(520px,100%);max-height:92vh;overflow:auto;background:var(--panel);color:var(--ink);
+  border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));
+}
+.sheet h2{margin:0;font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:1.4rem}
+.sheet h3{margin:16px 0 8px;font-size:.9375rem;font-weight:900}
+.sheet-note{margin:4px 0 12px;font-size:.8125rem;color:var(--muted);line-height:1.6}
+.fatline{display:flex;justify-content:space-between;align-items:baseline;font-size:.875rem;font-weight:700}
+.fatline b{font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:1.15rem}
+.sheet .track{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:4px}
+.sheet .fill{height:100%;background:var(--core);transition:width .3s}
+.fat-tip{margin:6px 0 0;font-size:.75rem;color:var(--muted);line-height:1.5}
+.opts{display:grid;gap:8px}
+.opts.cal{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opts.pro{grid-template-columns:repeat(3,minmax(0,1fr))}
+.opt{
+  text-align:left;border:1.5px solid var(--line);background:var(--panel);border-radius:10px;padding:9px 10px;
+  cursor:pointer;display:flex;flex-direction:column;gap:3px;min-height:58px;
+}
+.opt b{font-size:.9375rem}
+.opt span{font-size:.72rem;color:var(--muted);line-height:1.45}
+.opt.on{border-color:var(--legs);background:var(--legs-soft);box-shadow:inset 0 0 0 1px var(--legs)}
+.effect{margin:14px 0 0;padding:10px 12px;border-radius:10px;background:var(--bg);font-size:.875rem;line-height:1.6}
+.effect b{font-weight:900}
+.sheet-acts{display:grid;grid-template-columns:auto 1fr;gap:8px;margin-top:14px}
+.sheet .btn.sub{padding:0 14px;font-size:.9375rem;white-space:nowrap}
+.sheet .btn{width:100%}
+.gain.diet{background:#FFD86B;border-color:transparent;color:#16191E}
+.f-fat{margin:-8px 0 16px;font-size:.8125rem;color:rgba(255,255,255,.65)}
+
+.toast{
+  position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);z-index:8;transform:translate(-50%,-8px);
+  background:var(--toast);color:var(--toast-ink);font-weight:700;font-size:.875rem;
+  padding:10px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+  max-width:calc(100% - 32px);text-align:center;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion: reduce){
+  .figure.pump,.bubble.show{animation:none}
+  .fill,.toast{transition:none}
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <section class="stage" aria-label="キャラクター">
+    <div class="day" id="day">DAY 1<small>/12</small></div>
+    <div class="now" id="now">いまの体型：<b>ひょろひょろ</b></div>
+    <button class="meal" id="mealBtn" type="button">🍙 食事管理</button>
+    <button class="mute" id="mute" type="button" aria-label="音を消す">🔊</button>
+    <div class="fat" id="fatLbl">体脂肪 <b>11%</b></div>
+    <div class="figure" id="fig"></div>
+    <div class="bubble" id="bubble" hidden></div>
+  </section>
+
+  <div class="feedback">
+    <p class="howto" id="howto">今日のメニューを3種目まで選ぼう。同じ種目を何回選んでもOK。選んだ部位の筋肉が育ちます。</p>
+    <div class="gains" id="gains" hidden></div>
+  </div>
+  <div id="list"></div>
+</main>
+
+<div class="bar">
+  <div class="bar-in">
+    <div class="slots-h"><span>今日のメニュー</span><span id="slotHint">タップで外せます</span></div>
+    <div class="slots" id="slots"></div>
+    <div class="acts">
+      <button class="btn sub" id="rest" type="button">休養日にする</button>
+      <button class="btn" id="train" type="button" disabled>トレーニング開始</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="titleOv">
+  <div class="card">
+    <h1 class="logo">ムキムキ育成ジム</h1>
+    <p class="lead">12日間、毎日の筋トレメニューを組んで、ひょろひょろ君を育てよう。鍛えた部位だけが育つので、バランスよく鍛えれば美しい体に、偏らせればおもしろい体になります。</p>
+    <ul class="points">
+      <li style="--g:var(--push)">1日に選べるのは3種目まで。同じ種目を重ねてもOK</li>
+      <li style="--g:var(--pull)">同じ部位を続けて鍛えると筋肉痛で伸びが落ちる（赤くなっている部位）</li>
+      <li style="--g:var(--legs)">休養日をはさむと、次の日は超回復で伸びがアップ</li>
+      <li style="--g:var(--core)">「🍙 食事管理」で食べる量やタンパク質も決められます（決めなくても遊べます）</li>
+      <li style="--g:var(--push)">最後に「美しさ」と「おもしろさ」で体型を診断</li>
+    </ul>
+    <button class="btn" id="start" type="button">ジムに入る</button>
+  </div>
+</div>
+
+<div class="final" id="final" hidden role="dialog" aria-label="12日間の結果">
+  <div class="final-in">
+    <p class="f-top">12日間のトレーニング修了</p>
+    <div class="f-fig" id="fFig"></div>
+    <h2 class="f-title" id="fTitle"></h2>
+    <p class="f-desc" id="fDesc"></p>
+    <p class="f-fat" id="fFat"></p>
+    <div class="meters">
+      <div><div class="meter-h"><span>美しさ</span><b id="fBeauty">0</b></div><div class="track"><div class="fill" id="fBeautyBar" style="--c:#FFD86B"></div></div></div>
+      <div><div class="meter-h"><span>おもしろさ</span><b id="fFun">0</b></div><div class="track"><div class="fill" id="fFunBar" style="--c:#FF7A8A"></div></div></div>
+    </div>
+    <div class="mus" id="fMus"></div>
+    <div class="f-acts">
+      <button class="btn" id="retry" type="button">もう一度</button>
+      <button class="btn sub" id="share" type="button">結果をシェア</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay sheet-ov" id="mealOv" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mealTitle">
+    <h2 id="mealTitle">食事管理</h2>
+    <p class="sheet-note">設定しなくても遊べます。決めた内容は、変えるまで毎日続きます。</p>
+    <div class="fatline"><span>いまの体脂肪</span><b id="fatNow">11%</b></div>
+    <div class="track"><div class="fill" id="fatBar"></div></div>
+    <p class="fat-tip">体脂肪が多いとお腹が出て腹筋が埋もれ、少ないと筋肉のキレが増します。</p>
+    <h3>食べる量</h3>
+    <div class="opts cal" id="calOpts" role="radiogroup" aria-label="食べる量"></div>
+    <h3>タンパク質</h3>
+    <div class="opts pro" id="proOpts" role="radiogroup" aria-label="タンパク質"></div>
+    <p class="effect" id="effect"></p>
+    <div class="sheet-acts">
+      <button class="btn sub" id="mealReset" type="button">おまかせに戻す</button>
+      <button class="btn" id="mealOk" type="button">決定</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const DAYS = 12, SLOTS = 3, VMAX = 8, GROW = .24, FAT0 = .35;
+
+const MU = [
+  { k: 'traps', n: '首まわり', g: 'pull' },
+  { k: 'delts', n: '肩', g: 'push' },
+  { k: 'chest', n: '胸', g: 'push' },
+  { k: 'biceps', n: '力こぶ', g: 'pull' },
+  { k: 'triceps', n: '二の腕', g: 'push' },
+  { k: 'forearms', n: '前腕', g: 'pull' },
+  { k: 'lats', n: '背中', g: 'pull' },
+  { k: 'abs', n: '腹筋', g: 'core' },
+  { k: 'glutes', n: 'お尻', g: 'legs' },
+  { k: 'quads', n: 'もも前', g: 'legs' },
+  { k: 'hams', n: 'もも裏', g: 'legs' },
+  { k: 'calves', n: 'ふくらはぎ', g: 'legs' }
+];
+const MN = Object.fromEntries(MU.map(m => [m.k, m]));
+const GROUPS = [
+  { g: 'push', n: '押す筋肉', sub: '胸・肩・二の腕' },
+  { g: 'pull', n: '引く筋肉', sub: '背中・力こぶ・前腕・首まわり' },
+  { g: 'core', n: '体幹', sub: '腹筋' },
+  { g: 'legs', n: '脚', sub: 'お尻・もも・ふくらはぎ' }
+];
+const EX = [
+  { id: 'bench', n: 'ベンチプレス', w: { chest: 1, triceps: .5, delts: .35 } },
+  { id: 'pushup', n: '腕立て伏せ', w: { chest: .75, triceps: .45, delts: .3, abs: .15 } },
+  { id: 'fly', n: 'ダンベルフライ', w: { chest: 1.1, delts: .15 } },
+  { id: 'ohp', n: 'ショルダープレス', w: { delts: 1, triceps: .4, traps: .25 } },
+  { id: 'lateral', n: 'サイドレイズ', w: { delts: 1.15 } },
+  { id: 'dips', n: 'ディップス', w: { triceps: 1, chest: .4, delts: .2 } },
+  { id: 'pullup', n: '懸垂', w: { lats: 1, biceps: .45, forearms: .3 } },
+  { id: 'pulldown', n: 'ラットプルダウン', w: { lats: 1.1, biceps: .3 } },
+  { id: 'curl', n: 'ダンベルカール', w: { biceps: 1.1, forearms: .3 } },
+  { id: 'shrug', n: 'シュラッグ', w: { traps: 1.3, forearms: .2 } },
+  { id: 'wrist', n: 'リストカール', w: { forearms: 1.3 } },
+  { id: 'crunch', n: 'クランチ', w: { abs: 1.15 } },
+  { id: 'plank', n: 'プランク', w: { abs: .7, delts: .2, glutes: .15 } },
+  { id: 'squat', n: 'スクワット', w: { quads: 1, glutes: .6, hams: .3, abs: .15 } },
+  { id: 'deadlift', n: 'デッドリフト', w: { hams: .6, glutes: .6, traps: .5, lats: .4, forearms: .4 } },
+  { id: 'legcurl', n: 'レッグカール', w: { hams: 1.15 } },
+  { id: 'hipthrust', n: 'ヒップスラスト', w: { glutes: 1.25, hams: .35 } },
+  { id: 'calf', n: 'カーフレイズ', w: { calves: 1.3 } }
+];
+const EXM = Object.fromEntries(EX.map(e => [e.id, e]));
+const mainOf = e => Object.entries(e.w).sort((a, b) => b[1] - a[1])[0][0];
+const groupOf = e => MN[mainOf(e)].g;
+const gColor = g => `var(--${g})`, gSoft = g => `var(--${g}-soft)`;
+
+const CALLS = {
+  traps: ['僧帽筋が山脈！', '首と肩の境目どこ？'],
+  delts: ['肩メロン！', '肩にちっちゃいジープ乗せてんのかい！'],
+  chest: ['大胸筋が歩いてる！', '胸板が分厚い！'],
+  biceps: ['二頭がチョモランマ！', '力こぶが山！'],
+  triceps: ['二の腕がキレてる！', '三頭が馬蹄形！'],
+  forearms: ['前腕がワイルド！', 'りんご握りつぶせそう！'],
+  lats: ['背中に羽が生えてる！', '背中に鬼が宿ってる！'],
+  abs: ['腹筋板チョコ！', '腹筋6LDK！'],
+  glutes: ['お尻がメロン！', 'お尻が主役！'],
+  quads: ['脚が太い！土台が違う！', '太ももが競輪選手！'],
+  hams: ['もも裏がキレてる！', 'ハムが分厚い！'],
+  calves: ['ふくらはぎがダイヤモンド！', 'ふくらはぎにダチョウの卵！']
+};
+const SOLO = {
+  traps: '首が消えた人', delts: '肩にジープ', chest: '大胸筋が歩いてる人', biceps: '力こぶ一点豪華主義',
+  triceps: '二の腕番長', forearms: '前腕だけ職人', lats: '背中に羽', abs: '腹筋だけ板チョコ',
+  glutes: 'お尻が主役', quads: '太もも競輪選手', hams: 'もも裏番長', calves: 'ふくらはぎダイヤモンド'
+};
+
+/* ---------- state ---------- */
+const zero = () => Object.fromEntries(MU.map(m => [m.k, 0]));
+let v = zero(), f = zero(), menu = [], day = 1, restBonus = 1, busy = false, started = false, fat = FAT0;
+const CAL = [
+  { id: 'cut', n: '減量', d: '体脂肪が減る。筋肉の伸びは少し落ちる', g: .8, fat: -.12 },
+  { id: 'keep', n: '維持', d: '体脂肪はそのまま', g: 1, fat: 0 },
+  { id: 'bulk', n: '増量', d: '筋肉がよく伸びる。体脂肪も少し増える', g: 1.25, fat: .08 },
+  { id: 'feast', n: '爆食い', d: '筋肉がぐんぐん伸びる。体脂肪もぐんぐん増える', g: 1.5, fat: .18 }
+];
+const PRO = [
+  { id: 'low', n: '少なめ', d: '筋肉の材料が不足', g: .85 },
+  { id: 'mid', n: 'ふつう', d: '標準', g: 1 },
+  { id: 'high', n: '多め', d: 'プロテインで材料たっぷり', g: 1.2 }
+];
+const CALM = Object.fromEntries(CAL.map(x => [x.id, x])), PROM = Object.fromEntries(PRO.map(x => [x.id, x]));
+let diet = { cal: 'keep', pro: 'mid' }, dietSet = false;
+const dietMult = () => CALM[diet.cal].g * PROM[diet.pro].g;
+const fatPct = () => Math.round(6 + fat * 13);
+let muted = (() => { try { return localStorage.getItem('muki-muted') === '1'; } catch (e) { return false; } })();
+
+/* ---------- character ---------- */
+const SKIN = '#E8B48A', LINE = '#5B3520', HAIR = '#2A211C', SHORTS = '#1E5AA8', SHORTS_D = '#16447F', BAND = '#D7263D';
+const hx = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const mixHex = (a, b, t) => { const A = hx(a), B = hx(b); return `rgb(${A.map((x, i) => Math.round(x + (B[i] - x) * t)).join(',')})`; };
+const tint = x => mixHex(SKIN, '#E5534B', Math.min(.6, x * .75));
+const n1 = x => Math.round(x * 10) / 10;
+function smooth(pts) {
+  const n = pts.length;
+  let d = `M${n1(pts[0][0])},${n1(pts[0][1])}`;
+  for (let i = 0; i < n; i++) {
+    const p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n], p3 = pts[(i + 2) % n];
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    d += ` C${n1(c1[0])},${n1(c1[1])} ${n1(c2[0])},${n1(c2[1])} ${n1(p2[0])},${n1(p2[1])}`;
+  }
+  return d + 'Z';
+}
+let clipN = 0;
+function bodySVG(v, f, expr, fat) {
+  const cx = 180, out = [];
+  const st = `stroke="${LINE}" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"`;
+  const fx = Math.max(0, fat - .35);
+  const def = Math.max(.3, Math.min(1.2, 1.15 - .45 * fat));
+  const line = a => `fill="none" stroke="${LINE}" stroke-opacity="${Math.min(1, a * def).toFixed(2)}" stroke-width="2" stroke-linecap="round"`;
+
+  const neckH = 12 + 3 * v.traps + 2 * fx;
+  const chestHalf = 40 + 5 * v.chest + 4 * v.lats + 3 * fx;
+  const latHalf = Math.max(chestHalf - 1, 36 + 10 * v.lats + 2 * v.chest + 5 * fx);
+  const waistHalf = 29 + 1.5 * v.abs + v.lats + 15 * fx;
+  const rd = 14 + 6.5 * v.delts;
+  const shX = chestHalf + 3 + 2 * v.delts;
+  const ax = shX + rd * .55, UL = 52;
+  const bh = 8 + 10 * v.biceps, th = 6 + 7.5 * v.triceps + 4 * fx;
+  const fw1 = 9 + 4.5 * v.forearms, fw2 = 6 + 1.2 * v.forearms;
+  const legOff = 20 + 3.5 * v.quads + 1.5 * v.hams + 2 * v.glutes + 3 * fx;
+  const tw = 19 + 6 * v.quads + 3 * v.hams + 1.5 * v.glutes + 6 * fx;
+  const cw = 11 + 5.5 * v.calves + 2 * fx;
+  const hipHalf = Math.max(waistHalf + 9 + 6 * v.glutes, legOff + tw + 3);
+  const span = Math.max(150, ax + UL + fw1 + 2 * v.forearms + 10, hipHalf + 12, legOff + cw * 1.05 + 14);
+
+  /* floor shadow */
+  out.push(`<ellipse cx="${cx}" cy="412" rx="${n1(Math.max(70, legOff + tw + 30))}" ry="9" fill="rgba(0,0,0,.35)"/>`);
+
+  /* legs */
+  for (const s of [-1, 1]) {
+    const lx = cx + s * legOff;
+    const knee = 12 + .8 * v.quads, kneeIn = 11 + .6 * v.quads;
+    const calf = [
+      [lx + s * knee, 348], [lx + s * (cw * 1.05 + 2), 366], [lx + s * (cw * .7 + 1), 384], [lx + s * 6.5, 400],
+      [lx - s * 6.5, 400], [lx - s * (cw * .45 + 1), 382], [lx - s * (cw * .6 + 1), 364], [lx - s * kneeIn, 348]
+    ];
+    out.push(`<path d="${smooth(calf)}" fill="${tint(f.calves)}" ${st}/>`);
+    const thigh = [
+      [lx + s * tw, 280], [lx + s * (tw + 1 + 2.5 * v.quads), 308], [lx + s * (tw * .72 + 2), 334], [lx + s * knee, 353],
+      [lx - s * kneeIn, 353], [lx - s * (tw * .6 + 2 * v.quads), 336], [lx - s * (tw * .82), 310], [lx - s * (tw * .85), 280]
+    ];
+    out.push(`<path d="${smooth(thigh)}" fill="${tint(Math.max(f.quads, f.hams * .6))}" ${st}/>`);
+    out.push(`<path d="M${n1(lx + s * 3)},${300} Q${n1(lx + s * (tw * .2))},${325} ${n1(lx - s * 4)},${343}" ${line(.2 + .5 * Math.min(1, v.quads))}/>`);
+    out.push(`<path d="M${n1(lx - 6)},${352} Q${lx},${357} ${n1(lx + 6)},${352}" ${line(.45)}/>`);
+    out.push(`<rect x="${n1(lx - 15 + s * 4)}" y="397" width="30" height="14" rx="7" fill="#FFFFFF" ${st}/>`);
+    out.push(`<path d="M${n1(lx - 13 + s * 4)},407 H${n1(lx + 13 + s * 4)}" stroke="${LINE}" stroke-width="2.4"/>`);
+  }
+
+  /* shorts */
+  const outerB = legOff + tw + 4, innerB = Math.max(3, legOff - tw * .85 - 2);
+  out.push(`<path d="M${n1(cx - waistHalf - 3)},244 L${n1(cx + waistHalf + 3)},244 C${n1(cx + hipHalf * .95)},250 ${n1(cx + hipHalf)},266 ${n1(cx + outerB)},300 L${n1(cx + innerB)},296 Q${cx + 2},290 ${cx},282 Q${cx - 2},290 ${n1(cx - innerB)},296 L${n1(cx - outerB)},300 C${n1(cx - hipHalf)},266 ${n1(cx - hipHalf * .95)},250 ${n1(cx - waistHalf - 3)},244 Z" fill="${SHORTS}" ${st}/>`);
+  out.push(`<path d="M${n1(cx + hipHalf * .97 - 3)},262 L${n1(cx + outerB - 4)},298 M${n1(cx - hipHalf * .97 + 3)},262 L${n1(cx - outerB + 4)},298" stroke="#FFFFFF" stroke-opacity=".75" stroke-width="3"/>`);
+
+  /* neck sits behind the torso and traps */
+  out.push(`<rect x="${n1(cx - neckH)}" y="92" width="${n1(neckH * 2)}" height="32" fill="${SKIN}" ${st}/>`);
+
+  /* torso */
+  const torso = [
+    [cx - neckH - 4, 118], [cx - shX + 4, 130], [cx - chestHalf, 158], [cx - latHalf, 190], [cx - waistHalf - 1 - 6 * fx, 226], [cx - waistHalf, 246],
+    [cx + waistHalf, 246], [cx + waistHalf + 1 + 6 * fx, 226], [cx + latHalf, 190], [cx + chestHalf, 158], [cx + shX - 4, 130], [cx + neckH + 4, 118]
+  ];
+  out.push(`<path d="${smooth(torso)}" fill="${tint(f.lats * .8)}" ${st}/>`);
+  out.push(`<rect x="${n1(cx - waistHalf - 3)}" y="243" width="${n1(waistHalf * 2 + 6)}" height="8" fill="${SHORTS_D}" ${st}/>`);
+  for (const s of [-1, 1]) {
+    out.push(`<path d="M${n1(cx + s * (chestHalf - 4))},170 Q${n1(cx + s * (latHalf - 2))},196 ${n1(cx + s * (waistHalf + 3))},228" ${line(.15 + .55 * Math.min(1, v.lats))}/>`);
+  }
+
+  /* abs: fat hides them, a lean body shows them sharply */
+  const top = 134, ph = 22 + 9 * v.chest;
+  const y0 = top + ph + 5, y1 = 240, gap = 3, rowH = (y1 - y0 - gap * 2) / 3;
+  const bw = 12 + 2.5 * v.abs;
+  const absVis = Math.max(.05, Math.min(1.3, 1.35 - .9 * fat));
+  const aa = Math.min(1, (.08 + .6 * Math.min(1, v.abs / 1.5)) * absVis);
+  out.push(`<path d="M${cx},${n1(top + ph * .6)} V240" ${line(.12 + .3 * Math.min(1, v.abs))}/>`);
+  if (rowH > 5) {
+    for (let r = 0; r < 3; r++) for (const s of [-1, 1]) {
+      const x = s > 0 ? cx + 2 : cx - 2 - bw;
+      out.push(`<rect x="${n1(x)}" y="${n1(y0 + r * (rowH + gap))}" width="${n1(bw)}" height="${n1(rowH)}" rx="${n1(Math.min(5, rowH / 2))}" fill="${tint(f.abs)}" stroke="${LINE}" stroke-opacity="${aa.toFixed(2)}" stroke-width="2"/>`);
+    }
+  }
+  /* belly: hangs over the shorts when body fat is high */
+  if (fx > .12) {
+    const ry = 10 + 14 * Math.min(fx, 2.2);
+    out.push(`<ellipse cx="${cx}" cy="${n1(226 + ry * .25)}" rx="${n1(waistHalf + 3 * fx)}" ry="${n1(ry)}" fill="${SKIN}" stroke="${LINE}" stroke-opacity="${Math.min(.75, .3 + .25 * fx).toFixed(2)}" stroke-width="2.4"/>`);
+    out.push(`<ellipse cx="${cx}" cy="${n1(226 + ry * .35)}" rx="2.4" ry="3.4" fill="${LINE}" fill-opacity=".6"/>`);
+  }
+
+  /* chest */
+  const pw = chestHalf - 5, pa = .3 + .55 * Math.min(1, v.chest / 1.5);
+  for (const s of [-1, 1]) {
+    out.push(`<path d="M${cx},${top + 2} C${n1(cx + s * pw * .45)},${top - 4} ${n1(cx + s * pw * .95)},${top} ${n1(cx + s * pw)},${top + 10} C${n1(cx + s * (pw + 2))},${n1(top + ph * .7)} ${n1(cx + s * pw * .7)},${n1(top + ph)} ${n1(cx + s * pw * .35)},${n1(top + ph)} C${n1(cx + s * 8)},${n1(top + ph)} ${cx + s * 2},${n1(top + ph * .85)} ${cx},${n1(top + ph * .6)} Z" fill="${tint(f.chest)}" stroke="${LINE}" stroke-opacity="${Math.min(1, pa * def).toFixed(2)}" stroke-width="2.4" stroke-linejoin="round"/>`);
+  }
+
+  /* arms: double biceps pose */
+  for (const s of [-1, 1]) {
+    const a0 = cx + s * ax, ay = 142, ex = a0 + s * UL, ey = 146;
+    const fore = [
+      [ex + s * fw1, ey + 4], [ex + s * (fw1 + 1.5 * v.forearms + 1), ey - 18], [ex + s * (4 + fw2), 100],
+      [ex + s * (4 - fw2), 100], [ex - s * fw1 * .75, ey - 16], [ex - s * fw1 * .7, ey + 6]
+    ];
+    out.push(`<path d="${smooth(fore)}" fill="${tint(f.forearms)}" ${st}/>`);
+    const fr = 11 + 1.6 * v.forearms;
+    out.push(`<circle cx="${n1(ex + s * 4)}" cy="90" r="${n1(fr)}" fill="${SKIN}" ${st}/>`);
+    out.push(`<path d="M${n1(ex + s * 4 - fr * .55)},${n1(90 + fr * .2)} H${n1(ex + s * 4 + fr * .55)}" ${line(.5)}/>`);
+    const fa = Math.max(f.biceps, f.triceps);
+    out.push(`<path d="M${n1(a0)},${ay - 10} C${n1(a0 + s * UL * .22)},${n1(ay - 10 - bh)} ${n1(a0 + s * UL * .72)},${n1(ay - 10 - bh * .9)} ${n1(ex + s * 2)},${ey - 10} L${n1(ex + s * 4)},${ey + 8} C${n1(a0 + s * UL * .7)},${n1(ay + 11 + th)} ${n1(a0 + s * UL * .3)},${n1(ay + 11 + th)} ${n1(a0)},${ay + 12} Z" fill="${tint(fa)}" ${st}/>`);
+    out.push(`<path d="M${n1(a0 + s * UL * .2)},${ay - 2} Q${n1(a0 + s * UL * .55)},${ay + 3} ${n1(ex - s * 4)},${ey - 3}" ${line(.2 + .45 * Math.min(1, (v.biceps + v.triceps) / 2))}/>`);
+    if (fat < .2 && v.biceps > .8) {
+      const vy = ay - 10 - bh * .55;
+      out.push(`<path d="M${n1(a0 + s * UL * .25)},${n1(vy + 4)} q${n1(s * 8)},-5 ${n1(s * 15)},0 t${n1(s * 14)},-2" fill="none" stroke="#8A4B3A" stroke-opacity=".6" stroke-width="1.8" stroke-linecap="round"/>`);
+    }
+  }
+
+  /* traps and shoulders */
+  const tTop = Math.max(36, 102 - 10 * v.traps);
+  for (const s of [-1, 1]) {
+    const curve = `M${n1(cx + s * neckH)},${n1(tTop)} Q${n1(cx + s * (neckH + 8 + 9 * v.traps))},${n1(Math.max(44, 118 - 7 * v.traps))} ${n1(cx + s * (shX - 3))},131`;
+    out.push(`<path d="${curve} L${n1(cx + s * (shX - 3))},142 L${n1(cx + s * (neckH - 1))},142 Z" fill="${tint(f.traps)}"/>`);
+    out.push(`<path d="${curve}" fill="none" ${st}/>`);
+  }
+  for (const s of [-1, 1]) {
+    out.push(`<ellipse cx="${n1(cx + s * (shX + rd * .12))}" cy="140" rx="${n1(rd)}" ry="${n1(rd * .9)}" fill="${tint(f.delts)}" ${st}/>`);
+  }
+
+  /* head (rounder with more body fat) */
+  const id = 'hc' + (++clipN), hr = 34 + 3 * Math.min(fx, 2.2);
+  out.push(`<circle cx="${n1(cx - hr + 1)}" cy="76" r="6.5" fill="${SKIN}" ${st}/><circle cx="${n1(cx + hr - 1)}" cy="76" r="6.5" fill="${SKIN}" ${st}/>`);
+  out.push(`<clipPath id="${id}"><ellipse cx="${cx}" cy="70" rx="${n1(hr)}" ry="34"/></clipPath>`);
+  out.push(`<ellipse cx="${cx}" cy="70" rx="${n1(hr)}" ry="34" fill="${SKIN}"/>`);
+  out.push(`<g clip-path="url(#${id})"><path d="M${n1(cx - hr - 6)},70 C${n1(cx - hr - 6)},22 ${n1(cx + hr + 6)},22 ${n1(cx + hr + 6)},70 C${cx + 30},52 ${cx + 12},46 ${cx - 2},52 C${cx - 14},44 ${cx - 30},54 ${n1(cx - hr - 6)},70 Z" fill="${HAIR}"/><rect x="${n1(cx - hr - 6)}" y="50" width="${n1(hr * 2 + 12)}" height="9" fill="${BAND}" transform="rotate(-6 ${cx} 55)"/></g>`);
+  out.push(`<ellipse cx="${cx}" cy="70" rx="${n1(hr)}" ry="34" fill="none" ${st}/>`);
+  if (fat > 1.2) out.push(`<path d="M${cx - 14},101 Q${cx},109 ${cx + 14},101" ${line(.6)}/>`);
+  if (expr === 'grin') {
+    out.push(`<path d="M${cx - 18},77 Q${cx - 12},70 ${cx - 6},77 M${cx + 6},77 Q${cx + 12},70 ${cx + 18},77" fill="none" stroke="${HAIR}" stroke-width="3" stroke-linecap="round"/>`);
+    out.push(`<path d="M${cx - 20},65 L${cx - 7},68 M${cx + 7},68 L${cx + 20},65" stroke="${HAIR}" stroke-width="3" stroke-linecap="round"/>`);
+    out.push(`<path d="M${cx - 12},86 Q${cx},101 ${cx + 12},86 Z" fill="#7A2E2E" ${st}/><path d="M${cx - 10},87.5 H${cx + 10}" stroke="#FFFFFF" stroke-width="3"/>`);
+    out.push(`<circle cx="${cx - 23}" cy="86" r="5" fill="#FF7A7A" fill-opacity=".45"/><circle cx="${cx + 23}" cy="86" r="5" fill="#FF7A7A" fill-opacity=".45"/>`);
+  } else if (expr === 'tired') {
+    out.push(`<path d="M${cx - 17},77 H${cx - 7} M${cx + 7},77 H${cx + 17}" stroke="${HAIR}" stroke-width="3" stroke-linecap="round"/>`);
+    out.push(`<path d="M${cx - 19},67 L${cx - 8},64 M${cx + 8},64 L${cx + 19},67" stroke="${HAIR}" stroke-width="2.6" stroke-linecap="round"/>`);
+    out.push(`<path d="M${cx - 9},91 q4.5,-4 9,0 q4.5,4 9,0" fill="none" stroke="${HAIR}" stroke-width="2.6" stroke-linecap="round"/>`);
+    out.push(`<path d="M${n1(cx + hr - 4)},52 q5,9 0,12 q-5,-3 0,-12 Z" fill="#8FD3FF" stroke="#3B87B8" stroke-width="1.5"/>`);
+  } else {
+    out.push(`<ellipse cx="${cx - 12}" cy="76" rx="3.2" ry="4.2" fill="${HAIR}"/><ellipse cx="${cx + 12}" cy="76" rx="3.2" ry="4.2" fill="${HAIR}"/>`);
+    out.push(`<path d="M${cx - 18},66 L${cx - 7},67 M${cx + 7},67 L${cx + 18},66" stroke="${HAIR}" stroke-width="2.6" stroke-linecap="round"/>`);
+    out.push(`<path d="M${cx - 9},88 Q${cx},96 ${cx + 9},88" fill="none" stroke="${HAIR}" stroke-width="2.6" stroke-linecap="round"/>`);
+  }
+  return `<svg viewBox="${n1(cx - span - 6)} 22 ${n1(span * 2 + 12)} 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="キャラクターの体">${out.join('')}</svg>`;
+}
+
+/* ---------- diagnosis ---------- */
+const avgOf = ks => ks.reduce((s, k) => s + v[k], 0) / ks.length;
+function stats(vv) {
+  const vals = MU.map(m => vv[m.k]);
+  const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+  const sd = Math.sqrt(vals.reduce((a, b) => a + (b - mean) ** 2, 0) / vals.length);
+  return { mean, sd, cv: mean > 0 ? sd / mean : 0 };
+}
+function diagnose() {
+  const { mean, cv } = stats(v);
+  const order = MU.map(m => m.k).sort((a, b) => v[b] - v[a]);
+  const top = order[0], others = (mean * 12 - v[top]) / 11;
+  const upper = avgOf(['traps', 'delts', 'chest', 'biceps', 'triceps', 'forearms', 'lats']);
+  const lower = avgOf(['glutes', 'quads', 'hams', 'calves']);
+  const arms = avgOf(['biceps', 'triceps', 'forearms']);
+  const rest = (mean * 12 - arms * 3) / 9;
+  const chubby = mean >= 1
+    ? { t: 'ぽっちゃりパワー系', d: '筋肉も脂肪もたっぷり。力士のような迫力。' }
+    : { t: 'ぽっちゃりさん', d: '食べた分がほぼお腹に。まずは鍛えよう。' };
+  if (mean < .12) return fat >= 1.7 ? chubby : { t: 'ひょろひょろ', d: 'まだほとんど鍛えていない。伸びしろしかない。' };
+  if (v[top] >= 1.2 && v[top] >= 3 * others + .3) return { t: SOLO[top], d: `${MN[top].n}だけが異常に発達。ほかの部位はまだ眠っている。` };
+  if (arms >= .8 && arms >= 2.3 * rest + .1) return { t: '腕だけゴリラ', d: '腕まわりだけが別人。Tシャツの袖がきつそう。' };
+  if (upper >= .5 && upper >= 2.2 * lower) return { t: 'チキンレッグ', d: '上半身はムキムキなのに脚は細いまま。脚の日をサボった証。' };
+  if (lower >= .5 && lower >= 2.2 * upper) return { t: '下半身だけアスリート', d: '脚は立派、上半身はひょろり。走るのは速そう。' };
+  if (fat >= 1.7) return chubby;
+  if (fat <= .12 && mean >= .8 && cv <= .5) return { t: 'キレッキレの仕上がり', d: '体脂肪が削ぎ落とされ、筋肉の溝まで見える。' };
+  if (cv <= .4 && mean >= .4) {
+    if (mean >= 1.6) return { t: 'ナイスバルク！モンスター級', d: '全身が規格外に発達。ドアを横向きで通るタイプ。' };
+    if (mean >= .7) return { t: '黄金比ボディ', d: '全身がバランスよく発達。大会に出られる仕上がり。' };
+    return { t: 'バランス良しの細マッチョ', d: '偏りなく育っている。ここから大きくしていこう。' };
+  }
+  if ((v.delts + v.lats) / 2 >= 1.5 * mean && mean >= .35 && lower >= .5 * upper) return { t: '逆三角形ボディ', d: '広い肩と背中で見事な逆三角形。' };
+  return { t: '個性派ボディ', d: 'ちょっと偏りのある、味のある体。' };
+}
+function scores() {
+  const { mean, cv } = stats(v);
+  const c = (x) => Math.max(0, Math.min(1, x));
+  const fatPenalty = Math.max(.2, 1 - Math.max(0, fat - .9) * .45);
+  const beauty = Math.round(100 * c(1 - Math.max(0, cv - .18) / .8) * Math.sqrt(c(mean / .6)) * fatPenalty);
+  const fun = Math.min(100, Math.round(100 * c((cv - .35) / 1.4) * Math.sqrt(c(mean / .25)) + 18 * Math.max(0, fat - 1.2)));
+  return { beauty, fun };
+}
+
+/* ---------- rendering ---------- */
+const fig = $('fig');
+function expression() {
+  const fs = MU.map(m => f[m.k]).sort((a, b) => b - a);
+  return (fs[0] + fs[1] + fs[2]) / 3 > .25 ? 'tired' : 'smile';
+}
+function drawFig(expr) { fig.innerHTML = bodySVG(v, f, expr || expression(), fat); }
+function renderHead() {
+  $('day').innerHTML = `DAY ${Math.min(day, DAYS)}<small>/${DAYS}</small>`;
+  $('now').innerHTML = `いまの体型：<b>${diagnose().t}</b>`;
+  $('fatLbl').innerHTML = `体脂肪 <b>${fatPct()}%</b>`;
+}
+function buildList() {
+  const list = $('list');
+  list.innerHTML = GROUPS.map(G => {
+    const items = EX.filter(e => groupOf(e) === G.g).map(e => {
+      const tags = Object.entries(e.w).filter(([, a]) => a >= .3).sort((a, b) => b[1] - a[1])
+        .map(([k], i) => `<span class="tag${i === 0 ? ' main' : ''}">${MN[k].n}</span>`).join('');
+      return `<button type="button" class="ex" data-id="${e.id}" style="--g:${gColor(G.g)};--gs:${gSoft(G.g)}"><span class="ex-name">${e.n}</span><span class="tags">${tags}</span><span class="ex-count" hidden></span></button>`;
+    }).join('');
+    return `<section class="group"><h2 class="group-h"><span class="plate" style="--g:${gColor(G.g)}"></span>${G.n}<small>${G.sub}</small></h2><div class="exs">${items}</div></section>`;
+  }).join('');
+}
+function renderMenu() {
+  const slots = $('slots');
+  let html = '';
+  for (let i = 0; i < SLOTS; i++) {
+    const id = menu[i];
+    if (id) { const e = EXM[id]; html += `<button type="button" class="slot on" data-i="${i}" style="--g:${gColor(groupOf(e))}" aria-label="${e.n}をメニューから外す">${e.n}</button>`; }
+    else html += `<button type="button" class="slot" disabled aria-label="空き">ー</button>`;
+  }
+  slots.innerHTML = html;
+  document.querySelectorAll('.ex').forEach(b => {
+    const n = menu.filter(x => x === b.dataset.id).length, c = b.querySelector('.ex-count');
+    c.hidden = n === 0; c.textContent = '×' + n;
+    b.setAttribute('aria-label', `${EXM[b.dataset.id].n}${n ? `、${n}回選択中` : ''}`);
+  });
+  $('train').disabled = busy || menu.length === 0 || !started;
+  $('train').textContent = menu.length ? `トレーニング開始（${menu.length}種目）` : 'トレーニング開始';
+  $('rest').disabled = busy || !started;
+}
+
+/* ---------- bubble & gains ---------- */
+const bubble = $('bubble'), gainsEl = $('gains');
+function say(text) {
+  bubble.textContent = text; bubble.hidden = false;
+  bubble.classList.remove('show'); void bubble.offsetWidth; bubble.classList.add('show');
+  sfx('bubble');
+}
+function clearSay() { bubble.hidden = true; gainsEl.innerHTML = ''; gainsEl.hidden = true; $('howto').hidden = false; }
+function showGains(g, dm) {
+  const top = Object.entries(g).filter(([, x]) => x > .005).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  gainsEl.innerHTML = '<span class="gains-h">今日の成長</span>' + (dm && dm !== 1 ? `<span class="gain diet">食事 ×${dm.toFixed(2)}</span>` : '') + top.map(([k, x]) => `<span class="gain" style="--c:${gColor(MN[k].g)}"><i></i>${MN[k].n} +${Math.round(x * 100)}</span>`).join('');
+  gainsEl.hidden = false; $('howto').hidden = true;
+}
+
+/* ---------- day flow ---------- */
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const reduceMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const backOut = p => { const c1 = 2.2, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); };
+function tween(from, to, ms) {
+  return new Promise(res => {
+    if (reduceMotion) { Object.assign(v, to); drawFig('grin'); res(); return; }
+    const t0 = performance.now(), target = { ...to };
+    const step = now => {
+      const p = Math.min(1, (now - t0) / ms), e = backOut(p);
+      for (const m of MU) v[m.k] = Math.max(0, from[m.k] + (target[m.k] - from[m.k]) * e);
+      drawFig('grin');
+      if (p < 1) requestAnimationFrame(step); else { Object.assign(v, target); res(); }
+    };
+    requestAnimationFrame(step);
+  });
+}
+async function train() {
+  if (busy || !menu.length || !started) return;
+  busy = true; renderMenu(); clearSay();
+  ensureAudio();
+  window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+  const before = { ...v }, next = { ...v }, gain = {}, dm = dietMult();
+  let soreSum = 0, soreN = 0;
+  for (const id of menu) {
+    for (const [k, a] of Object.entries(EXM[id].w)) {
+      const sore = 1 - .5 * f[k];
+      const g = GROW * a * sore * restBonus * dm;
+      next[k] = Math.min(VMAX, next[k] + g);
+      gain[k] = (gain[k] || 0) + g;
+      f[k] = Math.min(1, f[k] + .45 * a);
+      soreSum += sore * a; soreN += a;
+    }
+  }
+  restBonus = 1;
+  sfx('pump');
+  fig.classList.remove('pump'); void fig.offsetWidth; fig.classList.add('pump');
+  await tween(before, next, 1000);
+  const topK = Object.entries(gain).sort((a, b) => b[1] - a[1])[0][0];
+  say(soreSum / soreN < .75 ? '筋肉痛で伸びがいまいち…休むのも筋トレ！' : CALLS[topK][Math.floor(Math.random() * CALLS[topK].length)]);
+  showGains(gain, dm);
+  renderHead();
+  await wait(1500);
+  endDay(.005 * menu.length);
+}
+async function rest() {
+  if (busy || !started) return;
+  busy = true; renderMenu(); clearSay();
+  ensureAudio();
+  window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+  for (const m of MU) f[m.k] = 0;
+  restBonus = 1.3;
+  drawFig('smile');
+  say(diet.cal === 'feast' ? '食べて寝る！最強のバルクアップ' : 'しっかり休んで超回復！明日は伸びるぞ');
+  sfx('rest');
+  await wait(1300);
+  endDay(0);
+}
+function endDay(burn) {
+  for (const m of MU) f[m.k] *= .3;
+  fat = Math.max(0, Math.min(2.6, fat + CALM[diet.cal].fat - burn));
+  day++;
+  if (day > DAYS) { finish(); return; }
+  busy = false;
+  drawFig(); renderHead(); renderMenu();
+}
+function finish() {
+  busy = true; started = false;
+  const d = diagnose(), s = scores();
+  for (const m of MU) f[m.k] = 0;
+  $('fFig').innerHTML = bodySVG(v, f, 'grin', fat);
+  $('fTitle').textContent = `「${d.t}」`;
+  $('fDesc').textContent = d.d;
+  $('fFat').textContent = `体脂肪 ${fatPct()}%　食事：${dietSet ? `${CALM[diet.cal].n}・タンパク質${PROM[diet.pro].n}` : 'おまかせ'}`;
+  $('fBeauty').textContent = s.beauty; $('fFun').textContent = s.fun;
+  const mx = Math.max(.5, ...MU.map(m => v[m.k]));
+  $('fMus').innerHTML = MU.slice().sort((a, b) => v[b.k] - v[a.k]).map(m =>
+    `<div class="mu"><div class="row"><span>${m.n}</span><span>${Math.round(v[m.k] * 100)}</span></div><div class="track"><div class="fill" style="--c:${gColor(m.g)};width:${(v[m.k] / mx * 100).toFixed(1)}%"></div></div></div>`).join('');
+  $('final').hidden = false; $('final').scrollTop = 0;
+  $('fBeautyBar').style.width = '0'; $('fFunBar').style.width = '0';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    $('fBeautyBar').style.width = s.beauty + '%';
+    $('fFunBar').style.width = s.fun + '%';
+  }));
+  lastResult = { ...d, ...s, pct: fatPct() };
+  sfx('final');
+  try { $('retry').focus({ preventScroll: true }); } catch (e) {}
+}
+let lastResult = null;
+function startGame() {
+  ensureAudio();
+  v = zero(); f = zero(); menu = []; day = 1; restBonus = 1; busy = false; started = true; fat = FAT0;
+  $('titleOv').hidden = true; $('final').hidden = true;
+  clearSay(); drawFig(); renderHead(); renderMenu();
+  window.scrollTo({ top: 0 });
+}
+
+/* ---------- meal management (optional) ---------- */
+const mealOv = $('mealOv');
+function renderMealBtn() {
+  const b = $('mealBtn');
+  b.textContent = dietSet ? `🍙 ${CALM[diet.cal].n}・タンパク質${PROM[diet.pro].n}` : '🍙 食事管理';
+  b.classList.toggle('set', dietSet);
+  b.setAttribute('aria-label', dietSet ? `食事管理：${CALM[diet.cal].n}、タンパク質${PROM[diet.pro].n}` : '食事管理を開く');
+}
+function renderMeal() {
+  $('calOpts').innerHTML = CAL.map(c => `<button type="button" class="opt${diet.cal === c.id ? ' on' : ''}" role="radio" aria-checked="${diet.cal === c.id}" data-cal="${c.id}"><b>${c.n}</b><span>${c.d}</span></button>`).join('');
+  $('proOpts').innerHTML = PRO.map(p => `<button type="button" class="opt${diet.pro === p.id ? ' on' : ''}" role="radio" aria-checked="${diet.pro === p.id}" data-pro="${p.id}"><b>${p.n}</b><span>${p.d}</span></button>`).join('');
+  const c = CALM[diet.cal];
+  const fatText = c.fat > .1 ? 'どんどん増える' : c.fat > 0 ? '少しずつ増える' : c.fat < 0 ? '少しずつ減る' : 'ほぼそのまま';
+  $('effect').innerHTML = `筋肉の伸び <b>×${dietMult().toFixed(2)}</b>　体脂肪 <b>${fatText}</b>`;
+  $('fatNow').textContent = fatPct() + '%';
+  $('fatBar').style.width = Math.min(100, fat / 2.6 * 100).toFixed(1) + '%';
+}
+function openMeal() {
+  if (busy) return;
+  renderMeal(); mealOv.hidden = false;
+  setTimeout(() => { const on = mealOv.querySelector('.opt.on'); try { (on || $('mealOk')).focus({ preventScroll: true }); } catch (e) {} }, 30);
+}
+function closeMeal() { mealOv.hidden = true; renderMealBtn(); try { $('mealBtn').focus({ preventScroll: true }); } catch (e) {} }
+
+/* ---------- sound ---------- */
+let actx = null;
+function ensureAudio() {
+  try {
+    if (!actx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) actx = new AC(); }
+    if (actx && actx.state === 'suspended') actx.resume();
+  } catch (e) {}
+}
+function tone(fq, dur, type, vol, f2, delay) {
+  if (muted || !actx) return;
+  try {
+    const t = actx.currentTime + (delay || 0), o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(fq, t);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + .01);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t); o.stop(t + dur + .03);
+  } catch (e) {}
+}
+function sfx(k) {
+  switch (k) {
+    case 'add': tone(660, .06, 'triangle', .07); break;
+    case 'remove': tone(420, .06, 'triangle', .06); break;
+    case 'full': tone(180, .12, 'square', .04); break;
+    case 'pump': tone(110, .25, 'sine', .3, 55); tone(520, .18, 'square', .03, 1300, .12); break;
+    case 'bubble': tone(1100, .08, 'sine', .07, 1700); break;
+    case 'rest': tone(523, .3, 'sine', .07); tone(659, .3, 'sine', .06, 0, .12); break;
+    case 'final': tone(523, .16, 'triangle', .1); tone(659, .16, 'triangle', .1, 0, .16); tone(784, .16, 'triangle', .1, 0, .32); tone(1047, .4, 'triangle', .1, 0, .48); break;
+  }
+}
+function syncMute() { $('mute').textContent = muted ? '🔇' : '🔊'; $('mute').setAttribute('aria-label', muted ? '音を出す' : '音を消す'); }
+
+/* ---------- share ---------- */
+let toastTimer = 0;
+function showToast(m) {
+  const t = $('toast'); t.textContent = m; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+async function copyText(t) {
+  try { await navigator.clipboard.writeText(t); return true; } catch (e) {}
+  try {
+    const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); return ok;
+  } catch (e) { return false; }
+}
+async function share() {
+  if (!lastResult) return;
+  const url = location.href.split('#')[0];
+  const text = `12日間の筋トレで「${lastResult.t}」が完成！ 美しさ${lastResult.beauty}・おもしろさ${lastResult.fun}（体脂肪${lastResult.pct}%） #ムキムキ育成ジム`;
+  if (navigator.share) {
+    try { await navigator.share({ text, url }); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  try {
+    const win = window.open('https://x.com/intent/post?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url), '_blank');
+    if (win) { try { win.opener = null; } catch (_) {} return; }
+  } catch (e) {}
+  if (await copyText(text + ' ' + url)) showToast('結果をコピーしました'); else showToast(text + ' ' + url);
+}
+
+/* ---------- events ---------- */
+$('list').addEventListener('click', e => {
+  const b = e.target.closest('.ex'); if (!b || busy || !started) return;
+  if (menu.length >= SLOTS) { sfx('full'); showToast('メニューは3種目まで。下の枠をタップすると外せます'); return; }
+  menu.push(b.dataset.id); sfx('add'); clearSay(); renderMenu();
+});
+$('slots').addEventListener('click', e => {
+  const b = e.target.closest('.slot.on'); if (!b || busy) return;
+  menu.splice(+b.dataset.i, 1); sfx('remove'); renderMenu();
+});
+$('train').addEventListener('click', train);
+$('rest').addEventListener('click', rest);
+$('start').addEventListener('click', startGame);
+$('retry').addEventListener('click', startGame);
+$('share').addEventListener('click', share);
+$('mealBtn').addEventListener('click', openMeal);
+$('calOpts').addEventListener('click', e => { const b = e.target.closest('[data-cal]'); if (!b) return; diet.cal = b.dataset.cal; dietSet = true; sfx('add'); renderMeal(); renderMealBtn(); });
+$('proOpts').addEventListener('click', e => { const b = e.target.closest('[data-pro]'); if (!b) return; diet.pro = b.dataset.pro; dietSet = true; sfx('add'); renderMeal(); renderMealBtn(); });
+$('mealReset').addEventListener('click', () => { diet = { cal: 'keep', pro: 'mid' }; dietSet = false; sfx('remove'); renderMeal(); renderMealBtn(); });
+$('mealOk').addEventListener('click', closeMeal);
+mealOv.addEventListener('click', e => { if (e.target === mealOv) closeMeal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !mealOv.hidden) closeMeal(); });
+$('mute').addEventListener('click', () => {
+  muted = !muted; try { localStorage.setItem('muki-muted', muted ? '1' : '0'); } catch (e) {}
+  syncMute(); ensureAudio();
+});
+
+/* ---------- boot ---------- */
+buildList(); syncMute(); renderMealBtn(); drawFig('smile'); renderHead(); renderMenu();
+})();
+</script>
+</body>
+</html>
