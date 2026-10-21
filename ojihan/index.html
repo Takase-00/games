@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>お辞儀ハンコ｜60秒の事務仕事ミニゲーム</title>
+<meta name="description" content="流れてくる書類に、上司の印へ向けてちょうどいい角度でハンコを押す60秒のミニゲーム。会釈15°・敬礼30°・最敬礼45°。傾けすぎると土下座ハンコに。何枚さばけたかと礼儀力で辞令が下ります。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="お辞儀ハンコ">
+<meta property="og:title" content="お辞儀ハンコ｜60秒の事務仕事ミニゲーム">
+<meta property="og:description" content="上司の印へ、ちょうどいい角度でハンコを押そう。傾けすぎると土下座ハンコに。スマホのブラウザですぐ遊べます。">
+<meta property="og:url" content="https://takase-00.github.io/games/ojihan/">
+<meta property="og:image" content="https://takase-00.github.io/games/ojihan/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="お辞儀ハンコ。上司の課長の印へ30度傾けて押すハンコと分度器の絵">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%99%87%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Yuji+Syuku&display=swap">
+<style>
+:root{
+  --f-min:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP","Noto Serif CJK JP",serif;
+  --f-seal:"Yuji Syuku","Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif;
+  --bg:#E4E9E3; --desk:#C5CEC6; --mat:#B2C2B6; --ink:#1F2421; --sub:#535D57; --line:#A9B4AC;
+  --panel:#F3F5F1; --btn:#FAFBF8; --btn-ink:#1F2421; --btn-edge:#8E9A92;
+  --accent:#C2302A; --accent-ink:#FFFFFF; --hurry:#B3261E; --shadow:rgba(28,40,32,.22);
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#161C1A; --desk:#202925; --mat:#2A3832; --ink:#E8EDE9; --sub:#A6B0A9; --line:#3B4842;
+    --panel:#1C2420; --btn:#26302B; --btn-ink:#E8EDE9; --btn-edge:#4C5A53;
+    --accent:#D2463B; --accent-ink:#FFFFFF; --hurry:#FF8172; --shadow:rgba(0,0,0,.5);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161C1A; --desk:#202925; --mat:#2A3832; --ink:#E8EDE9; --sub:#A6B0A9; --line:#3B4842;
+  --panel:#1C2420; --btn:#26302B; --btn-ink:#E8EDE9; --btn-edge:#4C5A53;
+  --accent:#D2463B; --accent-ink:#FFFFFF; --hurry:#FF8172; --shadow:rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-min);overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+#app{position:relative;height:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+
+/* ---- HUD ---- */
+#hud{flex:none;padding:9px 58px 4px 14px}
+.timebar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.timebar i{display:block;height:100%;width:100%;background:var(--ink);transform-origin:left center}
+#hud.hurry .timebar i{background:var(--hurry)}
+.stats{display:flex;gap:18px;align-items:baseline;height:34px;margin-top:3px;white-space:nowrap}
+.stat{display:flex;align-items:baseline;gap:4px}
+.stat .k{font-size:12px;color:var(--sub)}
+.stat b{font-size:23px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.stat .u{font-size:12px;color:var(--sub)}
+#hud.hurry #sTime{color:var(--hurry)}
+#mute{position:absolute;top:2px;right:4px;z-index:40;width:48px;height:48px;border:0;border-radius:50%;
+  background:transparent;color:var(--ink);display:grid;place-items:center;padding:0}
+#mute svg{width:24px;height:24px;display:block}
+
+/* ---- 机（Canvas） ---- */
+#stage{position:relative;flex:1 1 auto;min-height:0;touch-action:none}
+#cv{display:block;width:100%;height:100%;touch-action:none}
+#banner{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:5;max-width:calc(100% - 32px);
+  padding:8px 16px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:15px;
+  white-space:nowrap;box-shadow:0 3px 10px var(--shadow);pointer-events:none}
+#banner.pop{animation:pop .28s ease-out}
+@keyframes pop{from{transform:translateX(-50%) scale(.7);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}
+
+/* ---- お辞儀ボタン ---- */
+#controls{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:8px 12px 14px;touch-action:none}
+.hold{height:84px;border-radius:18px;border:2px solid var(--btn-edge);background:var(--btn);color:var(--btn-ink);
+  display:flex;align-items:center;justify-content:center;gap:8px;padding:0 8px;box-shadow:0 4px 0 var(--btn-edge);
+  touch-action:none;-webkit-user-select:none;user-select:none;transition:transform .05s,box-shadow .05s}
+.hold .arr{font-size:24px;line-height:1}
+.hold .lbl{display:flex;flex-direction:column;align-items:center;line-height:1.25}
+.hold .lbl b{font-size:17px;font-weight:800}
+.hold .lbl small{font-size:11px;color:var(--sub);font-weight:500}
+.hold.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 1px 0 var(--btn-edge);transform:translateY(3px)}
+.hold.on .lbl small{color:var(--accent-ink)}
+
+/* ---- タイトル ---- */
+#titleScreen{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;pointer-events:none}
+.tTop{pointer-events:auto;background:var(--bg);padding:24px 52px 8px;text-align:center;position:relative}
+.tTop::after{content:"";position:absolute;left:0;right:0;top:100%;height:24px;background:linear-gradient(var(--bg),transparent)}
+.tTop h1{margin:0;font-size:clamp(26px,calc((100vw - 176px) / 6.2),40px);white-space:nowrap;font-weight:800;letter-spacing:.02em;line-height:1.1;display:inline-flex;align-items:center;gap:12px}
+.logoSeal{flex:none;width:clamp(38px,12vw,48px);height:clamp(38px,12vw,48px);border:3px solid var(--accent);border-radius:50%;color:var(--accent);
+  font-family:var(--f-seal);font-size:25px;font-weight:400;letter-spacing:0;display:grid;place-items:center;transform:rotate(-26deg)}
+.tTop .tag{margin:8px -40px 0;font-size:14px;color:var(--sub);letter-spacing:.04em;white-space:nowrap}
+.tMid{flex:1 1 auto;min-height:170px;position:relative}
+.demoTag{position:absolute;left:14px;top:4px;padding:3px 10px;border-radius:999px;font-size:12px;
+  background:var(--panel);color:var(--sub);border:1px solid var(--line)}
+.tBot{pointer-events:auto;background:var(--bg);padding:12px 22px 16px;position:relative}
+.tBot::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:28px;background:linear-gradient(transparent,var(--bg))}
+.rules{list-style:none;margin:0;padding:0;display:grid;gap:7px;counter-reset:r}
+.rules li{counter-increment:r;display:grid;grid-template-columns:24px 1fr;gap:10px;font-size:14px;line-height:1.55;align-items:start}
+.rules li::before{content:counter(r,cjk-ideographic);width:24px;height:24px;margin-top:1px;border:1.5px solid var(--accent);border-radius:50%;
+  color:var(--accent);font-family:var(--f-seal);font-size:13px;display:grid;place-items:center;line-height:1}
+.best{margin:12px 0 10px;text-align:center;font-size:14px;color:var(--sub)}
+.best b{color:var(--ink);font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+.primary{display:block;width:100%;height:58px;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);
+  font-size:19px;font-weight:800;letter-spacing:.14em;box-shadow:0 4px 0 rgba(0,0,0,.28)}
+.primary:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.28)}
+.keys{margin:10px 0 0;text-align:center;font-size:12px;color:var(--sub)}
+
+/* ---- 結果（辞令） ---- */
+#resultScreen{position:absolute;inset:0;z-index:30;background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.rScroll{max-width:440px;margin:0 auto;padding:52px 16px 22px}
+.jirei{position:relative;background:#FBFAF6;color:#26241F;padding:24px 22px 16px;border:1px solid #D7D1C3;box-shadow:0 6px 18px var(--shadow)}
+.jirei::before{content:"";position:absolute;inset:6px;border:3px double #3A362E;pointer-events:none}
+.jirei h2{margin:0;text-align:center;font-size:28px;font-weight:800;letter-spacing:.6em;text-indent:.6em}
+.jirei .to{margin:12px 0 0;font-size:16px;font-weight:700;letter-spacing:.08em}
+.jirei .lead{margin:8px 0 0;font-size:14px;line-height:1.7}
+.jirei .post{margin:4px 0 0;text-align:center;font-size:clamp(20px,6.3vw,27px);font-weight:800;line-height:1.35;letter-spacing:.02em}
+.jirei .post::before{content:"「"}
+.jirei .post::after{content:"」"}
+.jirei .lead.end{text-align:right;margin-top:2px}
+.jirei .note{margin:6px 0 0;font-size:13px;color:#5B5549;text-align:center;line-height:1.6}
+.nums{display:grid;grid-template-columns:repeat(3,1fr);margin:12px 0 0;border-top:1px solid #3A362E;border-bottom:1px solid #3A362E}
+.nums div{padding:7px 0 6px;text-align:center}
+.nums div+div{border-left:1px solid #CFC8B8}
+.nums dt{font-size:12px;color:#5B5549}
+.nums dd{margin:1px 0 0;font-size:12px}
+.nums dd b{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;margin-right:1px}
+.brk{margin:8px 0 0;font-size:12px;line-height:1.7;color:#3D3930;text-align:center}
+.sign{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:12px;line-height:1.5}
+.mySeal{flex:none;width:46px;height:46px;border:2px solid #C62F28;border-radius:50%;color:#C62F28;display:grid;place-items:center;opacity:.9}
+.mySeal span{writing-mode:vertical-rl;font-family:var(--f-seal);font-size:15px;line-height:1}
+.signTxt{margin-left:auto;display:flex;flex-direction:column;text-align:right}
+.corpSeal{flex:none;width:62px;height:62px;border:3px solid #C62F28;color:#C62F28;display:grid;place-items:center;transform:rotate(-3deg);opacity:.9}
+.corpSeal span{writing-mode:vertical-rl;font-family:var(--f-seal);font-size:17px;line-height:1.05}
+.newRec{position:absolute;top:18px;left:16px;border:2.5px solid #C62F28;color:#C62F28;font-family:var(--f-seal);font-size:15px;
+  font-style:normal;padding:2px 7px;transform:rotate(-12deg);background:rgba(251,250,246,.7)}
+.bestLine{margin:10px 0 0;text-align:center;font-size:13px;color:var(--sub)}
+.rBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.rBtns .primary{height:54px;font-size:16px;letter-spacing:.06em}
+.secondary{height:54px;border-radius:14px;border:2px solid var(--btn-edge);background:var(--btn);color:var(--btn-ink);font-size:16px;font-weight:800;box-shadow:0 4px 0 var(--btn-edge)}
+.secondary:active{transform:translateY(3px);box-shadow:0 1px 0 var(--btn-edge)}
+.ghost{display:block;margin:8px auto 0;min-height:44px;padding:0 16px;border:0;background:transparent;color:var(--sub);font-size:14px;text-decoration:underline;text-underline-offset:3px}
+#toast{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);z-index:35;background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;font-size:14px;white-space:nowrap}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+
+@media (max-height: 640px){
+  .tTop{padding-top:14px}
+  .rules{gap:4px}
+  .rules li{font-size:13px;line-height:1.45}
+  .best{margin:8px 0 6px}
+  .keys{display:none}
+  .primary{height:52px}
+  .rScroll{padding-top:48px}
+  .jirei{padding:18px 18px 12px}
+  .jirei h2{font-size:24px}
+  .nums dd b{font-size:22px}
+  .mySeal{width:40px;height:40px}
+  .corpSeal{width:54px;height:54px}
+  .corpSeal span{font-size:15px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="hud">
+    <div class="timebar" aria-hidden="true"><i id="timeFill"></i></div>
+    <div class="stats">
+      <div class="stat"><span class="k">残り</span><b id="sTime">60</b><span class="u">秒</span></div>
+      <div class="stat"><span class="k">決裁</span><b id="sCount">0</b><span class="u">枚</span></div>
+      <div class="stat"><span class="k">礼儀力</span><b id="sManner">—</b></div>
+    </div>
+  </header>
+
+  <button id="mute" type="button" aria-label="効果音をオフにする" aria-pressed="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4 9h4l5-4v14l-5-4H4z"/>
+      <path id="muteWave" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>
+      <path id="muteX" d="M16 9l6 6M22 9l-6 6" hidden/>
+    </svg>
+  </button>
+
+  <main id="stage">
+    <canvas id="cv" aria-label="書類にハンコを押す机" role="img"></canvas>
+    <div id="banner" hidden></div>
+  </main>
+
+  <footer id="controls">
+    <button id="btnL" class="hold" type="button" aria-label="左へお辞儀。長押しで傾けて、離すと押印">
+      <span class="arr" aria-hidden="true">◀</span><span class="lbl" aria-hidden="true"><b>左へお辞儀</b><small>長押し→離す</small></span>
+    </button>
+    <button id="btnR" class="hold" type="button" aria-label="右へお辞儀。長押しで傾けて、離すと押印">
+      <span class="lbl" aria-hidden="true"><b>右へお辞儀</b><small>長押し→離す</small></span><span class="arr" aria-hidden="true">▶</span>
+    </button>
+  </footer>
+
+  <section id="titleScreen" aria-labelledby="ttl">
+    <div class="tTop">
+      <h1 id="ttl"><span class="logoSeal" aria-hidden="true">礼</span>お辞儀ハンコ</h1>
+      <p class="tag">上司の印へ、ちょうどいい角度で。</p>
+    </div>
+    <div class="tMid" aria-hidden="true"><span class="demoTag">お手本デモ</span></div>
+    <div class="tBot">
+      <ol class="rules">
+        <li>上司の印がある側のボタンを長押しすると、ハンコが傾きます</li>
+        <li>離すと押印。会釈15°・敬礼30°・最敬礼45°が礼儀正しい角度</li>
+        <li>60秒で何枚さばけるか。傾けすぎると土下座ハンコに…</li>
+      </ol>
+      <p class="best" id="tBest">自己ベスト　まだ記録がありません</p>
+      <button id="btnStart" class="primary" type="button">出社する</button>
+      <p class="keys">PCでは ← → キーの長押しでも遊べます</p>
+    </div>
+  </section>
+
+  <section id="resultScreen" hidden aria-labelledby="rHead">
+    <div class="rScroll">
+      <article class="jirei">
+        <i class="newRec" id="rNew" hidden>新記録</i>
+        <h2 id="rHead">辞令</h2>
+        <p class="to">新人　殿</p>
+        <p class="lead">本日の勤務成績により、貴殿を</p>
+        <p class="post" id="rTitle"></p>
+        <p class="lead end">に任命する。</p>
+        <p class="note" id="rComment"></p>
+        <dl class="nums">
+          <div><dt>決裁</dt><dd><b id="rCount">0</b>枚</dd></div>
+          <div><dt>礼儀力</dt><dd><b id="rManner">0</b>%</dd></div>
+          <div><dt>総合</dt><dd><b id="rScore">0</b>点</dd></div>
+        </dl>
+        <p class="brk" id="rBreak"></p>
+        <div class="sign">
+          <span class="mySeal" id="rMySeal" aria-hidden="true"><span>新人</span></span>
+          <div class="signTxt"><span id="rDate"></span><span>株式会社ハンコ商事</span><span>代表取締役社長</span></div>
+          <span class="corpSeal" aria-hidden="true"><span>判子商<br>事之印</span></span>
+        </div>
+      </article>
+      <p class="bestLine" id="rBest"></p>
+      <div class="rBtns">
+        <button id="btnShare" class="primary" type="button">結果をシェア</button>
+        <button id="btnRetry" class="secondary" type="button">もう一度出社</button>
+      </div>
+      <button id="btnTitle" class="ghost" type="button">タイトルへ戻る</button>
+    </div>
+    <p id="toast" role="status" hidden></p>
+  </section>
+  <div id="live" class="sr" aria-live="polite"></div>
+</div>
+
+<script id="core">
+/* ===== ゲームの中身（画面に依存しない部分） ===== */
+(function (root) {
+  'use strict';
+
+  const C = {
+    GAME_TIME: 60,
+    W0: 40, ACC: 80, MAX_ANGLE: 180,      // 傾きの初速(度/秒)・加速度(度/秒²)・上限
+    TOL_PERFECT: 5, TOL_GOOD: 12,          // 目安からの許容差(度)
+    UPRIGHT_UNDER: 5, DOGEZA_AT: 70, REVERSE_AT: 135,
+    ENTER_T: 0.26, EXIT_T: 0.28, PRESS_T: 0.14, LINGER_T: 0.32, END_T: 1.7,
+    JUNIOR_AT: 20, RUSH_AT: 40, JUNIOR_RATE: 0.4, DEMO_JUNIOR_RATE: 0.2,
+    COMBO_STEP: 10, COMBO_CAP: 10, BUBBLE_DELAY: 0.16
+  };
+
+  const RANKS = [
+    { label: '主任', deg: 15, bow: '会釈' },
+    { label: '係長', deg: 15, bow: '会釈' },
+    { label: '課長', deg: 30, bow: '敬礼' },
+    { label: '部長', deg: 30, bow: '敬礼' },
+    { label: '専務', deg: 45, bow: '最敬礼' },
+    { label: '社長', deg: 45, bow: '最敬礼' }
+  ];
+  const BOSS_NAMES = ['田中', '佐藤', '鈴木', '高橋', '渡辺', '伊藤', '山本', '中村', '小林', '加藤', '吉田', '松本', '井上', '木村', '清水', '権田', '鬼塚', '金剛', '大門', '石橋'];
+  const JUNIOR_NAMES = ['新井', '若林', '小森', '早川', '青木', '春野', '松田', '森下'];
+  const BLANK_LABELS = ['確認', '回覧', '受付', '経理', '総務'];
+  const DOC_TYPES = ['稟議書', '経費精算書', '出張申請書', '休暇届', '議事録', '企画書', '見積書', '発注書', '業務日報', '始末書', '報告書', '回覧板', '押印申請書', '備品購入申請書', 'ハンコ廃止の稟議書'];
+  const SUBJECTS = ['シュレッダー購入の件', '会議の進め方を決める会議', 'コピー用紙の節約について', '社員旅行（熱海）', '忘年会の幹事決め', '観葉植物の水やり当番', 'ハンコの角度について', 'エレベーターの譲り合い', '給湯室の冷蔵庫整理', '名刺の追加発注', '朝礼の短縮について', 'ペーパーレス化の推進', 'お中元の手配', '席替えの実施', '電卓の買い替え'];
+
+  const RES = {
+    perfect: { mark: '◎', name: '完璧なお辞儀', pts: 100, manner: 100, color: '#1B7347', combo: true, anim: 'nod', ono: 'ピタッ', boss: ['見事な角度だ', 'うむ、よろしい', '礼儀正しいな'] },
+    good: { mark: '○', name: '良いお辞儀', pts: 60, manner: 80, color: '#235F96', combo: true, anim: 'nod', ono: 'ポン', boss: ['うむ', 'ご苦労', 'よし'] },
+    shallow: { mark: '△', name: '浅いお辞儀', pts: 30, manner: 45, color: '#8A5B08', anim: 'sulk', ono: 'ペコ', boss: ['頭が高いな', '軽いねえ', 'もう一声'] },
+    deep: { mark: '△', name: '深すぎるお辞儀', pts: 30, manner: 45, color: '#8A5B08', anim: 'huh', ono: 'ペコォ', boss: ['そこまでせんでも', '大げさだな', '恐縮だな'] },
+    dogeza: { mark: '▽', name: '土下座ハンコ', pts: 20, manner: 20, color: '#6A2C9C', anim: 'jump', ono: 'ズサーッ', boss: ['顔を上げたまえ！', '何をしでかした!?', 'そこまで!?'] },
+    upright: { mark: '×', name: '棒立ちハンコ', pts: 5, manner: 0, color: '#B0241C', anim: 'sulk', ono: 'ドン', boss: ['……', '無礼な', '礼儀を知らんのか'] },
+    away: { mark: '×', name: 'そっぽ向きハンコ', pts: 0, manner: 0, color: '#B0241C', anim: 'sulk', ono: 'プイッ', boss: ['こっちを向け', 'どこを見ている', 'ムッ'] },
+    junior: { mark: '×', name: '後輩にお辞儀', pts: 10, manner: 10, color: '#B0241C', anim: 'sulk', ono: 'ペコリ', boss: ['私は無視か', '…ほう？'], jr: ['恐縮です！', 'せ、先輩!?'] },
+    reverse: { mark: '↻', name: '逆さハンコ', pts: 0, manner: 0, color: '#B0241C', anim: 'shake', ono: 'グルン', boss: ['反逆か!!', 'クビだ!!', '異議ありだと!?'] }
+  };
+  const RES_KEYS = Object.keys(RES);
+
+  function gauss(r) { return (r() + r() + r() + r() - 2) * 1.732; }
+  function pick(r, a) { return a[Math.min(a.length - 1, Math.floor(r() * a.length))]; }
+  function shuffled(r, a) {
+    const b = a.slice();
+    for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); const t = b[i]; b[i] = b[j]; b[j] = t; }
+    return b;
+  }
+  function makeSpecks(r, n) {
+    const s = [];
+    for (let i = 0; i < (n || 9); i++) {
+      const a = r() * Math.PI * 2, d = Math.sqrt(r()) * 0.85;
+      s.push({ x: Math.cos(a) * d, y: Math.sin(a) * d, s: 0.04 + r() * 0.07 });
+    }
+    return s;
+  }
+  function zoneName(a) {
+    if (a < C.UPRIGHT_UNDER) return '直立';
+    if (a < 22.5) return '会釈';
+    if (a < 37.5) return '敬礼';
+    if (a < 55) return '最敬礼';
+    if (a < C.DOGEZA_AT) return '深々';
+    if (a < C.REVERSE_AT) return '土下座';
+    return '逆さま';
+  }
+
+  function makeDoc(G) {
+    const r = G.rng;
+    const n = r() < 0.5 ? 3 : 4;
+    const rate = G.mode === 'play' ? (G.elapsed >= C.JUNIOR_AT ? C.JUNIOR_RATE : 0) : C.DEMO_JUNIOR_RATE;
+    const withJunior = r() < rate;
+    const side = r() < 0.5 ? -1 : 1;           // 上司があなたの左(-1)か右(+1)か
+    let you;
+    if (withJunior) {
+      you = 1 + Math.floor(r() * (n - 2));
+    } else {
+      const c = [];
+      for (let i = 0; i < n; i++) if (i + side >= 0 && i + side < n) c.push(i);
+      you = pick(r, c);
+    }
+    const rank = pick(r, RANKS);
+    const blanks = shuffled(r, BLANK_LABELS);
+    const boxes = [];
+    for (let i = 0; i < n; i++) boxes.push({ kind: 'blank', label: blanks[i % blanks.length] });
+    boxes[you] = { kind: 'you', label: 'あなた' };
+    boxes[you + side] = { kind: 'boss', label: rank.label, name: pick(r, BOSS_NAMES), specks: makeSpecks(r) };
+    if (withJunior) boxes[you - side] = { kind: 'junior', label: '後輩', name: pick(r, JUNIOR_NAMES), specks: makeSpecks(r) };
+    const lines = [];
+    for (let i = 0; i < 7; i++) lines.push(0.45 + r() * 0.55);
+    G.docNo += 1 + Math.floor(r() * 3);
+    return {
+      type: pick(r, DOC_TYPES), subject: pick(r, SUBJECTS), no: G.docNo,
+      n, you, side, rank, target: rank.deg, junior: withJunior, boxes, lines,
+      anim: 0, exiting: false, t: 0, stamp: null, bubbles: [], bossAnim: null, jrAnim: null
+    };
+  }
+
+  function newGame(mode, rng) {
+    const counts = {};
+    RES_KEYS.forEach(k => { counts[k] = 0; });
+    const r = rng || Math.random;
+    const G = {
+      mode, rng: r, t: 0, elapsed: 0, timeLeft: C.GAME_TIME, started: false, over: false,
+      phase: 'enter', pt: 0, endT: 0, cur: null, prev: null,
+      held: 0, tiltDir: 0, angle: 0, holdT: 0,
+      count: 0, score: 0, mannerSum: 0, angleSum: 0, combo: 0, maxCombo: 0, counts,
+      jdg: null, docNo: 100 + Math.floor(r() * 400), events: [],
+      flags: { junior: false, rush: false }, countdown: 6
+    };
+    G.cur = makeDoc(G);
+    return G;
+  }
+
+  function emit(G, type, data) { G.events.push({ type, data: data || {} }); }
+
+  function speedMult(G) {
+    if (G.mode !== 'play') return 1;
+    const e = G.elapsed;
+    return e < C.RUSH_AT ? 1 + 0.2 * e / C.RUSH_AT : 1.2 + 0.4 * Math.min(1, (e - C.RUSH_AT) / (C.GAME_TIME - C.RUSH_AT));
+  }
+
+  function judge(doc, dir, a) {
+    if (a >= C.REVERSE_AT) return 'reverse';
+    if (a >= C.DOGEZA_AT) return 'dogeza';
+    if (a < C.UPRIGHT_UNDER) return 'upright';
+    const nb = doc.boxes[doc.you + dir];
+    if (!nb || nb.kind === 'blank') return 'away';
+    if (nb.kind === 'junior') return 'junior';
+    const d = a - doc.target;
+    if (Math.abs(d) <= C.TOL_PERFECT) return 'perfect';
+    if (Math.abs(d) <= C.TOL_GOOD) return 'good';
+    return d < 0 ? 'shallow' : 'deep';
+  }
+
+  function beginTilt(G, dir) {
+    G.phase = 'tilt'; G.tiltDir = dir; G.angle = 0; G.holdT = 0; G.jdg = null;
+  }
+
+  function stamp(G) {
+    const doc = G.cur, dir = G.tiltDir, a = G.angle, r = G.rng;
+    const key = judge(doc, dir, a), R = RES[key];
+    G.count++; G.counts[key]++; G.mannerSum += R.manner; G.angleSum += a;
+    let bonus = 0;
+    if (R.combo) { G.combo++; bonus = Math.min(G.combo - 1, C.COMBO_CAP) * C.COMBO_STEP; } else G.combo = 0;
+    if (G.combo > G.maxCombo) G.maxCombo = G.combo;
+    G.score += R.pts + bonus;
+    doc.stamp = { dir, angle: a, key, t: 0, specks: makeSpecks(r, 8) };
+    doc.bubbles = [{ i: doc.you + doc.side, text: pick(r, R.boss), t: -C.BUBBLE_DELAY }];
+    doc.bossAnim = { type: R.anim, t: 0 };
+    if (key === 'junior') {
+      doc.bubbles.push({ i: doc.you - doc.side, text: pick(r, R.jr), t: -C.BUBBLE_DELAY - 0.16 });
+      doc.jrAnim = { type: 'bow', t: 0 };
+    }
+    G.jdg = { key, t: 0, angle: a, dir, rank: doc.rank, side: doc.side, combo: G.combo, bonus };
+    G.phase = 'press'; G.pt = 0;
+    emit(G, 'stamp', { key, angle: a, dir, combo: G.combo, bonus });
+  }
+
+  function nextDoc(G) {
+    G.prev = G.cur; G.prev.exiting = true; G.prev.anim = 0;
+    G.cur = makeDoc(G);
+    G.phase = 'enter'; G.angle = 0; G.tiltDir = 0; G.holdT = 0;
+  }
+
+  function endGame(G) {
+    if (G.over) return;
+    G.over = true; G.phase = 'end'; G.endT = 0; G.held = 0; G.tiltDir = 0; G.angle = 0;
+    emit(G, 'end');
+  }
+
+  function tickDoc(d, dt) {
+    d.t += dt;
+    if (d.stamp) d.stamp.t += dt;
+    for (const b of d.bubbles) b.t += dt;
+    if (d.bossAnim) d.bossAnim.t += dt;
+    if (d.jrAnim) d.jrAnim.t += dt;
+  }
+
+  function update(G, dt) {
+    if (!(dt > 0)) return;
+    G.t += dt;
+    if (G.mode === 'play' && G.started && !G.over) {
+      G.timeLeft = Math.max(0, G.timeLeft - dt);
+      G.elapsed = C.GAME_TIME - G.timeLeft;
+      if (!G.flags.junior && G.elapsed >= C.JUNIOR_AT) { G.flags.junior = true; emit(G, 'banner', { key: 'junior' }); }
+      if (!G.flags.rush && G.elapsed >= C.RUSH_AT) { G.flags.rush = true; emit(G, 'banner', { key: 'rush' }); }
+      const sec = Math.ceil(G.timeLeft);
+      if (sec <= 5 && sec < G.countdown) { G.countdown = sec; if (sec > 0) emit(G, 'countdown', { sec }); }
+      if (G.timeLeft <= 0) endGame(G);
+    }
+    if (G.prev) {
+      tickDoc(G.prev, dt);
+      G.prev.anim += dt / C.EXIT_T;
+      if (G.prev.anim >= 1) G.prev = null;
+    }
+    if (G.cur) tickDoc(G.cur, dt);
+    if (G.jdg) G.jdg.t += dt;
+
+    switch (G.phase) {
+      case 'enter':
+        G.cur.anim = Math.min(1, G.cur.anim + dt / C.ENTER_T);
+        if (G.cur.anim >= 1) {
+          G.phase = 'ready';
+          if (G.mode === 'play' && !G.started) { G.started = true; emit(G, 'start'); }
+        }
+        break;
+      case 'ready':
+        if (G.held && !G.over) beginTilt(G, G.held);
+        break;
+      case 'tilt': {
+        G.holdT += dt;
+        const w = (C.W0 + C.ACC * G.holdT) * speedMult(G);
+        const before = G.angle;
+        G.angle = Math.min(C.MAX_ANGLE, G.angle + w * dt);
+        const tb = Math.floor(before / 15), ta = Math.floor(G.angle / 15);
+        if (ta > tb) emit(G, 'tick', { deg: ta * 15 });
+        break;
+      }
+      case 'press':
+        G.pt += dt;
+        if (G.pt >= C.PRESS_T + C.LINGER_T) nextDoc(G);
+        break;
+      case 'end':
+        G.endT += dt;
+        if (G.cur && G.cur.anim < 1) G.cur.anim = Math.min(1, G.cur.anim + dt / C.ENTER_T);
+        break;
+    }
+  }
+
+  function press(G, dir) {
+    if (!G || G.over || G.held || (dir !== -1 && dir !== 1)) return false;
+    G.held = dir;
+    if (G.phase === 'ready') beginTilt(G, dir);
+    return true;
+  }
+
+  function release(G, dir) {
+    if (!G || G.held !== dir) return false;
+    G.held = 0;
+    if (G.phase === 'tilt' && G.tiltDir === dir && !G.over) { stamp(G); return true; }
+    return false;
+  }
+
+  function stats(G) {
+    const n = G.count;
+    return {
+      count: n, counts: Object.assign({}, G.counts),
+      manner: n ? Math.round(G.mannerSum / n) : 0,
+      score: G.score, maxCombo: G.maxCombo, avgAngle: n ? G.angleSum / n : 0
+    };
+  }
+
+  const PREFIX = [
+    [90, '礼節を極めし', 'その角度、教科書に載せたい。'],
+    [75, '折り目正しい', '上司の覚えもめでたい。'],
+    [55, 'まあまあ礼儀正しい', 'ときどき頭が高い。'],
+    [35, 'ちょっと頭が高い', '上司の眉間にしわが寄っている。'],
+    [-1, '無礼講な', '人事部が面談を希望しています。']
+  ];
+  const RANK_TITLES = [[44, '決裁マシーン'], [38, '専務'], [32, '部長'], [26, '課長'], [20, '係長'], [14, '主任'], [7, '新入社員'], [0, 'インターン']];
+
+  function calcTitle(s) {
+    const n = s.count, c = s.counts;
+    const T = (lines, comment, kind) => ({ title: lines.join(''), lines, comment, kind });
+    if (n === 0) return T(['幽霊社員'], '一枚も押さずに定時を迎えた。', 'ghost');
+    const ratio = k => (c[k] || 0) / n;
+    if (n >= 25 && ratio('perfect') >= 0.9) return T(['お辞儀ハンコ道', '家元'], 'その角度、もはや芸術。免許皆伝とする。', 'iemoto');
+    if (n >= 4) {
+      if (ratio('reverse') >= 0.5) return T(['反逆の', '逆さ印鑑'], '取締役会で問題になっています。', 'reverse');
+      if (ratio('dogeza') >= 0.5) return T(['平身低頭の', '土下座マイスター'], '毎回なにを謝っているのか、誰にも分からない。', 'dogeza');
+      if (ratio('upright') >= 0.5) return T(['直立不動の', '鉄人'], '微動だにしない背筋だけは評価に値する。', 'upright');
+      if (ratio('away') + ratio('junior') >= 0.5) return T(['我が道を行く', '一匹狼'], '上司のほうを一度も見なかった。', 'away');
+    }
+    const p = PREFIX.find(x => s.manner >= x[0]);
+    const rk = RANK_TITLES.find(x => n >= x[0]);
+    return T([p[1], rk[1]], p[2], 'normal');
+  }
+
+  function shareText(s, tt) {
+    const c = s.counts;
+    const meh = c.shallow + c.deep, rude = c.upright + c.away + c.junior + c.reverse;
+    return '【お辞儀ハンコ】60秒で' + s.count + '枚を決裁。礼儀力' + s.manner + '%・' + s.score + '点で「' + tt.title + '」に任命されました🙇\n' +
+      '◎完璧' + c.perfect + ' ○良' + c.good + ' △' + meh + ' ▽土下座' + c.dogeza + ' ×無礼' + rude;
+  }
+
+  /* ---- CPUの打ち手（タイトルのお手本デモと自動テスト用） ---- */
+  function makeBot(kind, rng) {
+    return { kind, rng: rng || Math.random, wait: kind === 'demo' ? 0.8 : 0.3, holding: false, dir: 0, target: 0, lag: 0, planned: false };
+  }
+  function planBot(B, doc) {
+    const r = B.rng;
+    let dir = doc ? doc.side : (r() < 0.5 ? -1 : 1);
+    let tgt = doc ? doc.target : 30;
+    B.lag = 0;
+    switch (B.kind) {
+      case 'human': if (r() < 0.04) dir = -dir; tgt += gauss(r) * 3; B.lag = Math.max(0, 0.05 + gauss(r) * 0.035); break;
+      case 'casual': if (r() < 0.08) dir = -dir; tgt += gauss(r) * 5; B.lag = Math.max(0, 0.08 + gauss(r) * 0.05); break;
+      case 'demo': {
+        const x = r();
+        if (x < 0.10) tgt = 78 + r() * 30;
+        else if (x < 0.14) tgt = 1;
+        else if (x < 0.19) dir = -dir;
+        else tgt += gauss(r) * 3.5;
+        break;
+      }
+      case 'random': dir = r() < 0.5 ? -1 : 1; tgt = r() * 180; break;
+      case 'dogeza': tgt = 85; break;
+      case 'reverse': tgt = 179; break;
+      case 'spam': tgt = 0; break;
+      case 'wrong': dir = -dir; break;
+      case 'holdforever': tgt = 1e9; break;
+      default: break;
+    }
+    B.dir = dir; B.target = tgt;
+  }
+  function botWait(B) {
+    const r = B.rng;
+    switch (B.kind) {
+      case 'perfect': return 0.12;
+      case 'human': return 0.22 + r() * 0.22;
+      case 'casual': return 0.45 + r() * 0.4;
+      case 'demo': return 0.55 + r() * 0.4;
+      case 'spam': case 'eager': return 0;
+      default: return r() * 0.4;
+    }
+  }
+  function botStep(B, G, dt) {
+    if (G.over) { B.holding = false; return; }
+    if (B.kind === 'idle') return;
+    if (!B.holding) {
+      const ok = G.phase === 'ready' || (B.kind === 'eager' && (G.phase === 'enter' || G.phase === 'press'));
+      if (!ok) return;
+      B.wait -= dt;
+      if (B.wait > 0) return;
+      const doc = G.phase === 'ready' ? G.cur : null;
+      planBot(B, doc); B.planned = !!doc;
+      if (press(G, B.dir)) B.holding = true;
+      return;
+    }
+    if (G.phase === 'tilt') {
+      if (!B.planned) { const d = B.dir; planBot(B, G.cur); B.dir = d; B.planned = true; }
+      if (G.angle >= B.target) {
+        if (B.lag > 0) { B.lag -= dt; return; }
+        release(G, B.dir); B.holding = false; B.wait = botWait(B);
+      }
+    }
+  }
+
+  root.OjihanCore = {
+    C, RANKS, RES, RES_KEYS, DOC_TYPES, SUBJECTS, BOSS_NAMES, JUNIOR_NAMES, BLANK_LABELS, PREFIX, RANK_TITLES,
+    makeDoc, newGame, update, press, release, judge, stats, calcTitle, shareText, zoneName, speedMult,
+    makeBot, botStep
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+
+<script id="ui">
+/* ===== 画面・入力・音 ===== */
+(function () {
+  'use strict';
+  const O = window.OjihanCore, C = O.C;
+  const $ = id => document.getElementById(id);
+
+  const F_MIN = '"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP","Noto Serif CJK JP",serif';
+  const F_SEAL = '"Yuji Syuku","Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif';
+  // 紙・朱肉・ハンコなどの「物」はテーマに関係なく現実の色
+  const PAPER = '#FBFAF6', TXT = '#26241F', RULE = '#3A362E', FAINT = '#DCD7CB', SUBTXT = '#6A6457', SEAL = '#C62F28', HILITE = '#FFF1BC';
+
+  /* ---- 保存 ---- */
+  const KEY_BEST = 'ojihan-best', KEY_MUTE = 'ojihan-muted';
+  function load(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+  function save(k, v) { try { localStorage.setItem(k, String(v)); } catch (e) {} }
+
+  /* ---- 効果音 ---- */
+  let muted = load(KEY_MUTE, '0') === '1';
+  let actx = null;
+  function ensureAudio() {
+    try {
+      if (!actx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) actx = new AC(); }
+      if (actx && actx.state === 'suspended') actx.resume();
+    } catch (e) {}
+  }
+  // 周波数, 長さ(秒), 波形, 音量, 終わりの周波数(任意), 開始の遅れ(任意)
+  function tone(f, dur, type, vol, f2, delay) {
+    if (muted || !actx) return;
+    const t = actx.currentTime + (delay || 0), o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t); o.stop(t + dur + 0.03);
+  }
+  let noiseBuf = null;
+  function noise(dur, vol, delay) {
+    if (muted || !actx) return;
+    try {
+      if (!noiseBuf) {
+        const len = Math.floor(actx.sampleRate * 0.5);
+        noiseBuf = actx.createBuffer(1, len, actx.sampleRate);
+        const d = noiseBuf.getChannelData(0);
+        for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      }
+      const t = actx.currentTime + (delay || 0);
+      const s = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain();
+      s.buffer = noiseBuf; f.type = 'lowpass'; f.frequency.value = 900;
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      s.connect(f); f.connect(g); g.connect(actx.destination);
+      s.start(t); s.stop(t + dur + 0.02);
+    } catch (e) {}
+  }
+  const SFX = {
+    tick(deg) { tone(520 + deg * 5, 0.035, 'square', 0.035); },
+    stamp() { tone(170, 0.1, 'sine', 0.38, 70); noise(0.06, 0.25); },
+    perfect() { tone(1047, 0.12, 'triangle', 0.16, null, 0.05); tone(1568, 0.26, 'triangle', 0.14, null, 0.13); },
+    good() { tone(880, 0.16, 'triangle', 0.14, null, 0.05); },
+    meh() { tone(494, 0.16, 'triangle', 0.12, 440, 0.05); },
+    dogeza() { tone(300, 0.55, 'sawtooth', 0.08, 60, 0.04); tone(110, 0.35, 'sine', 0.3, 45, 0.04); noise(0.25, 0.18, 0.04); },
+    rude() { tone(150, 0.2, 'square', 0.08, 120, 0.05); },
+    reverse() { tone(233, 0.4, 'sawtooth', 0.07, null, 0.04); tone(247, 0.4, 'sawtooth', 0.07, null, 0.04); },
+    count() { tone(1175, 0.05, 'square', 0.05); },
+    banner() { tone(660, 0.1, 'triangle', 0.1); tone(880, 0.14, 'triangle', 0.1, null, 0.09); },
+    chimeStart() { [784, 988].forEach((f, i) => tone(f, 0.35, 'triangle', 0.13, null, i * 0.16)); },
+    chimeEnd() { [659, 523, 587, 392].forEach((f, i) => tone(f, 0.6, 'triangle', 0.14, null, i * 0.34)); }
+  };
+  const RES_SFX = { perfect: 'perfect', good: 'good', shallow: 'meh', deep: 'meh', dogeza: 'dogeza', upright: 'rude', away: 'rude', junior: 'rude', reverse: 'reverse' };
+
+  /* ---- 動きを減らす設定 ---- */
+  function onMQ(mq, fn) { try { if (mq.addEventListener) mq.addEventListener('change', fn); else if (mq.addListener) mq.addListener(fn); } catch (e) {} }
+  const mqReduce = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  let reduceMotion = !!(mqReduce && mqReduce.matches);
+  if (mqReduce) onMQ(mqReduce, () => { reduceMotion = mqReduce.matches; });
+
+  /* ---- Canvas ---- */
+  const cv = $('cv'), ctx = cv.getContext('2d');
+  let cssW = 390, cssH = 560, dpr = 1;
+  function resize() {
+    const r = cv.getBoundingClientRect();
+    cssW = Math.max(1, Math.round(r.width)); cssH = Math.max(1, Math.round(r.height));
+    dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    cv.width = Math.round(cssW * dpr); cv.height = Math.round(cssH * dpr);
+  }
+  if (window.ResizeObserver) new ResizeObserver(resize).observe($('stage'));
+  window.addEventListener('resize', resize);
+
+  const THEME = { desk: '#C5CEC6', mat: '#B2C2B6' };
+  function readTheme() {
+    try {
+      const cs = getComputedStyle(document.documentElement);
+      THEME.desk = cs.getPropertyValue('--desk').trim() || THEME.desk;
+      THEME.mat = cs.getPropertyValue('--mat').trim() || THEME.mat;
+    } catch (e) {}
+  }
+  if (window.matchMedia) onMQ(window.matchMedia('(prefers-color-scheme: dark)'), readTheme);
+  if (window.MutationObserver) new MutationObserver(readTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
+
+  // Canvasで使う文字のフォントを先に読み込む（読めなければ標準の明朝で描く）
+  (function preloadFonts() {
+    if (!document.fonts || !document.fonts.load) return;
+    const txt = JSON.stringify([O.DOC_TYPES, O.SUBJECTS, O.RANKS, O.RES, O.BLANK_LABELS]) +
+      '0123456789第号令和年月日件名記印あなた後輩目安上司は左右側長押し中自分の印が直立会釈敬礼最敬礼深々土下座逆さまコンボ°（）：';
+    ['500', '700', '800'].forEach(w => { document.fonts.load(w + ' 20px "Shippori Mincho B1"', txt).catch(() => {}); });
+    document.fonts.load('20px "Yuji Syuku"', O.BOSS_NAMES.join('') + O.JUNIOR_NAMES.join('') + '新人礼判子商事之印').catch(() => {});
+  })();
+
+  const now0 = new Date();
+  const DATE_JP = '令和' + (now0.getFullYear() - 2018) + '年' + (now0.getMonth() + 1) + '月' + now0.getDate() + '日';
+
+  /* ---- 状態 ---- */
+  let state = 'title';      // 'title' → 'playing' → 'over'
+  let G = null, bot = null;
+  let shakeT = 0, shakeAmp = 0;
+  const parts = [];
+  let lastStats = null, lastTitle = null;
+
+  /* ---- 便利関数 ---- */
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const easeOut = t => 1 - Math.pow(1 - t, 3);
+  const easeIn = t => t * t * t;
+  const easeOutBack = t => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); };
+  function rrect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+  }
+
+  /* ---- レイアウト（描画範囲と、吹き出し・判定の置き場所を先に決める） ---- */
+  function layout() {
+    const W = cssW, H = cssH;
+    const pw = Math.min(W - 28, 460);
+    const px = Math.round((W - pw) / 2);
+    const py = 10;
+    const b = Math.round(clamp((pw - 30) / 4, 54, 84));
+    const L = b * 1.36, R = L + 16;
+    const rowTop = py + Math.round(clamp(H * 0.30, 118, 210));
+    const labH = 22;
+    const yc = rowTop + labH + b / 2;
+    const rowBottom = rowTop + labH + b;
+    return { W, H, pw, px, py, b, L, R, rowTop, labH, yc, rowBottom, bandY: rowBottom + 44, r: b * 0.36, rodW: Math.max(20, b * 0.4) };
+  }
+  function boxX(doc, i, Ly) { return Ly.px + (Ly.pw - doc.n * Ly.b) / 2 + i * Ly.b; }
+  function boxCX(doc, i, Ly) { return boxX(doc, i, Ly) + Ly.b / 2; }
+  function docOffset(doc, Ly) {
+    if (reduceMotion) return 0;
+    if (doc.exiting) return -easeIn(clamp(doc.anim, 0, 1)) * (Ly.W + 24);
+    return (1 - easeOut(clamp(doc.anim, 0, 1))) * (Ly.W + 24);
+  }
+  function docAlpha(doc) {
+    if (!reduceMotion) return 1;
+    return doc.exiting ? 1 - clamp(doc.anim, 0, 1) : clamp(doc.anim, 0, 1);
+  }
+
+  /* ---- 印影 ---- */
+  function drawSeal(x, y, r, text, rot, specks, o) {
+    ctx.save();
+    ctx.translate(x + ((o && o.dx) || 0), y + ((o && o.dy) || 0));
+    ctx.rotate(rot * Math.PI / 180);
+    const sc = (o && o.sc) || 1;
+    if (sc !== 1) ctx.scale(sc, sc);
+    ctx.globalAlpha *= 0.92;
+    const base = ctx.globalAlpha;
+    ctx.strokeStyle = SEAL; ctx.lineWidth = Math.max(2, r * 0.11);
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = SEAL; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = (r * 0.74).toFixed(1) + 'px ' + F_SEAL;
+    const ch = Array.from(text);
+    if (ch.length === 1) ctx.fillText(ch[0], 0, 1);
+    else { ctx.fillText(ch[0], 0, -r * 0.37); ctx.fillText(ch[1], 0, r * 0.39); }
+    if (specks) {
+      ctx.fillStyle = PAPER; ctx.globalAlpha = base * 0.8;
+      for (const s of specks) { ctx.beginPath(); ctx.arc(s.x * r, s.y * r, s.s * r, 0, Math.PI * 2); ctx.fill(); }
+    }
+    ctx.restore();
+  }
+  // 上司・後輩の印のリアクション（towardYou: あなたの方向へ傾くときの符号）
+  function sealXf(an, towardYou) {
+    const id = { rot: 0, dx: 0, dy: 0, sc: 1 };
+    if (!an) return id;
+    const t = an.t;
+    switch (an.type) {
+      case 'nod': { const p = Math.min(1, t / 0.5); return { rot: towardYou * 16 * Math.sin(Math.PI * p), dx: 0, dy: 0, sc: 1 }; }
+      case 'bow': { const p = Math.min(1, t / 0.7); return { rot: towardYou * 42 * Math.sin(Math.PI * p), dx: 0, dy: 0, sc: 1 }; }
+      case 'sulk': { const p = Math.min(1, t / 0.25); return { rot: -towardYou * 10 * easeOut(p), dx: 0, dy: 0, sc: 1 }; }
+      case 'huh': { const p = Math.min(1, t / 0.35); return { rot: -towardYou * 7 * Math.sin(Math.PI * p), dx: 0, dy: -5 * Math.sin(Math.PI * p), sc: 1 }; }
+      case 'jump': { const p = Math.min(1, t / 0.6); return { rot: 0, dx: 0, dy: -16 * Math.abs(Math.sin(Math.PI * 2 * p)) * (1 - p), sc: 1 + 0.14 * (1 - p) }; }
+      case 'shake': { const p = Math.min(1, t / 0.75); return { rot: Math.sin(t * 50) * 9 * (1 - p), dx: Math.sin(t * 63) * 5 * (1 - p), dy: 0, sc: 1 + 0.1 * (1 - p) }; }
+    }
+    return id;
+  }
+
+  function drawBubble(cx, bottom, text, t, Ly) {
+    const p = Math.min(1, t / 0.16);
+    const sc = reduceMotion ? 1 : 0.55 + 0.45 * easeOutBack(p);
+    ctx.font = '700 13px ' + F_MIN;
+    const w = ctx.measureText(text).width + 18, h = 26;
+    const bx = clamp(cx, Ly.px + w / 2 + 4, Ly.px + Ly.pw - w / 2 - 4);
+    const tail = clamp(cx - bx, -w / 2 + 10, w / 2 - 10);
+    ctx.save();
+    ctx.translate(bx, bottom); ctx.scale(sc, sc);
+    rrect(-w / 2, -h - 7, w, h, 9);
+    ctx.fillStyle = '#FFFFFF'; ctx.fill();
+    ctx.strokeStyle = TXT; ctx.lineWidth = 1.4; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(tail - 6, -7.7); ctx.lineTo(tail, 0); ctx.lineTo(tail + 6, -7.7);
+    ctx.fillStyle = '#FFFFFF'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(tail - 6, -7); ctx.lineTo(tail, 0); ctx.lineTo(tail + 6, -7); ctx.stroke();
+    ctx.fillStyle = TXT; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(text, 0, -7 - h / 2 + 1);
+    ctx.restore();
+  }
+
+  /* ---- 書類 ---- */
+  function drawDoc(doc, Ly) {
+    const ox = docOffset(doc, Ly), al = docAlpha(doc);
+    if (al <= 0.001 || ox > Ly.W + 10 || ox < -Ly.W - 30) return;
+    const { px, py, pw, H, b, labH, rowTop, yc, r } = Ly;
+    ctx.save();
+    ctx.globalAlpha = al;
+    ctx.translate(ox, 0);
+    const ph = H - py + 30;
+    ctx.fillStyle = 'rgba(0,0,0,0.14)'; ctx.fillRect(px + 3, py + 4, pw, ph);
+    ctx.fillStyle = PAPER; ctx.fillRect(px, py, pw, ph);
+
+    // 表題・番号・件名
+    ctx.fillStyle = TXT; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.font = '800 21px ' + F_MIN;
+    const ttl = doc.type.length <= 4 ? Array.from(doc.type).join(' ') : doc.type;
+    ctx.fillText(ttl, px + pw / 2, py + 38);
+    ctx.font = '500 11px ' + F_MIN; ctx.fillStyle = SUBTXT; ctx.textAlign = 'right';
+    ctx.fillText('第' + String(doc.no).padStart(4, '0') + '号　' + DATE_JP, px + pw - 14, py + 60);
+    ctx.textAlign = 'left'; ctx.fillStyle = TXT; ctx.font = '700 13px ' + F_MIN;
+    ctx.fillText('件名　' + doc.subject, px + 14, py + 86);
+    ctx.fillStyle = FAINT; ctx.fillRect(px + 14, py + 93, pw - 28, 1);
+
+    // 承認欄
+    const rx = boxX(doc, 0, Ly), rw = doc.n * b;
+    for (let i = 0; i < doc.n; i++) {
+      const bx = boxX(doc, i, Ly), box = doc.boxes[i];
+      if (box.kind === 'you') { ctx.fillStyle = HILITE; ctx.fillRect(bx, rowTop, b, labH + b); }
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      if (box.kind === 'boss') { ctx.font = '800 14px ' + F_MIN; ctx.fillStyle = TXT; }
+      else if (box.kind === 'you') { ctx.font = '800 13px ' + F_MIN; ctx.fillStyle = SEAL; }
+      else if (box.kind === 'junior') { ctx.font = '700 12px ' + F_MIN; ctx.fillStyle = SUBTXT; }
+      else { ctx.font = '500 12px ' + F_MIN; ctx.fillStyle = SUBTXT; }
+      ctx.fillText(box.label, bx + b / 2, rowTop + labH / 2 + 1);
+    }
+    ctx.strokeStyle = RULE; ctx.lineWidth = 1.2;
+    ctx.strokeRect(rx + 0.5, rowTop + 0.5, rw, labH + b);
+    ctx.beginPath();
+    ctx.moveTo(rx, rowTop + labH + 0.5); ctx.lineTo(rx + rw, rowTop + labH + 0.5);
+    for (let i = 1; i < doc.n; i++) { const x = rx + i * b + 0.5; ctx.moveTo(x, rowTop); ctx.lineTo(x, rowTop + labH + b); }
+    ctx.stroke();
+
+    // あなたの欄（押す前は点線の丸）
+    const ycx = boxCX(doc, doc.you, Ly);
+    if (!doc.stamp) {
+      ctx.setLineDash([4, 4]); ctx.strokeStyle = 'rgba(198,47,40,0.45)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(ycx, yc, r, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(198,47,40,0.35)'; ctx.font = '700 15px ' + F_MIN; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('印', ycx, yc + 1);
+    }
+    // 上司・後輩の印
+    for (let i = 0; i < doc.n; i++) {
+      const box = doc.boxes[i];
+      if (box.kind === 'boss') drawSeal(boxCX(doc, i, Ly), yc, r, box.name, 0, box.specks, sealXf(doc.bossAnim, -doc.side));
+      if (box.kind === 'junior') {
+        const xf = sealXf(doc.jrAnim, doc.side);
+        drawSeal(boxCX(doc, i, Ly), yc, r, box.name, xf.rot, box.specks, xf);
+      }
+    }
+    // あなたの印影
+    if (doc.stamp) {
+      const s = doc.stamp, p = Math.min(1, s.t / 0.12);
+      const sc = reduceMotion ? 1 : 1.18 - 0.18 * easeOut(p);
+      drawSeal(ycx, yc, r, '新人', s.dir * s.angle, s.specks, { sc });
+    }
+    // 本文
+    const by0 = Ly.rowBottom + 98;
+    ctx.fillStyle = TXT; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.font = '700 13px ' + F_MIN;
+    if (by0 < H) ctx.fillText('記', px + pw / 2, by0);
+    ctx.fillStyle = FAINT;
+    for (let y = by0 + 22, k = 0; y < H - 4; y += 22, k++) {
+      rrect(px + 28, y - 4, doc.lines[k % doc.lines.length] * (pw - 56), 7, 3.5); ctx.fill();
+    }
+    ctx.restore();
+  }
+  function drawBubbles(doc, Ly) {
+    if (!doc.bubbles.length) return;
+    const ox = docOffset(doc, Ly), al = docAlpha(doc);
+    if (al <= 0.001) return;
+    ctx.save(); ctx.globalAlpha = al; ctx.translate(ox, 0);
+    for (const bu of doc.bubbles) if (bu.t >= 0) drawBubble(boxCX(doc, bu.i, Ly), Ly.rowTop - 4, bu.text, bu.t, Ly);
+    ctx.restore();
+  }
+
+  /* ---- 分度器 ---- */
+  function drawProtractor(cx, cy, R, dir, rank, a, alpha) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.globalAlpha *= alpha;
+    const rad = d => (-90 + dir * d) * Math.PI / 180;
+    const ccw = dir < 0;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, R, rad(0), rad(180), ccw); ctx.closePath();
+    ctx.fillStyle = 'rgba(70,140,190,0.11)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(30,70,110,0.55)'; ctx.lineWidth = 1.2; ctx.stroke();
+    const band = (d0, d1, rr, w, col) => {
+      ctx.beginPath(); ctx.arc(0, 0, rr, rad(d0), rad(d1), ccw); ctx.strokeStyle = col; ctx.lineWidth = w; ctx.stroke();
+    };
+    band(C.DOGEZA_AT, C.REVERSE_AT, R - 6, 10, 'rgba(106,44,156,0.30)');
+    band(C.REVERSE_AT, 180, R - 6, 10, 'rgba(176,36,28,0.28)');
+    if (rank) {
+      band(Math.max(0, rank.deg - C.TOL_GOOD), rank.deg + C.TOL_GOOD, R - 7, 13, 'rgba(27,115,71,0.28)');
+      band(rank.deg - C.TOL_PERFECT, rank.deg + C.TOL_PERFECT, R - 7, 13, 'rgba(27,115,71,0.85)');
+    }
+    ctx.strokeStyle = 'rgba(30,70,110,0.7)'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let d = 0; d <= 180; d += 5) {
+      const len = d % 45 === 0 ? 12 : d % 15 === 0 ? 8 : 4, an = rad(d);
+      ctx.moveTo(Math.cos(an) * (R - len), Math.sin(an) * (R - len));
+      ctx.lineTo(Math.cos(an) * R, Math.sin(an) * R);
+    }
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(30,70,110,0.9)'; ctx.font = '700 10px ' + F_MIN; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (const d of [15, 30, 45, 90]) { const an = rad(d); ctx.fillText(String(d), Math.cos(an) * (R + 9), Math.sin(an) * (R + 9)); }
+    ctx.fillStyle = 'rgba(106,44,156,0.95)';
+    let an = rad(102); ctx.fillText('土下座', Math.cos(an) * (R - 22), Math.sin(an) * (R - 22));
+    ctx.fillStyle = 'rgba(176,36,28,0.95)';
+    an = rad(160); ctx.fillText('逆さ', Math.cos(an) * (R - 22), Math.sin(an) * (R - 22));
+    // 今の角度の目盛り
+    an = rad(Math.min(a, 180));
+    ctx.save(); ctx.rotate(an);
+    ctx.beginPath(); ctx.moveTo(R + 1, 0); ctx.lineTo(R + 12, -6); ctx.lineTo(R + 12, 6); ctx.closePath();
+    ctx.fillStyle = SEAL; ctx.fill();
+    ctx.restore();
+    ctx.restore();
+  }
+
+  /* ---- ハンコ本体（お辞儀する人に見立てる） ---- */
+  function drawFace(expr, fy, w) {
+    const ex = w * 0.2, col = '#3A2512';
+    ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 1.7; ctx.lineCap = 'round';
+    const dot = (x, y) => { ctx.beginPath(); ctx.arc(x, y, 2.1, 0, Math.PI * 2); ctx.fill(); };
+    const line = (x1, y1, x2, y2) => { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); };
+    switch (expr) {
+      case 'bow':
+        line(-ex - 3, fy, -ex + 3, fy); line(ex - 3, fy, ex + 3, fy);
+        line(-2, fy + 7, 2, fy + 7);
+        break;
+      case 'proud':
+        ctx.beginPath(); ctx.arc(-ex, fy + 2, 3, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
+        ctx.beginPath(); ctx.arc(ex, fy + 2, 3, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
+        ctx.beginPath(); ctx.arc(0, fy + 5, 3.2, Math.PI * 0.15, Math.PI * 0.85); ctx.stroke();
+        break;
+      case 'dogeza':
+        line(-ex - 3, fy - 3, -ex + 2, fy); line(-ex + 2, fy, -ex - 3, fy + 3);
+        line(ex + 3, fy - 3, ex - 2, fy); line(ex - 2, fy, ex + 3, fy + 3);
+        ctx.fillStyle = '#4C9BD6';
+        ctx.beginPath(); ctx.moveTo(w / 2 + 4, fy - 9); ctx.quadraticCurveTo(w / 2 + 9, fy - 1, w / 2 + 4, fy); ctx.quadraticCurveTo(w / 2 - 1, fy - 1, w / 2 + 4, fy - 9); ctx.fill();
+        break;
+      case 'reverse':
+        line(-ex - 2.5, fy - 2.5, -ex + 2.5, fy + 2.5); line(-ex + 2.5, fy - 2.5, -ex - 2.5, fy + 2.5);
+        line(ex - 2.5, fy - 2.5, ex + 2.5, fy + 2.5); line(ex + 2.5, fy - 2.5, ex - 2.5, fy + 2.5);
+        ctx.beginPath(); ctx.arc(0, fy + 8, 2.4, 0, Math.PI * 2); ctx.stroke();
+        break;
+      case 'blank':
+        dot(-ex, fy); dot(ex, fy); line(-3, fy + 7, 3, fy + 7);
+        break;
+      default:
+        dot(-ex, fy); dot(ex, fy);
+        ctx.beginPath(); ctx.arc(0, fy + 4, 3, Math.PI * 0.2, Math.PI * 0.8); ctx.stroke();
+    }
+  }
+  function drawRod(x, y, angDeg, len, w, o) {
+    ctx.save();
+    ctx.translate(x, y - (o.lift || 0) * 28);
+    ctx.globalAlpha *= 1 - (o.lift || 0);
+    ctx.rotate(angDeg * Math.PI / 180);
+    if (o.halo) {
+      ctx.save(); ctx.translate(0, -len * 0.55); ctx.rotate(o.t * 0.8);
+      ctx.fillStyle = 'rgba(236,180,40,0.28)';
+      for (let i = 0; i < 12; i++) {
+        ctx.rotate(Math.PI / 6);
+        ctx.beginPath(); ctx.moveTo(-5, 0); ctx.lineTo(0, -len * 0.95); ctx.lineTo(5, 0); ctx.closePath(); ctx.fill();
+      }
+      ctx.restore();
+    }
+    ctx.scale(1, o.squash || 1);
+    const hw = w / 2;
+    const g = ctx.createLinearGradient(-hw, 0, hw, 0);
+    if (o.gold) { g.addColorStop(0, '#A9780F'); g.addColorStop(0.35, '#FFE58F'); g.addColorStop(0.6, '#E1B23A'); g.addColorStop(1, '#8E640B'); }
+    else { g.addColorStop(0, '#9C6A32'); g.addColorStop(0.35, '#E9C78E'); g.addColorStop(0.6, '#CFA163'); g.addColorStop(1, '#8A5A28'); }
+    ctx.beginPath();
+    ctx.moveTo(-hw, -5); ctx.lineTo(-hw, -len + hw); ctx.arc(0, -len + hw, hw, Math.PI, 0); ctx.lineTo(hw, -5); ctx.closePath();
+    ctx.fillStyle = g; ctx.fill();
+    ctx.strokeStyle = 'rgba(70,40,15,0.75)'; ctx.lineWidth = 1.3; ctx.stroke();
+    ctx.strokeStyle = 'rgba(70,40,15,0.4)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-hw + 1, -len * 0.84); ctx.lineTo(hw - 1, -len * 0.84); ctx.stroke();
+    ctx.fillStyle = SEAL; ctx.fillRect(-hw + 1.5, -6, w - 3, 6);
+    drawFace(o.expr, -len * 0.6, w);
+    ctx.restore();
+  }
+  function exprFor(a) { return a < C.UPRIGHT_UNDER ? 'idle' : a < C.DOGEZA_AT ? 'bow' : a < C.REVERSE_AT ? 'dogeza' : 'reverse'; }
+  function exprAfter(key, a) {
+    if (key === 'perfect' || key === 'good') return 'proud';
+    if (key === 'dogeza') return 'dogeza';
+    if (key === 'reverse') return 'reverse';
+    if (key === 'shallow' || key === 'deep') return 'bow';
+    return a < C.UPRIGHT_UNDER ? 'blank' : 'blank';
+  }
+
+  function drawTool(Ly) {
+    const doc = G.cur;
+    if (!doc) return;
+    const ph = G.phase;
+    if (ph === 'end' && doc.stamp) return;
+    const ox = docOffset(doc, Ly), al = docAlpha(doc);
+    const cx = boxCX(doc, doc.you, Ly) + ox, cy = Ly.yc;
+    let ang = 0, lift = 0, squash = 1, expr = 'idle';
+    if (ph === 'tilt') { ang = G.tiltDir * G.angle; expr = exprFor(G.angle); }
+    else if (ph === 'press') {
+      ang = G.tiltDir * G.angle;
+      const p = G.pt;
+      if (p < C.PRESS_T) squash = 1 - 0.16 * Math.sin(Math.PI * p / C.PRESS_T);
+      else lift = Math.min(1, (p - C.PRESS_T) / C.LINGER_T);
+      expr = exprAfter(G.jdg && G.jdg.key, G.angle);
+    }
+    if (lift >= 1) return;
+    ctx.save();
+    ctx.globalAlpha = al;
+    if (ph === 'tilt' || ph === 'press') {
+      drawProtractor(cx, cy, Ly.R, G.tiltDir, G.tiltDir === doc.side ? doc.rank : null, G.angle, ph === 'press' ? 1 - lift : 1);
+    }
+    drawRod(cx, cy, ang, Ly.L, Ly.rodW, { lift, squash, expr, gold: G.combo >= 5, halo: G.combo >= 10 && !reduceMotion, t: G.t });
+    ctx.restore();
+  }
+
+  /* ---- 判定の表示（書類の下に確保した帯） ---- */
+  function bandPanel(cx, cy, w, h) {
+    rrect(cx - w / 2, cy - h / 2, w, h, 12);
+    ctx.fillStyle = 'rgba(251,250,246,0.94)'; ctx.fill();
+  }
+  function drawJudge(Ly) {
+    const cx = Ly.px + Ly.pw / 2, cy = Ly.bandY;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    if (G.phase === 'tilt') {
+      const a = G.angle, doc = G.cur, toBoss = G.tiltDir === doc.side;
+      bandPanel(cx, cy + 4, Math.min(Ly.pw - 16, 300), G.mode === 'demo' ? 86 : 72);
+      ctx.fillStyle = TXT; ctx.font = '800 34px ' + F_MIN;
+      ctx.fillText(Math.round(a) + '°', cx, cy - 12);
+      ctx.font = '700 12px ' + F_MIN; ctx.fillStyle = SUBTXT;
+      const hint = toBoss ? '目安：' + doc.rank.label + 'に' + doc.rank.bow + doc.rank.deg + '°'
+        : '目安なし（上司は' + (doc.side < 0 ? '左' : '右') + '）';
+      ctx.fillText(O.zoneName(a) + '　｜　' + hint, cx, cy + 16);
+      if (G.mode === 'demo') {
+        ctx.fillStyle = SEAL; ctx.font = '700 12px ' + F_MIN;
+        ctx.fillText((G.tiltDir < 0 ? '◀ 左' : '右 ▶') + 'のボタンを長押し中', cx, cy + 34);
+      }
+      return;
+    }
+    const j = G.jdg;
+    if (!j || j.t > 1.25) return;
+    const R = O.RES[j.key];
+    const fade = j.t < 0.95 ? 1 : 1 - (j.t - 0.95) / 0.3;
+    const pop = reduceMotion ? 1 : 0.7 + 0.3 * easeOutBack(Math.min(1, j.t / 0.18));
+    ctx.save();
+    ctx.globalAlpha = clamp(fade, 0, 1);
+    ctx.translate(cx, cy); ctx.scale(pop, pop);
+    const hasCombo = R.combo && j.combo >= 2;
+    bandPanel(0, hasCombo ? 6 : 2, Math.min(Ly.pw - 16, 320), hasCombo ? 84 : 66);
+    ctx.fillStyle = R.color; ctx.font = '800 25px ' + F_MIN;
+    ctx.fillText(R.mark + ' ' + R.name, 0, -12);
+    ctx.fillStyle = SUBTXT; ctx.font = '700 12px ' + F_MIN;
+    const a = Math.round(j.angle), rk = j.rank, sideTxt = j.side < 0 ? '左' : '右';
+    let sub;
+    switch (j.key) {
+      case 'away': sub = rk.label + 'は' + sideTxt + '側です（' + a + '°）'; break;
+      case 'junior': sub = '偉いのは' + sideTxt + 'の' + rk.label + 'です（' + a + '°）'; break;
+      case 'upright': sub = a + '°　ほぼ直立のまま押印'; break;
+      case 'dogeza': sub = a + '°　平伏しての押印'; break;
+      case 'reverse': sub = a + '°　上下が逆さまです'; break;
+      default: sub = rk.label + 'には' + rk.bow + rk.deg + '°　あなたは' + a + '°';
+    }
+    ctx.fillText(sub, 0, 14);
+    if (hasCombo) {
+      ctx.fillStyle = SEAL; ctx.font = '800 13px ' + F_MIN;
+      ctx.fillText('礼儀コンボ ×' + j.combo + '　+' + j.bonus, 0, 34);
+    }
+    ctx.restore();
+  }
+
+  /* ---- 粒・擬音 ---- */
+  function spawn(kind, x, y, n, opt) {
+    if (reduceMotion && kind !== 'text') return;
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, sp = (opt && opt.speed || 120) * (0.4 + Math.random() * 0.8);
+      parts.push({ kind, x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - (kind === 'dust' ? 30 : 0), life: 0, max: (opt && opt.life) || 0.6, size: (opt && opt.size) || 4, color: (opt && opt.color) || SEAL, text: opt && opt.text });
+    }
+  }
+  function updateParts(dt) {
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      p.life += dt;
+      if (p.life >= p.max) { parts.splice(i, 1); continue; }
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      if (p.kind === 'text') { p.vy *= 0.9; } else { p.vx *= 0.92; p.vy = p.vy * 0.92 + (p.kind === 'ink' ? 200 * dt : 0); }
+    }
+  }
+  function drawParts() {
+    for (const p of parts) {
+      const k = 1 - p.life / p.max;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, Math.min(1, k * 1.4));
+      if (p.kind === 'text') {
+        ctx.font = '800 22px ' + F_MIN; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.lineWidth = 4; ctx.strokeStyle = PAPER; ctx.strokeText(p.text, p.x, p.y);
+        ctx.fillStyle = p.color; ctx.fillText(p.text, p.x, p.y);
+      } else if (p.kind === 'spark') {
+        ctx.translate(p.x, p.y); ctx.rotate(p.life * 6); ctx.fillStyle = p.color;
+        const s = p.size * (0.6 + k * 0.6);
+        ctx.beginPath(); ctx.moveTo(0, -s * 2); ctx.lineTo(s * 0.5, -s * 0.5); ctx.lineTo(s * 2, 0); ctx.lineTo(s * 0.5, s * 0.5);
+        ctx.lineTo(0, s * 2); ctx.lineTo(-s * 0.5, s * 0.5); ctx.lineTo(-s * 2, 0); ctx.lineTo(-s * 0.5, -s * 0.5); ctx.closePath(); ctx.fill();
+      } else if (p.kind === 'dust') {
+        ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (1 + (1 - k) * 1.6), 0, Math.PI * 2); ctx.fill();
+      } else {
+        ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size * k + 0.5, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+
+  function onStamp(d, play) {
+    const Ly = layout(), doc = G.cur;
+    const x = boxCX(doc, doc.you, Ly), y = Ly.yc;
+    const R = O.RES[d.key];
+    const tx = clamp(x - doc.side * Ly.b * 0.3, Ly.px + 46, Ly.px + Ly.pw - 46);
+    spawn('text', tx, Ly.rowTop - 18, 1, { text: R.ono, color: R.color, life: 0.36, speed: 0.001 });
+    parts[parts.length - 1].vy = -36;
+    if (d.key === 'perfect') spawn('spark', x, y, 12, { color: '#E2A912', size: 3.2, speed: 150, life: 0.55 });
+    else if (d.key === 'good') spawn('ink', x, y, 6, { color: SEAL, size: 2.6, speed: 90, life: 0.4 });
+    else if (d.key === 'dogeza') {
+      const a = d.dir * d.angle * Math.PI / 180;
+      spawn('dust', x + Math.sin(a) * Ly.L, y - Math.cos(a) * Ly.L, 14, { color: 'rgba(130,120,105,0.55)', size: 4, speed: 110, life: 0.6 });
+      shakeT = 0.35; shakeAmp = 7;
+    } else if (d.key === 'reverse') { spawn('spark', x, y, 10, { color: SEAL, size: 3, speed: 170, life: 0.5 }); shakeT = 0.45; shakeAmp = 6; }
+    else if (d.key === 'upright' || d.key === 'away' || d.key === 'junior') { shakeT = 0.12; shakeAmp = 2; }
+    if (play) {
+      SFX.stamp(); SFX[RES_SFX[d.key]]();
+      if (!muted && navigator.vibrate) { try { navigator.vibrate(d.key === 'dogeza' ? [20, 40, 60] : 15); } catch (e) {} }
+    }
+  }
+
+  /* ---- お知らせの帯 ---- */
+  const banner = $('banner');
+  let bannerTimer = 0;
+  const BANNERS = { junior: '後輩が配属！ 偉い人のほうへお辞儀', rush: '定時前ラッシュ！ ハンコが加速' };
+  function showBanner(text, sec) {
+    banner.textContent = text;
+    banner.hidden = false;
+    banner.classList.remove('pop'); void banner.offsetWidth; banner.classList.add('pop');
+    clearTimeout(bannerTimer);
+    bannerTimer = setTimeout(() => { banner.hidden = true; }, (sec || 1.8) * 1000);
+  }
+  function hideBanner() { clearTimeout(bannerTimer); banner.hidden = true; }
+
+  function drainEvents() {
+    const evs = G.events;
+    if (!evs.length) return;
+    G.events = [];
+    const play = G.mode === 'play';
+    for (const e of evs) {
+      switch (e.type) {
+        case 'start': if (play) SFX.chimeStart(); break;
+        case 'tick': if (play) SFX.tick(e.data.deg); break;
+        case 'stamp': onStamp(e.data, play); break;
+        case 'banner': if (play) { showBanner(BANNERS[e.data.key], 2); SFX.banner(); } break;
+        case 'countdown': if (play) SFX.count(); break;
+        case 'end': if (play) { showBanner('終業！ お疲れさまでした', 1.7); SFX.chimeEnd(); } break;
+      }
+    }
+  }
+
+  /* ---- 描画 ---- */
+  function render() {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = THEME.desk; ctx.fillRect(0, 0, cssW, cssH);
+    const Ly = layout();
+    ctx.fillStyle = THEME.mat; rrect(Ly.px - 10, 4, Ly.pw + 20, cssH + 20, 10); ctx.fill();
+    if (!G) return;
+    ctx.save();
+    if (shakeT > 0 && !reduceMotion) {
+      const k = shakeAmp * Math.min(1, shakeT / 0.2);
+      ctx.translate((Math.random() - 0.5) * 2 * k, (Math.random() - 0.5) * 2 * k);
+    }
+    if (G.prev) drawDoc(G.prev, Ly);
+    if (G.cur) drawDoc(G.cur, Ly);
+    drawTool(Ly);
+    if (G.prev) drawBubbles(G.prev, Ly);
+    if (G.cur) drawBubbles(G.cur, Ly);
+    drawParts();
+    drawJudge(Ly);
+    ctx.restore();
+  }
+
+  /* ---- HUD ---- */
+  const hud = $('hud'), sTime = $('sTime'), sCount = $('sCount'), sManner = $('sManner'), timeFill = $('timeFill');
+  const btnL = $('btnL'), btnR = $('btnR');
+  const hudCache = {};
+  function setText(el, key, v) { if (hudCache[key] !== v) { hudCache[key] = v; el.textContent = v; } }
+  function updateHud() {
+    if (!G || G.mode !== 'play') return;
+    const tl = G.timeLeft, sec = Math.ceil(tl - 1e-9);
+    setText(sTime, 't', String(Math.max(0, sec)));
+    setText(sCount, 'c', String(G.count));
+    setText(sManner, 'm', G.count ? Math.round(G.mannerSum / G.count) + '%' : '—');
+    const fr = (tl / C.GAME_TIME).toFixed(3);
+    if (hudCache.f !== fr) { hudCache.f = fr; timeFill.style.transform = 'scaleX(' + fr + ')'; }
+    const hurry = G.started && sec <= 10;
+    if (hudCache.h !== hurry) { hudCache.h = hurry; hud.classList.toggle('hurry', hurry); }
+    const hl = state === 'playing' && G.held === -1, hr = state === 'playing' && G.held === 1;
+    if (hudCache.l !== hl) { hudCache.l = hl; btnL.classList.toggle('on', hl); }
+    if (hudCache.r !== hr) { hudCache.r = hr; btnR.classList.toggle('on', hr); }
+  }
+
+  /* ---- 画面の切り替え ---- */
+  const titleScreen = $('titleScreen'), resultScreen = $('resultScreen');
+  function setInert(on) {
+    ['hud', 'stage', 'controls'].forEach(id => {
+      const el = $(id);
+      if (on) { el.setAttribute('inert', ''); el.setAttribute('aria-hidden', 'true'); }
+      else { el.removeAttribute('inert'); el.removeAttribute('aria-hidden'); }
+    });
+  }
+  function bestValue() { const v = parseInt(load(KEY_BEST, '0'), 10); return isFinite(v) && v > 0 ? v : 0; }
+  function refreshBest() {
+    const b = bestValue();
+    const el = $('tBest');
+    el.textContent = '';
+    if (b > 0) { el.append('自己ベスト　'); const s = document.createElement('b'); s.textContent = b.toLocaleString('ja-JP'); el.append(s, ' 点'); }
+    else el.textContent = '自己ベスト　まだ記録がありません';
+  }
+  function goTitle() {
+    state = 'title';
+    G = O.newGame('demo'); bot = O.makeBot('demo');
+    parts.length = 0; hideBanner();
+    Object.keys(hudCache).forEach(k => delete hudCache[k]);
+    btnL.classList.remove('on'); btnR.classList.remove('on');
+    resultScreen.hidden = true; titleScreen.hidden = false;
+    setInert(true);
+    refreshBest();
+  }
+  function startGame() {
+    ensureAudio();
+    state = 'playing';
+    G = O.newGame('play'); bot = null;
+    parts.length = 0; shakeT = 0;
+    Object.keys(hudCache).forEach(k => delete hudCache[k]);
+    titleScreen.hidden = true; resultScreen.hidden = true;
+    setInert(false);
+    $('live').textContent = '';
+    showBanner('始業！ 上司の印へお辞儀を', 1.5);
+  }
+  function showResult() {
+    state = 'over';
+    hideBanner();
+    btnL.classList.remove('on'); btnR.classList.remove('on');
+    const st = O.stats(G), tt = O.calcTitle(st);
+    lastStats = st; lastTitle = tt;
+    const c = st.counts;
+    const rt = $('rTitle');
+    rt.textContent = '';
+    if (Array.from(tt.title).length > 9 && tt.lines.length > 1) {
+      tt.lines.forEach((ln, i) => { if (i) rt.append(document.createElement('br')); rt.append(ln); });
+    } else rt.textContent = tt.title;
+    $('rComment').textContent = tt.comment;
+    $('rCount').textContent = st.count;
+    $('rManner').textContent = st.manner;
+    $('rScore').textContent = st.score.toLocaleString('ja-JP');
+    const brk = $('rBreak');
+    brk.textContent = '◎完璧 ' + c.perfect + '　○良 ' + c.good + '　△浅深 ' + (c.shallow + c.deep) +
+      '　▽土下座 ' + c.dogeza + '　×無礼 ' + (c.upright + c.away + c.junior + c.reverse);
+    brk.append(document.createElement('br'), '最大コンボ ×' + st.maxCombo);
+    $('rDate').textContent = DATE_JP;
+    $('rMySeal').style.transform = 'rotate(' + Math.min(180, st.avgAngle).toFixed(0) + 'deg)';
+    const prev = bestValue();
+    const isNew = st.score > prev;
+    if (isNew) save(KEY_BEST, st.score);
+    $('rNew').hidden = !isNew;
+    $('rBest').textContent = isNew ? (prev > 0 ? '自己ベスト更新（前回 ' + prev.toLocaleString('ja-JP') + ' 点）' : '初めての記録です')
+      : prev > 0 ? '自己ベスト ' + prev.toLocaleString('ja-JP') + ' 点' : '0点は記録に残りません';
+    titleScreen.hidden = true; resultScreen.hidden = false;
+    resultScreen.scrollTop = 0;
+    setInert(true);
+    $('live').textContent = '結果。決裁' + st.count + '枚、礼儀力' + st.manner + 'パーセント、総合' + st.score + '点。「' + tt.title + '」に任命されました。';
+    try { $('btnShare').focus({ preventScroll: true }); } catch (e) {}
+  }
+
+  /* ---- シェア ---- */
+  const toastEl = $('toast');
+  let toastTimer = 0;
+  function toast(msg) {
+    toastEl.textContent = msg; toastEl.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { toastEl.hidden = true; }, 1800);
+  }
+  async function copyText(text) {
+    let ok = false;
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); ok = true; } } catch (e) {}
+    if (!ok) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); ta.remove();
+      } catch (e) {}
+    }
+    toast(ok ? 'コピーしました' : 'コピーできませんでした');
+  }
+  // 一般公開版：シェア文の最後にハッシュタグとページのURL（#以降を除く）を付ける
+  const HASHTAG = '#お辞儀ハンコ';
+  function pageUrl() { try { return String(location.href).split('#')[0]; } catch (e) { return ''; } }
+  async function doShare() {
+    if (!lastStats) return;
+    const text = [O.shareText(lastStats, lastTitle), HASHTAG, pageUrl()].filter(Boolean).join('\n');
+    if (navigator.share) {
+      try { await navigator.share({ text }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    try {
+      const w = window.open('https://x.com/intent/post?text=' + encodeURIComponent(text), '_blank');
+      if (w) { try { w.opener = null; } catch (e) {} return; }
+    } catch (e) {}
+    copyText(text);
+  }
+
+  /* ---- 入力 ---- */
+  function pressInput(dir) {
+    if (state !== 'playing' || !G || G.over) return;
+    ensureAudio();
+    O.press(G, dir);
+  }
+  function releaseInput(dir) {
+    if (state !== 'playing' || !G) return;
+    O.release(G, dir);
+  }
+  function bindHold(btn, dir) {
+    let pid = null;
+    btn.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      e.preventDefault();
+      if (pid !== null) return;
+      pid = e.pointerId;
+      try { btn.setPointerCapture(pid); } catch (err) {}
+      pressInput(dir);
+    });
+    const up = e => { if (pid === null || e.pointerId !== pid) return; pid = null; releaseInput(dir); };
+    btn.addEventListener('pointerup', up);
+    btn.addEventListener('pointercancel', up);
+    btn.addEventListener('lostpointercapture', up);
+    btn.addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); if (!e.repeat) pressInput(dir); }
+    });
+    btn.addEventListener('keyup', e => {
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); releaseInput(dir); }
+    });
+    btn.addEventListener('click', e => e.preventDefault());
+  }
+  bindHold(btnL, -1);
+  bindHold(btnR, 1);
+
+  const KEYDIR = { ArrowLeft: -1, KeyA: -1, ArrowRight: 1, KeyD: 1 };
+  window.addEventListener('keydown', e => {
+    const dir = KEYDIR[e.code];
+    if (dir) { if (state === 'playing') { e.preventDefault(); if (!e.repeat) pressInput(dir); } return; }
+    if ((e.code === 'Space' || e.code === 'Enter') && !(e.target && e.target.closest && e.target.closest('button'))) {
+      if (state === 'title' || state === 'over') { e.preventDefault(); startGame(); }
+    }
+  });
+  window.addEventListener('keyup', e => {
+    const dir = KEYDIR[e.code];
+    if (dir && state === 'playing') { e.preventDefault(); releaseInput(dir); }
+  });
+  function releaseAll() { if (G && G.held) releaseInput(G.held); }
+  window.addEventListener('blur', releaseAll);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) releaseAll(); });
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('selectstart', e => e.preventDefault());
+
+  $('btnStart').addEventListener('click', startGame);
+  $('btnRetry').addEventListener('click', startGame);
+  $('btnTitle').addEventListener('click', goTitle);
+  $('btnShare').addEventListener('click', doShare);
+
+  const muteBtn = $('mute');
+  function paintMute() {
+    muteBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+    muteBtn.setAttribute('aria-label', muted ? '効果音をオンにする' : '効果音をオフにする');
+    $('muteWave').style.display = muted ? 'none' : '';
+    $('muteX').style.display = muted ? '' : 'none';
+    $('muteX').removeAttribute('hidden');
+  }
+  muteBtn.addEventListener('click', () => {
+    muted = !muted; save(KEY_MUTE, muted ? '1' : '0'); paintMute();
+    if (!muted) { ensureAudio(); tone(880, 0.08, 'triangle', 0.1); }
+  });
+  paintMute();
+
+  /* ---- ゲームループ ---- */
+  let last = 0;
+  function frame(now) {
+    if (!last) last = now;
+    let dt = (now - last) / 1000;
+    last = now;
+    if (!(dt > 0)) dt = 0;
+    if (dt > 0.05) dt = 0.05;
+    if (G) {
+      if (state === 'title') { O.botStep(bot, G, dt); O.update(G, dt); drainEvents(); }
+      else if (state === 'playing') {
+        O.update(G, dt); drainEvents();
+        if (G.over && G.endT >= C.END_T) showResult();
+      }
+    }
+    if (shakeT > 0) shakeT = Math.max(0, shakeT - dt);
+    updateParts(dt);
+    updateHud();
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  readTheme();
+  resize();
+  goTitle();
+  requestAnimationFrame(frame);
+
+  // 自動テスト用の窓口（遊ぶ人には影響しない）
+  window.__ojihan = { get G() { return G; }, get state() { return state; }, startGame, goTitle, showResult, pressInput, releaseInput };
+})();
+</script>
+</body>
+</html>
