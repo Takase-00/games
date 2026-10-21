@@ -1,0 +1,1381 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>せんたく日和</title>
+<meta name="description" content="洗濯物を干して、たたんで、4日分。洗濯ばさみのずれも折り目のずれも、全部しあがりに響く。1回2〜3分のミニゲーム。100点は全部ぴったりのときだけ。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="せんたく日和">
+<meta property="og:description" content="洗濯物を干して、たたんで、4日分。洗濯ばさみのずれも折り目のずれも、全部しあがりに響く。1回2〜3分のミニゲーム。100点は全部ぴったりのときだけ。">
+<meta property="og:url" content="https://takase-00.github.io/games/sentaku/">
+<meta property="og:image" content="https://takase-00.github.io/games/sentaku/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='88'%3E%F0%9F%91%95%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+<style>
+:root{
+  --bg:#D6ECF8; --ink:#1C2A35; --sub:#536676; --card:#FFFFFF; --card2:#EEF4F7; --line:#C7D5DD; --stitch:#A9BBC8;
+  --accent:#245F93; --accent-ink:#FFFFFF; --hud:rgba(255,255,255,.92); --hud-ink:#1C2A35;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1820; --ink:#E6EDF2; --sub:#A3B4C1; --card:#1C262E; --card2:#25313A; --line:#384854; --stitch:#566B7B;
+    --accent:#86BFEA; --accent-ink:#0E1820; --hud:rgba(22,32,40,.92); --hud-ink:#E6EDF2;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1820; --ink:#E6EDF2; --sub:#A3B4C1; --card:#1C262E; --card2:#25313A; --line:#384854; --stitch:#566B7B;
+  --accent:#86BFEA; --accent-ink:#0E1820; --hud:rgba(22,32,40,.92); --hud-ink:#E6EDF2;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","BIZ UDPGothic","Meiryo",system-ui,sans-serif;
+  overflow:hidden;overscroll-behavior:none;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+  -webkit-text-size-adjust:100%;
+}
+[hidden]{display:none !important}
+#app{position:relative;width:100%;height:100%;overflow:hidden}
+#cv{display:block;width:100%;height:100%;touch-action:none}
+button{font:inherit;color:inherit}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#muteBtn{
+  position:absolute;top:8px;right:8px;z-index:6;width:44px;height:44px;border-radius:50%;
+  border:1.5px solid var(--line);background:var(--hud);color:var(--hud-ink);
+  display:grid;place-items:center;cursor:pointer;touch-action:manipulation;padding:0;
+}
+#muteBtn svg{display:block;width:22px;height:22px}
+.overlay{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;touch-action:manipulation;padding:0 16px}
+.spacer{flex:1 1 0;min-height:8px}
+
+/* タイトル：竿に干した文字 */
+.logo{position:relative;margin:64px 0 0;display:flex;gap:6px;justify-content:center;padding-top:16px;font-weight:900}
+.logo::before{content:"";position:absolute;left:-18px;right:-18px;top:6px;height:3px;border-radius:2px;background:#8C9AA4;box-shadow:0 1px 0 rgba(255,255,255,.6) inset}
+.logo span{
+  position:relative;display:block;width:min(50px,13vw);height:min(58px,15vw);
+  border-radius:3px 3px 9px 9px;background:var(--c);color:var(--k);
+  font-size:min(33px,8.6vw);line-height:min(58px,15vw);text-align:center;
+  transform-origin:50% -10px;animation:sway 3.4s ease-in-out infinite;animation-delay:var(--d);
+  box-shadow:0 3px 0 rgba(0,0,0,.13);
+}
+.logo span::before{content:"";position:absolute;top:-15px;left:50%;width:9px;height:21px;margin-left:-4.5px;border-radius:2px;background:var(--p);box-shadow:0 0 0 1px rgba(0,0,0,.22) inset}
+@keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.tagline{margin:14px 0 0;font-size:15px;font-weight:700;color:#1C2A35;background:rgba(255,255,255,.72);padding:3px 12px;border-radius:999px}
+
+/* 洗濯表示タグ風のカード */
+.tag{
+  position:relative;width:100%;max-width:348px;background:var(--card);color:var(--ink);
+  border-radius:4px 4px 14px 14px;padding:26px 22px 18px;
+  box-shadow:0 2px 0 var(--line),0 14px 30px rgba(10,30,45,.22);
+}
+.tag::before{content:"";position:absolute;left:12px;right:12px;top:11px;border-top:2px dashed var(--stitch)}
+.rules{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.rules li{display:grid;grid-template-columns:30px 1fr;gap:8px;align-items:start;font-size:14.5px;line-height:1.5;font-weight:700}
+.rules svg{display:block;width:28px;height:28px}
+.ph{display:inline-block}
+.note{margin:12px 0 0;font-size:12.5px;color:var(--sub);line-height:1.5}
+.best-line{margin:8px 0 0;font-size:14px;font-weight:700;color:var(--sub)}
+.best-line b{color:var(--ink);font-size:18px}
+.btn{
+  display:block;width:100%;min-height:52px;margin-top:14px;border-radius:12px;border:2px solid var(--accent);
+  background:var(--card);color:var(--accent);font-size:18px;font-weight:900;cursor:pointer;touch-action:manipulation;
+}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn:active{transform:translateY(1px)}
+
+/* 結果 */
+.result-tag{text-align:center;padding-top:30px}
+.tag-brand{margin:0;font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.06em}
+.score{margin:2px 0 0;font-weight:900;line-height:1}
+.score #scoreNum{font-size:72px}
+.score .unit{font-size:24px;margin-left:4px}
+.rtitle{margin:8px 0 0;font-size:21px;font-weight:900}
+.care{margin:14px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;text-align:left;border-top:1.5px solid var(--line);padding-top:12px}
+.care div{display:flex;justify-content:space-between;gap:6px;font-size:13.5px;white-space:nowrap}
+@media (max-width:370px){.care{grid-template-columns:1fr}}
+.care dt{color:var(--sub)}
+.care dd{margin:0;font-weight:900}
+.days{margin:12px 0 0;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.day{background:var(--card2);border-radius:8px;padding:5px 2px 6px}
+.day small{display:block;font-size:11.5px;color:var(--sub)}
+.day span{display:block;font-size:17px;font-weight:900;letter-spacing:.06em}
+.actions{width:100%;max-width:348px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actions .btn{margin-top:12px}
+.toast{margin:10px 0 0;padding:6px 14px;border-radius:999px;background:var(--hud);color:var(--hud-ink);font-size:14px;font-weight:700}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+@media (max-height:640px){
+  .logo{margin-top:56px}
+  .tag{padding:22px 18px 14px}
+  .rules li{font-size:13.5px}
+  .score #scoreNum{font-size:58px}
+}
+@media (prefers-reduced-motion: reduce){
+  .logo span{animation:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="cv" aria-label="ゲーム画面"></canvas>
+  <button id="muteBtn" type="button" aria-label="音を消す" aria-pressed="false"></button>
+
+  <section id="title" class="overlay" aria-labelledby="ttl">
+    <h1 id="ttl" class="logo" aria-label="せんたく日和">
+      <span aria-hidden="true" style="--c:#F1C14B;--k:#4E3A0B;--p:#E5493A;--d:-.1s">せ</span>
+      <span aria-hidden="true" style="--c:#F7F3EA;--k:#2F5C88;--p:#3D7BD6;--d:-.9s">ん</span>
+      <span aria-hidden="true" style="--c:#7DBFDE;--k:#173E54;--p:#F2C230;--d:-1.7s">た</span>
+      <span aria-hidden="true" style="--c:#F0B6A2;--k:#5A2414;--p:#38A673;--d:-.5s">く</span>
+      <span aria-hidden="true" style="--c:#3E5D86;--k:#FFFFFF;--p:#E5493A;--d:-2.3s">日</span>
+      <span aria-hidden="true" style="--c:#E6EAEE;--k:#1C2A35;--p:#F2C230;--d:-1.3s">和</span>
+    </h1>
+    <p class="tagline">干して、たたんで、4日分。</p>
+    <div class="spacer"></div>
+    <div class="tag">
+      <ul class="rules">
+        <li><svg viewBox="0 0 28 28" aria-hidden="true"><rect x="10" y="3" width="8" height="22" rx="2" fill="#E5493A"/><circle cx="14" cy="13" r="2.4" fill="#fff"/><line x1="2" y1="7" x2="26" y2="7" stroke="#8C9AA4" stroke-width="2.5"/></svg><span><span class="ph">服を竿まで</span><span class="ph">引っぱり、</span><span class="ph">両肩（両はし）を</span><span class="ph">洗濯ばさみで</span><span class="ph">2か所とめる</span></span></li>
+        <li><svg viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="8" width="22" height="16" rx="2" fill="#7DBFDE"/><line x1="14" y1="5" x2="14" y2="27" stroke="#1C2A35" stroke-width="2" stroke-dasharray="3 2.5"/><path d="M21 6c-3-3-8-3-11 0" fill="none" stroke="#1C2A35" stroke-width="2"/><path d="M8.5 3.5 10 6.5 6.8 7" fill="none" stroke="#1C2A35" stroke-width="2"/></svg><span><span class="ph">乾いたら、</span><span class="ph">端をつかんで</span><span class="ph">重ねて、</span><span class="ph">点線どおりに</span><span class="ph">3回折る</span></span></li>
+        <li><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M3 9h15a4 4 0 1 0-4-4M3 15h20a4 4 0 1 1-4 4M3 21h9" fill="none" stroke="#536676" stroke-width="2.4" stroke-linecap="round"/></svg><span><span class="ph">ずれは全部、</span><span class="ph">しあがりに響く。</span><span class="ph">風の強い日は、</span><span class="ph">とめ方が甘いと</span><span class="ph">飛んでいく</span></span></li>
+      </ul>
+      <p class="note"><span class="ph">100点は、</span><span class="ph">24回のとめと</span><span class="ph">36回の折りが</span><span class="ph">全部ぴったりの</span><span class="ph">ときだけ。</span></p>
+      <p class="best-line">ベスト <b id="bestT">0</b>点</p>
+      <button id="startBtn" class="btn primary" type="button">あそぶ</button>
+    </div>
+    <div class="spacer" style="flex:0 0 14px"></div>
+  </section>
+
+  <section id="result" class="overlay" hidden aria-labelledby="resHead">
+    <div class="spacer"></div>
+    <div class="tag result-tag">
+      <h2 id="resHead" class="tag-brand">せんたく日和　しあがり表示</h2>
+      <p class="score" aria-live="polite"><span id="scoreNum">0</span><span class="unit">点</span></p>
+      <p class="rtitle" id="rTitle"></p>
+      <dl class="care">
+        <div><dt>ぴったり干し</dt><dd id="stPin"></dd></div>
+        <div><dt>ぴったり折り</dt><dd id="stFold"></dd></div>
+        <div><dt>風で飛んだ</dt><dd id="stFly"></dd></div>
+        <div><dt>山くずれ</dt><dd id="stTop"></dd></div>
+      </dl>
+      <div class="days" id="days"></div>
+      <p class="best-line" id="bestR"></p>
+    </div>
+    <div class="actions">
+      <button id="shareBtn" class="btn primary" type="button">結果をシェア</button>
+      <button id="againBtn" class="btn" type="button">もう一度</button>
+    </div>
+    <p id="toast" class="toast" role="status" hidden></p>
+    <div class="spacer"></div>
+  </section>
+
+  <div id="live" class="sr" aria-live="polite"></div>
+</div>
+
+<script>
+(function(){
+'use strict';
+const TEST = typeof window !== 'undefined' && !!window.__SENTAKU_TEST;
+
+/* ================= 定数 ================= */
+const W = 390, H = 760;          // 論理サイズ
+const KH = 0.5;                  // 竿に干したときの縮尺
+const POLE_Y = 230, POLE_L = 16, POLE_R = 374;
+const BASKET = { x: 195, y: 690, w: 176, h: 86 };
+const TC = [195, 392];           // たたむ台の中心
+const HANG_TIME = 16, FOLD_TIME = 26;
+const PIN_PERF = 1.5, PIN_TAU = 8;      // とめ：ぴったり許容(px) / 0点になるまでの幅
+const FOLD_PERF = 1.5, FOLD_TAU = 10;   // 折り：ぴったり許容 / 0点になるまでの幅
+const PIN_EXP = 1, FOLD_EXP = 2;        // 1枚のしあがり = とめ^1 × 折り^2
+const FOLD_ARM = 35;                    // 角度のずれを測る範囲（点線の中心から±px）
+const DAYS = [
+  { items: ['towel', 'towel', 'tee'],  A: 2.5, G: 0.40, lv: 1, txt: 'そよ風' },
+  { items: ['towel', 'tee', 'pants'],  A: 4.5, G: 0.90, lv: 2, txt: 'ふつう' },
+  { items: ['tee', 'pants', 'tee'],    A: 6.5, G: 1.20, lv: 3, txt: 'つよめ' },
+  { items: ['pants', 'tee', 'pants'],  A: 8.5, G: 1.45, lv: 4, txt: '強風' }
+];
+const CLIP_COLORS = ['#E5493A', '#F2C230', '#38A673', '#3D7BD6'];
+const KEY_BEST = 'sentaku-best', KEY_MUTE = 'sentaku-muted';
+
+/* ================= 保存 ================= */
+function load(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+function save(k, v) { try { localStorage.setItem(k, String(v)); } catch (e) {} }
+let muted = TEST ? true : load(KEY_MUTE, '0') === '1';
+
+/* ================= 音 ================= */
+let actx = null;
+function ensureAudio() {
+  try {
+    if (!actx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) actx = new AC(); }
+    if (actx && actx.state === 'suspended') actx.resume();
+  } catch (e) {}
+}
+function tone(f, dur, type, vol, f2, delay) {
+  if (muted || !actx) return;
+  try {
+    const t = actx.currentTime + (delay || 0), o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t); o.stop(t + dur + 0.03);
+  } catch (e) {}
+}
+function noise(dur, vol, f1, f2, delay) {
+  if (muted || !actx) return;
+  try {
+    const t = actx.currentTime + (delay || 0), len = Math.floor(actx.sampleRate * dur);
+    const buf = actx.createBuffer(1, len, actx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    const src = actx.createBufferSource(); src.buffer = buf;
+    const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 0.9;
+    bp.frequency.setValueAtTime(f1, t); bp.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + dur * 0.3);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(bp); bp.connect(g); g.connect(actx.destination);
+    src.start(t); src.stop(t + dur + 0.05);
+  } catch (e) {}
+}
+const SFX = {
+  pick() { tone(520, 0.08, 'triangle', 0.10, 760); },
+  drop() { tone(210, 0.14, 'sine', 0.18, 120); },
+  clipPerfect() { tone(1500, 0.04, 'square', 0.05, 900); tone(1568, 0.09, 'sine', 0.12, null, 0.05); tone(2093, 0.16, 'sine', 0.10, null, 0.11); },
+  clip() { tone(1200, 0.05, 'square', 0.05, 700); },
+  miss() { tone(240, 0.22, 'sawtooth', 0.05, 140); },
+  gust() { noise(1.1, 0.22, 380, 1700); },
+  fly() { tone(1150, 0.8, 'sine', 0.08, 230, 0.15); },
+  fold() { tone(260, 0.14, 'sine', 0.09, 540); },
+  foldPerfect() { tone(1047, 0.12, 'sine', 0.10); tone(1568, 0.22, 'sine', 0.09, null, 0.07); },
+  item(q) { const b = q >= 0.999 ? 784 : q >= 0.7 ? 659 : q >= 0.35 ? 523 : 330; tone(b, 0.1, 'triangle', 0.1); tone(b * 1.25, 0.1, 'triangle', 0.1, null, 0.08); tone(b * 1.5, 0.18, 'triangle', q >= 0.35 ? 0.1 : 0.0001, null, 0.16); },
+  tick() { tone(1000, 0.03, 'square', 0.03); },
+  day() { tone(660, 0.1, 'triangle', 0.1); tone(990, 0.16, 'triangle', 0.1, null, 0.1); },
+  topple() { tone(300, 0.5, 'sawtooth', 0.06, 60); noise(0.4, 0.14, 300, 120, 0.05); },
+  timeup() { tone(440, 0.18, 'square', 0.05, 220); tone(330, 0.3, 'square', 0.05, 160, 0.18); },
+  result(s) { const seq = s >= 95 ? [523, 659, 784, 1047, 1319] : s >= 50 ? [523, 659, 784, 1047] : [392, 349, 330]; seq.forEach((f, i) => tone(f, 0.18, 'triangle', 0.1, null, i * 0.12)); }
+};
+function snd(G, name, a) { if (G && G.demo) return; SFX[name](a); }
+
+/* ================= 小道具 ================= */
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, t) => a + (b - a) * t;
+const ease = t => t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
+function hex2rgb(h) { h = h.replace('#', ''); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
+function rgb(a) { return 'rgb(' + (a[0] | 0) + ',' + (a[1] | 0) + ',' + (a[2] | 0) + ')'; }
+function mixc(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+function shade(a, f) { return f < 0 ? mixc(a, [0, 0, 0], -f) : mixc(a, [255, 255, 255], f); }
+function mkPal(base, ink) { const b = hex2rgb(base); return { b, base: rgb(b), back: rgb(shade(b, -0.14)), edge: rgb(shade(b, -0.45)), wet: mixc(b, [64, 98, 128], 0.3), ink }; }
+const PALS = {
+  towel: [mkPal('#F3EBDD', '#4D7DAE'), mkPal('#F0B6A2', '#FFFFFF')],
+  tee:   [mkPal('#F1C14B', '#7A5A12'), mkPal('#7DBFDE', '#2B5C77'), mkPal('#E6EAEE', '#7B8792')],
+  pants: [mkPal('#3E5D86', '#E2A856'), mkPal('#6F604E', '#E6D6B4')]
+};
+
+/* ================= 図形 ================= */
+function area(p) { let s = 0; for (let i = 0, j = p.length - 1; i < p.length; j = i++) s += (p[j][0] + p[i][0]) * (p[j][1] - p[i][1]); return s / 2; }
+function pip(x, y, p) {
+  let c = false;
+  for (let i = 0, j = p.length - 1; i < p.length; j = i++) {
+    const xi = p[i][0], yi = p[i][1], xj = p[j][0], yj = p[j][1];
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) c = !c;
+  }
+  return c;
+}
+function subdivide(poly, m) {
+  const out = [];
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length], L = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.ceil(L / m));
+    for (let k = 0; k < n; k++) out.push([a[0] + (b[0] - a[0]) * k / n, a[1] + (b[1] - a[1]) * k / n]);
+  }
+  return out;
+}
+// 半平面 (p-M)・n <= 0 側を残す
+function clipHalf(poly, M, n) {
+  const out = [], L = poly.length; if (!L) return out;
+  let prev = poly[L - 1], sp = (prev[0] - M[0]) * n[0] + (prev[1] - M[1]) * n[1];
+  for (let i = 0; i < L; i++) {
+    const cur = poly[i], sc = (cur[0] - M[0]) * n[0] + (cur[1] - M[1]) * n[1];
+    if (sc <= 0) {
+      if (sp > 0) { const t = sp / (sp - sc); out.push([prev[0] + (cur[0] - prev[0]) * t, prev[1] + (cur[1] - prev[1]) * t]); }
+      out.push(cur);
+    } else if (sp <= 0) {
+      const t = sp / (sp - sc); out.push([prev[0] + (cur[0] - prev[0]) * t, prev[1] + (cur[1] - prev[1]) * t]);
+    }
+    prev = cur; sp = sc;
+  }
+  return out;
+}
+function reflPt(p, M, n) { const s = (p[0] - M[0]) * n[0] + (p[1] - M[1]) * n[1]; return [p[0] - 2 * s * n[0], p[1] - 2 * s * n[1]]; }
+// アフィン [a,b,c,d,e,f] : x' = a x + c y + e, y' = b x + d y + f
+function mulT(A, B) {
+  return [A[0] * B[0] + A[2] * B[1], A[1] * B[0] + A[3] * B[1], A[0] * B[2] + A[2] * B[3], A[1] * B[2] + A[3] * B[3],
+    A[0] * B[4] + A[2] * B[5] + A[4], A[1] * B[4] + A[3] * B[5] + A[5]];
+}
+function reflT(M, n) { const d = M[0] * n[0] + M[1] * n[1]; return [1 - 2 * n[0] * n[0], -2 * n[0] * n[1], -2 * n[0] * n[1], 1 - 2 * n[1] * n[1], 2 * d * n[0], 2 * d * n[1]]; }
+// 折る：n 側（つかんだ側）を線で裏返して上に重ねる
+function foldLayers(layers, M, n) {
+  const keep = [], mov = [], nn = [-n[0], -n[1]], R = reflT(M, n);
+  for (const L of layers) {
+    const k = clipHalf(L.poly, M, n);
+    if (k.length > 2 && Math.abs(area(k)) > 0.4) keep.push({ poly: k, T: L.T, back: L.back });
+    const m = clipHalf(L.poly, M, nn);
+    if (m.length > 2 && Math.abs(area(m)) > 0.4) mov.push({ poly: m.map(p => reflPt(p, M, n)), T: mulT(R, L.T), back: !L.back });
+  }
+  mov.reverse();
+  return { layers: keep.concat(mov), moved: mov.length };
+}
+function bboxOf(layers) {
+  let a = 1e9, b = 1e9, c = -1e9, d = -1e9;
+  for (const L of layers) for (const p of L.poly) { if (p[0] < a) a = p[0]; if (p[1] < b) b = p[1]; if (p[0] > c) c = p[0]; if (p[1] > d) d = p[1]; }
+  return [a, b, c, d];
+}
+function inLayers(layers, x, y) { for (const L of layers) if (pip(x, y, L.poly)) return true; return false; }
+function hitCloth(layers, x, y, tol) {
+  if (inLayers(layers, x, y)) return true;
+  const b = bboxOf(layers);
+  return x > b[0] - tol && x < b[2] + tol && y > b[1] - tol && y < b[3] + tol;
+}
+
+/* ================= 服 ================= */
+const TYPES = {
+  towel: {
+    name: 'タオル', poly: [[-105, -60], [105, -60], [105, 60], [-105, 60]],
+    pinX: 101, pinY: -60, outMiss: 6, inMiss: 33, pinHint: '両方の角を、洗濯ばさみでとめる',
+    folds: [
+      { M: [0, 0], n: [0, 1], len: 210, hint: '下半分を上へ重ねる' },
+      { M: [-35, -30], n: [-1, 0], len: 60, hint: '左から3分の1を折る' },
+      { M: [35, -30], n: [1, 0], len: 60, hint: '右からも重ねる' }
+    ]
+  },
+  tee: {
+    name: 'Tシャツ',
+    poly: [[-24, -85], [-12, -79], [0, -77], [12, -79], [24, -85], [64, -78], [106, -52], [94, -26], [70, -34], [70, 85],
+      [-70, 85], [-70, -34], [-94, -26], [-106, -52], [-64, -78]],
+    pinX: 64, pinY: -78, outMiss: null, outSleeve: (106 - 64) * KH, inMiss: 29, pinHint: '両肩の縫い目を、洗濯ばさみでとめる',
+    folds: [
+      { M: [-35, 0], n: [-1, 0], len: 170, hint: '左の袖と脇を内側へ' },
+      { M: [35, 0], n: [1, 0], len: 170, hint: '右の袖と脇も内側へ' },
+      { M: [0, 0], n: [0, 1], len: 70, hint: 'すそを上へ半分に' }
+    ]
+  },
+  pants: {
+    name: 'ズボン', poly: [[-60, -110], [60, -110], [64, -40], [58, 110], [6, 110], [0, -28], [-6, 110], [-58, 110], [-64, -40]],
+    pinX: 56, pinY: -110, outMiss: 6, inMiss: 20, pinHint: 'ウエストの両はしを、洗濯ばさみでとめる',
+    folds: [
+      { M: [0, 0], n: [1, 0], len: 220, hint: '右足を左足に重ねる' },
+      { M: [-32, 0], n: [0, 1], len: 64, hint: 'すそを上へ半分に' },
+      { M: [-32, -55], n: [0, 1], len: 64, hint: 'もう一度、半分に' }
+    ]
+  }
+};
+function baseLayer(poly) { return { poly: poly.map(p => [p[0] + TC[0], p[1] + TC[1]]), T: [1, 0, 0, 1, TC[0], TC[1]], back: false }; }
+for (const k in TYPES) {
+  const T = TYPES[k]; T.key = k; T.sub = subdivide(T.poly, 6);
+  let a = 1e9, b = 1e9, c = -1e9, d = -1e9;
+  for (const p of T.poly) { a = Math.min(a, p[0]); b = Math.min(b, p[1]); c = Math.max(c, p[0]); d = Math.max(d, p[1]); }
+  T.minX = a; T.top = b; T.maxX = c; T.bot = d; T.w = c - a; T.h = d - b; T.hangW = T.w * KH;
+  let L = [baseLayer(T.sub)];
+  for (const f of T.folds) L = foldLayers(L, [TC[0] + f.M[0], TC[1] + f.M[1]], f.n).layers;
+  T.ideal = L; const bb = bboxOf(L); T.idealC = [(bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2]; T.idealBox = bb;
+}
+
+// 干し方のクセ：とめた位置のずれから、乾いたあとの形を作る（e はずれ px、内側が+）
+function deformPoly(T, def, final) {
+  const Rr = 0.55 * Math.max(T.w, T.h);
+  const oneMiss = final && (def.L.miss !== def.R.miss);
+  const corners = [{ x: -T.pinX, y: T.pinY, s: -1, d: def.L }, { x: T.pinX, y: T.pinY, s: 1, d: def.R }];
+  return T.sub.map(p => {
+    const x = p[0], y = p[1]; let dx = 0, dy = 0;
+    for (const c of corners) {
+      let E;
+      if (c.d.miss) E = oneMiss ? 46 : 0; else E = clamp(c.d.e / KH, -30, 46);
+      if (!E) continue;
+      const dist = Math.hypot(x - c.x, y - c.y); let w = 1 - dist / Rr; if (w <= 0) continue; w = w * w;
+      if (E > 0) { dx += -c.s * 0.55 * E * w; dy += 1.25 * E * w; }
+      else { dx += c.s * 0.45 * (-E) * w; dy += -0.22 * (-E) * w; }
+    }
+    if (oneMiss) { const s = def.L.miss ? 1 : -1; dx += s * 0.2 * (y - T.top); }
+    return [x + dx, y + dy];
+  });
+}
+function pinDef(it, final) {
+  const d = { L: { e: 0, miss: false }, R: { e: 0, miss: false } };
+  for (const p of it.pins) { const v = { e: p.e, miss: p.miss }; if (p.side < 0) d.L = v; else d.R = v; }
+  if (!final) { if (d.L.miss) d.L = { e: 0, miss: false }; if (d.R.miss) d.R = { e: 0, miss: false }; }
+  return d;
+}
+
+/* ================= ゲーム本体 ================= */
+function newGame(opts) {
+  opts = opts || {};
+  const rnd = opts.rng || Math.random;
+  const G = {
+    demo: !!opts.demo, t: 0, day: 0, phase: 'intro', phaseT: 0, timer: HANG_TIME, tickNext: 5,
+    items: [], hang: { drag: null, hold: null, doneT: -1 }, fold: { queue: [], cur: null, drag: null, anim: null, appear: 1 },
+    pile: { slabs: [], lean: 0, fallen: [] }, fx: [], flying: [], gust: 0, gustDone: false, dayScene: 'hang', lastScene: 'hang',
+    stats: { pinPerfect: 0, foldPerfect: 0, flown: 0, toppled: 0, forgot: 0, nokori: 0, weird: 0 }, result: null
+  };
+  const ci = { towel: 0, tee: 0, pants: 0 };
+  DAYS.forEach((d, di) => d.items.forEach((type, k) => {
+    const pal = PALS[type][(ci[type]++) % PALS[type].length];
+    G.items.push({ type, day: di, k, pal, state: 'wait', cx: 0, pins: [], anch: false, anchSide: 0, anchOff: 0, fixed: false, dpoly: null,
+      ph1: rnd() * 6.283, ph2: rnd() * 6.283, ph3: rnd() * 6.283, layers: null, step: 0, foldQs: [], foldD: [], q: 0, mark: '×' });
+  }));
+  startDay(G, 0);
+  return G;
+}
+function dayItems(G) { return G.items.filter(it => it.day === G.day); }
+function setPhase(G, p) { G.phase = p; G.phaseT = 0; }
+function startDay(G, d) {
+  G.lastScene = G.day === d ? 'hang' : G.dayScene;
+  G.day = d; setPhase(G, 'intro'); G.timer = HANG_TIME; G.tickNext = 5;
+  G.hang = { drag: null, hold: null, doneT: -1 }; G.gust = 0; G.gustDone = false; G.dayScene = 'hang';
+  dayItems(G).forEach(it => { it.state = 'basket'; });
+  snd(G, 'day'); announce(G, (d + 1) + '日目。風は' + DAYS[d].txt + '。');
+}
+function activePin(G) { if (G.phase !== 'hang') return null; return dayItems(G).find(it => it.state === 'pinning') || null; }
+function basketItem(G) { if (G.phase !== 'hang' || activePin(G)) return null; return dayItems(G).find(it => it.state === 'basket') || null; }
+function inBasket(x, y) { return Math.abs(x - BASKET.x) < BASKET.w / 2 + 12 && Math.abs(y - BASKET.y) < BASKET.h / 2 + 22; }
+
+function sway(g, t) { const A = DAYS[g.day].A; return A * (0.62 * Math.sin(6.2832 * 0.43 * t + g.ph1) + 0.38 * Math.sin(6.2832 * 1.07 * t + g.ph2)); }
+function flutter(g, t) { const A = DAYS[g.day].A; return A * 0.75 * (0.6 * Math.sin(6.2832 * 0.83 * t + g.ph3) + 0.4 * Math.sin(6.2832 * 1.71 * t + g.ph1)); }
+function shoulderX(g, side, t) {
+  const T = TYPES[g.type], base = g.cx + side * T.pinX * KH;
+  if (!g.anch) return base + sway(g, t);
+  if (side === g.anchSide || g.fixed) return base + g.anchOff;
+  return base + g.anchOff + flutter(g, t);
+}
+function resolveX(G, it, x) {
+  const hw = TYPES[it.type].hangW / 2, lo = POLE_L + hw + 3, hi = POLE_R - hw - 3;
+  const others = dayItems(G).filter(o => o !== it && (o.state === 'pinning' || o.state === 'hung'))
+    .map(o => [o.cx - TYPES[o.type].hangW / 2 - 4, o.cx + TYPES[o.type].hangW / 2 + 4]);
+  const ok = c => c >= lo - 0.01 && c <= hi + 0.01 && others.every(r => c + hw <= r[0] + 0.01 || c - hw >= r[1] - 0.01);
+  const cands = [clamp(x, lo, hi), lo, hi];
+  for (const r of others) cands.push(r[0] - hw, r[1] + hw);
+  let best = null, bd = 1e9;
+  for (const c of cands) if (ok(c)) { const dd = Math.abs(c - x); if (dd < bd) { bd = dd; best = c; } }
+  return best === null ? clamp(x, lo, hi) : best;
+}
+function addFx(G, x, y, text, opt) { G.fx.push(Object.assign({ x, y, text, t: 0, life: 1.1, size: 15 }, opt || {})); }
+
+// 入力（論理座標）
+function onDown(G, x, y) {
+  if (G.phase === 'hang') {
+    const g = activePin(G);
+    if (g) { if (y > POLE_Y - 95 && y < POLE_Y + 190 && !inBasket(x, y)) { G.hang.hold = { x, y }; } return; }
+    const bi = basketItem(G);
+    if (bi && inBasket(x, y)) { G.hang.drag = { it: bi, x, y }; snd(G, 'pick'); }
+  } else if (G.phase === 'fold') {
+    const F = G.fold; if (F.cur === null || F.anim) return;
+    const it = G.items[F.cur];
+    if (hitCloth(it.layers, x, y, 14)) F.drag = { g: [x, y], r: [x, y], prev: null };
+  }
+}
+function onMove(G, x, y) {
+  if (G.hang.drag) { G.hang.drag.x = x; G.hang.drag.y = y; }
+  if (G.hang.hold) { G.hang.hold.x = x; G.hang.hold.y = y; }
+  const d = G.fold.drag;
+  if (d && G.fold.cur !== null) {
+    d.r = [x, y];
+    const dx = d.g[0] - x, dy = d.g[1] - y, L = Math.hypot(dx, dy);
+    d.prev = L > 4 ? foldLayers(G.items[G.fold.cur].layers, [(d.g[0] + x) / 2, (d.g[1] + y) / 2], [dx / L, dy / L]) : null;
+  }
+}
+function onUp(G, x, y) {
+  if (G.hang.drag) { onMove(G, x, y); dropGarment(G); }
+  else if (G.hang.hold) { onMove(G, x, y); G.hang.hold = null; pinAttempt(G, x); }
+  else if (G.fold.drag) { onMove(G, x, y); commitFold(G); }
+}
+function onCancel(G) { G.hang.drag = null; G.hang.hold = null; G.fold.drag = null; }
+
+function dropGarment(G) {
+  const d = G.hang.drag; G.hang.drag = null; if (!d || G.phase !== 'hang') return;
+  const it = d.it, top = d.y - 14;
+  if (top > POLE_Y - 80 && top < POLE_Y + 100) {
+    it.cx = resolveX(G, it, d.x); it.state = 'pinning'; it.pins = []; it.anch = false; it.fixed = false; it.dpoly = null;
+    snd(G, 'drop');
+  }
+}
+function pinAttempt(G, x) {
+  const g = activePin(G); if (!g) return;
+  const T = TYPES[g.type];
+  let side;
+  if (g.pins.length) side = -g.pins[0].side;
+  else { const lx = shoulderX(g, -1, G.t), rx = shoulderX(g, 1, G.t); side = Math.abs(x - lx) <= Math.abs(x - rx) ? -1 : 1; }
+  const sx = shoulderX(g, side, G.t);
+  const e = side < 0 ? x - sx : sx - x;    // 内側が+
+  const outLim = T.outMiss !== null ? T.outMiss : T.outSleeve;
+  const miss = e < -outLim || e > T.inMiss;
+  const ae = Math.abs(e);
+  const q = miss ? 0 : clamp(1 - (ae - PIN_PERF) / PIN_TAU, 0, 1);
+  const hDen = (e < 0 && T.outMiss !== null) ? T.outMiss + 2 : 22;
+  const h = miss ? 0 : clamp(1 - ae / hDen, 0, 1);
+  g.pins.push({ side, e, miss, x, q, h });
+  if (!miss && !g.anch) { g.anch = true; g.anchSide = side; g.anchOff = sway(g, G.t); }
+  let label;
+  if (miss) { label = '× 空振り'; snd(G, 'miss'); }
+  else if (ae <= PIN_PERF) { label = '◎ ぴったり'; G.stats.pinPerfect++; snd(G, 'clipPerfect'); }
+  else if (ae <= 4) { label = '○ おしい'; snd(G, 'clip'); }
+  else if (ae <= 9) { label = '△ ずれ'; snd(G, 'clip'); }
+  else { label = '× 大ずれ'; snd(G, 'clip'); }
+  addFx(G, clamp(x, 40, 350), POLE_Y - 30, label, { size: 15 });
+  if (g.pins.length >= 2) finalizeHang(G, g); else g.dpoly = deformPoly(T, pinDef(g, false), false);
+}
+function finalizeHang(G, it) {
+  it.state = 'hung';
+  const second = it.pins[1];
+  it.fixed = !!(second && !second.miss && it.anch);
+  if (!it.anch) { it.anch = true; it.anchSide = -1; it.anchOff = sway(it, G.t); }
+  it.dpoly = deformPoly(TYPES[it.type], pinDef(it, true), true);
+}
+function endHang(G) {
+  G.hang.drag = null; G.hang.hold = null;
+  for (const it of dayItems(G)) {
+    if (it.state === 'basket') {
+      it.state = 'forgot'; it.q = 0; it.mark = '×'; G.stats.forgot++;
+      addFx(G, BASKET.x, BASKET.y - 70, '干し忘れ', { life: 1.4 });
+    } else if (it.state === 'pinning') {
+      while (it.pins.length < 2) { const side = it.pins.length ? -it.pins[0].side : -1; it.pins.push({ side, e: 0, miss: true, x: null, q: 0, h: 0 }); }
+      finalizeHang(G, it);
+    }
+  }
+  if (!G.demo && G.timer <= 0) snd(G, 'timeup');
+  setPhase(G, 'dry');
+}
+function doGust(G) {
+  const D = DAYS[G.day]; G.gust = 1.0; let flew = 0;
+  for (const it of dayItems(G)) {
+    if (it.state !== 'hung') continue;
+    const hold = it.pins.reduce((s, p) => s + p.h, 0);
+    if (hold < D.G) {
+      it.state = 'flown'; it.q = 0; it.mark = '×'; G.stats.flown++; flew++;
+      G.flying.push({ it, t: 0, x0: it.cx, y0: POLE_Y + 30, dir: it.cx < 195 ? 1 : 1.2 });
+      addFx(G, clamp(it.cx, 60, 330), POLE_Y + 70, '飛んだ！', { size: 18, life: 1.5 });
+    }
+  }
+  snd(G, 'gust'); if (flew) snd(G, 'fly');
+}
+function prepareFold(G) {
+  const q = dayItems(G).filter(it => it.state === 'hung').sort((a, b) => a.cx - b.cx).map(it => G.items.indexOf(it));
+  G.fold = { queue: q, cur: null, drag: null, anim: null, appear: 1 };
+  if (!q.length) { setPhase(G, 'dayEnd'); dayEndAnnounce(G); }
+  else { G.dayScene = 'fold'; setPhase(G, 'wipe'); }
+}
+function nextFoldItem(G) {
+  const F = G.fold, i = F.queue.shift();
+  if (i === undefined) { endFold(G, false); return; }
+  const it = G.items[i];
+  F.cur = i; it.layers = [baseLayer(it.dpoly || TYPES[it.type].sub)]; it.step = 0; it.foldQs = []; it.foldD = []; F.appear = 0;
+}
+function commitFold(G) {
+  const F = G.fold, d = F.drag; F.drag = null;
+  if (!d || F.cur === null || G.phase !== 'fold') return;
+  const it = G.items[F.cur];
+  const dx = d.g[0] - d.r[0], dy = d.g[1] - d.r[1], L = Math.hypot(dx, dy);
+  if (L < 12) return;
+  const n = [dx / L, dy / L], M = [(d.g[0] + d.r[0]) / 2, (d.g[1] + d.r[1]) / 2];
+  const res = foldLayers(it.layers, M, n);
+  if (!res.moved) return;
+  it.layers = res.layers;
+  const sp = TYPES[it.type].folds[it.step], SM = [TC[0] + sp.M[0], TC[1] + sp.M[1]];
+  const dot = n[0] * sp.n[0] + n[1] * sp.n[1];
+  let D, q, label;
+  if (dot <= 0) { D = 999; q = 0; label = '× 逆向き'; G.stats.weird++; }
+  else {
+    const ang = Math.acos(Math.min(1, dot));
+    const off = Math.abs((SM[0] - M[0]) * n[0] + (SM[1] - M[1]) * n[1]);
+    D = ang > 1.2 ? 999 : off + Math.min(sp.len / 2, FOLD_ARM) * Math.tan(ang);
+    q = clamp(1 - (D - FOLD_PERF) / FOLD_TAU, 0, 1);
+    if (D <= FOLD_PERF) { label = '◎ ぴったり'; G.stats.foldPerfect++; }
+    else if (D <= 4) label = '○ おしい';
+    else if (D <= 9) label = '△ ずれ';
+    else label = '× 大ずれ';
+    if (D > 25) G.stats.weird++;
+  }
+  it.foldQs.push(q); it.foldD.push(D); it.step++;
+  addFx(G, clamp(M[0], 50, 340), clamp(M[1] - 26, 110, 600), label, { size: 15 });
+  if (q >= 1) snd(G, 'foldPerfect'); else snd(G, 'fold');
+  if (q >= 1 && !G.demo && !RM) burst(G, M[0], M[1]);
+  if (it.step >= 3) {
+    it.state = 'folded'; computeItemQ(it); pushSlab(G, it);
+    F.anim = { i: F.cur, t: 0 }; F.cur = null;
+    addFx(G, 195, 150, 'しあがり ' + it.mark + ' ' + Math.round(it.q * 100) + '%', { size: 20, life: 1.3 });
+    snd(G, 'item', it.q);
+  }
+}
+function burst(G, x, y) { for (let i = 0; i < 10; i++) { const a = i / 10 * 6.283; G.fx.push({ spark: true, x, y, vx: Math.cos(a) * 70, vy: Math.sin(a) * 70, t: 0, life: 0.5, c: CLIP_COLORS[i % 4] }); } }
+function endFold(G, timeout) {
+  const F = G.fold; F.drag = null;
+  if (timeout) {
+    const rest = []; if (F.cur !== null) rest.push(F.cur); rest.push(...F.queue);
+    for (const i of rest) {
+      const it = G.items[i]; if (!it.layers) it.layers = [baseLayer(it.dpoly || TYPES[it.type].sub)];
+      it.state = 'timeout'; computeItemQ(it); pushSlab(G, it); G.stats.nokori++;
+    }
+    if (rest.length) addFx(G, 195, 300, '時間切れ', { size: 22, life: 1.4 });
+    snd(G, 'timeup');
+  }
+  F.cur = null; F.queue = [];
+  setPhase(G, 'dayEnd'); dayEndAnnounce(G);
+}
+function computeItemQ(it) {
+  if (it.state === 'flown' || it.state === 'forgot') { it.q = 0; it.mark = '×'; return; }
+  const pa = it.pins.length >= 2 ? (it.pins[0].q + it.pins[1].q) / 2 : 0;
+  let fs = 0; for (let k = 0; k < 3; k++) fs += (it.foldQs[k] || 0);
+  const fa = fs / 3;
+  it.pinAvg = pa; it.foldAvg = fa;
+  it.q = Math.pow(pa, PIN_EXP) * Math.pow(fa, FOLD_EXP);
+  it.mark = it.q >= 0.999 ? '◎' : it.q >= 0.7 ? '○' : it.q >= 0.35 ? '△' : '×';
+}
+const PILE_X = 62, PILE_Y = 750;
+function pushSlab(G, it) {
+  const T = TYPES[it.type], bb = bboxOf(it.layers);
+  const dx = (bb[0] + bb[2]) / 2 - T.idealC[0];
+  const sgn = Math.abs(dx) > 0.5 ? Math.sign(dx) : (G.pile.slabs.length % 2 ? 1 : -1);
+  const off = clamp(dx * 0.35, -8, 8) + (1 - it.q) * 9 * sgn;
+  const P = G.pile;
+  P.lean += off;
+  const s = { pal: it.pal, w: clamp((bb[2] - bb[0]) * 0.75, 34, 84), h: 10 + (1 - it.q) * 6, x: PILE_X + P.lean, rot: (1 - it.q) * 0.14 * sgn, q: it.q, a: 0, sgn };
+  P.slabs.push(s);
+  if (Math.abs(P.lean) > 34 && P.slabs.length >= 3) topple(G);
+}
+function topple(G) {
+  const P = G.pile, dir = Math.sign(P.lean) || 1; let y = PILE_Y;
+  const base = P.fallen.length;
+  P.slabs.forEach((s, k) => {
+    y -= s.h;
+    P.fallen.push(Object.assign({}, s, { fx0: s.x, fy0: y + s.h / 2, fr0: s.rot, fx1: clamp(PILE_X + 30 + (base + k) * 15, 40, 360), fy1: PILE_Y - s.h / 2 - ((base + k) % 2) * 6, fr1: dir * (0.15 + 0.05 * (k % 3)), fa: 0 }));
+  });
+  P.slabs = []; P.lean = 0; G.stats.toppled++;
+  addFx(G, 120, 640, '山がくずれた！', { size: 17, life: 1.4 });
+  snd(G, 'topple');
+}
+function dayEndAnnounce(G) {
+  const m = dayItems(G).map(it => it.mark).join('');
+  announce(G, (G.day + 1) + '日目のしあがり ' + m);
+}
+function computeResult(G) {
+  let sum = 0; for (const it of G.items) sum += it.q;
+  const score = Math.floor(100 * sum / G.items.length + 1e-9);
+  const st = G.stats;
+  const marks = DAYS.map((d, di) => G.items.filter(it => it.day === di).map(it => it.mark).join(''));
+  G.result = { score, title: titleOf(score, st), marks, stats: st };
+  return G.result;
+}
+function titleOf(score, st) {
+  if (score >= 100) return 'たたみの人間国宝';
+  if (st.flown >= 4) return '洗濯物を空へ返す人';
+  if (st.weird >= 6) return '前衛たたみアーティスト';
+  if (score >= 95) return 'ホテルのリネン係';
+  if (score >= 85) return '角がそろう人';
+  if (st.toppled >= 2) return '山くずしの名人';
+  if (st.flown >= 2) return '風に愛された人';
+  if (score >= 65) return 'きちんと派';
+  if (score >= 45) return 'ふつうにたためる人';
+  if (score >= 25) return 'たたみ見習い';
+  if (score >= 10) return 'とりあえず山積み派';
+  return '洗濯物と和解できない人';
+}
+
+function update(G, dt) {
+  G.t += dt; G.phaseT += dt;
+  switch (G.phase) {
+    case 'intro':
+      if (G.phaseT >= 1.3) setPhase(G, 'hang');
+      break;
+    case 'hang': {
+      if (!G.demo) {
+        G.timer -= dt;
+        if (G.timer <= G.tickNext && G.tickNext > 0) { snd(G, 'tick'); G.tickNext -= 1; }
+        if (G.timer <= 0) { endHang(G); break; }
+      }
+      if (G.hang.doneT < 0 && dayItems(G).every(it => it.state === 'hung')) G.hang.doneT = G.phaseT;
+      if (G.hang.doneT >= 0 && G.phaseT - G.hang.doneT > 0.45) endHang(G);
+      break;
+    }
+    case 'dry':
+      if (!G.gustDone && G.phaseT >= 1.4) { G.gustDone = true; doGust(G); }
+      if (G.phaseT >= 3.1) prepareFold(G);
+      break;
+    case 'wipe':
+      if (G.phaseT >= 0.7) { setPhase(G, 'fold'); G.timer = FOLD_TIME; G.tickNext = 5; nextFoldItem(G); }
+      break;
+    case 'fold': {
+      const F = G.fold;
+      F.appear = Math.min(1, F.appear + dt / 0.25);
+      if (F.anim) { F.anim.t += dt; if (F.anim.t >= 0.5) { F.anim = null; nextFoldItem(G); } }
+      if (!G.demo && G.phase === 'fold') {
+        G.timer -= dt;
+        if (G.timer <= G.tickNext && G.tickNext > 0) { snd(G, 'tick'); G.tickNext -= 1; }
+        if (G.timer <= 0) endFold(G, true);
+      }
+      break;
+    }
+    case 'dayEnd':
+      if (G.phaseT >= 1.8) { if (G.day < DAYS.length - 1) startDay(G, G.day + 1); else setPhase(G, 'end'); }
+      break;
+  }
+  updateFx(G, dt);
+}
+function updateFx(G, dt) {
+  for (const f of G.fx) { f.t += dt; if (f.spark) { f.x += f.vx * dt; f.y += f.vy * dt; } }
+  G.fx = G.fx.filter(f => f.t < f.life);
+  for (const f of G.flying) f.t += dt;
+  G.flying = G.flying.filter(f => f.t < 2.4);
+  if (G.gust > 0) G.gust = Math.max(0, G.gust - dt);
+  for (const s of G.pile.slabs) s.a = Math.min(1, s.a + dt / 0.3);
+  for (const s of G.pile.fallen) s.fa = Math.min(1, s.fa + dt / 0.6);
+}
+
+/* ================= CPU（お手本デモと自動テスト用） ================= */
+function gauss(r) { let u = 0; while (u === 0) u = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(6.2832 * r()); }
+const SK = {
+  // pin: 洗濯ばさみのずれ(px)、fing: 折るときに指を離す位置のずれ(px、縦横それぞれ)
+  perfect: { pin: 0, fing: 0, wrong: 0, spd: 0.7 },
+  expert:  { pin: 1.0, fing: 1.4, wrong: 0, spd: 1.0 },
+  good:    { pin: 2.0, fing: 3.0, wrong: 0, spd: 1.0 },
+  median:  { pin: 3.0, fing: 5.0, wrong: 0.01, spd: 1.15 },
+  casual:  { pin: 6.0, fing: 9.0, wrong: 0.03, spd: 1.0 },
+  sloppy:  { pin: 14, fing: 24, wrong: 0.12, spd: 0.6 },
+  random:  { random: true, spd: 0.6 },
+  demo:    { pin: 1.6, fing: 2.4, wrong: 0, spd: 1.35 }
+};
+function makeBot(sk, rng, io) {
+  rng = rng || Math.random;
+  const B = { sk, task: null, wait: 0.7, fx: BASKET.x, fy: BASKET.y, down: false };
+  const sp = v => v * sk.spd * (0.85 + 0.3 * rng());
+  function down(G, x, y) { B.fx = x; B.fy = y; B.down = true; if (io) io.down(x, y); else onDown(G, x, y); }
+  function move(G, x, y) { B.fx = x; B.fy = y; if (io) io.move(x, y); else onMove(G, x, y); }
+  function up(G, x, y) { B.fx = x; B.fy = y; B.down = false; if (io) io.up(x, y); else onUp(G, x, y); }
+  B.step = function (G, dt) {
+    if (B.task) { run(G, dt); return; }
+    if (B.wait > 0) { B.wait -= dt; return; }
+    plan(G);
+  };
+  function run(G, dt) {
+    const k = B.task;
+    if (k.phase0 !== G.phase) { if (B.down) { B.down = false; if (io) io.up(B.fx, B.fy); else onCancel(G); } B.task = null; B.wait = 0.2; return; }
+    if (k.t === 0) {
+      if (k.kind === 'pin') down(G, k.x0, POLE_Y + 44); else down(G, k.from[0], k.from[1]);
+    }
+    k.t += dt;
+    const p = ease(Math.min(1, k.t / k.dur));
+    if (k.kind === 'pin') {
+      const tgt = k.fixedX !== undefined ? k.fixedX : shoulderX(k.g, k.side, G.t) + (k.side < 0 ? k.err : -k.err);
+      if (k.t >= k.dur) { move(G, tgt, POLE_Y + 44); up(G, tgt, POLE_Y + 44); B.task = null; B.wait = sp(0.28); }
+      else move(G, lerp(k.x0, tgt, p), POLE_Y + 44);
+    } else {
+      const x = lerp(k.from[0], k.to[0], p), y = lerp(k.from[1], k.to[1], p) - Math.sin(p * Math.PI) * (k.arc || 0);
+      if (k.t >= k.dur) { move(G, k.to[0], k.to[1]); up(G, k.to[0], k.to[1]); B.task = null; B.wait = sp(0.35); }
+      else move(G, x, y);
+    }
+  }
+  function plan(G) {
+    if (G.phase === 'hang') {
+      const g = activePin(G);
+      if (g) {
+        const side = g.pins.length ? -g.pins[0].side : (rng() < 0.5 ? -1 : 1);
+        const task = { kind: 'pin', g, side, t: 0, dur: sp(0.6), x0: shoulderX(g, side, G.t) + (rng() - 0.5) * 18, err: gauss(rng) * (sk.pin || 0), phase0: G.phase };
+        if (sk.random) task.fixedX = POLE_L + rng() * (POLE_R - POLE_L);
+        B.task = task; return;
+      }
+      const bi = basketItem(G);
+      if (bi) {
+        const idx = dayItems(G).indexOf(bi);
+        let to = [POLE_L + (POLE_R - POLE_L) * (idx + 0.5) / 3 + (rng() - 0.5) * 10, POLE_Y + 14];
+        if (sk.random) to = [30 + rng() * 330, 120 + rng() * 300];
+        B.task = { kind: 'drag', from: [BASKET.x + (rng() - 0.5) * 30, BASKET.y - 8], to, t: 0, dur: sp(0.8), arc: 40, phase0: G.phase };
+      }
+    } else if (G.phase === 'fold' && G.fold.cur !== null && !G.fold.anim) {
+      const it = G.items[G.fold.cur];
+      if (sk.random) {
+        const L = it.layers[Math.floor(rng() * it.layers.length)], p = L.poly[Math.floor(rng() * L.poly.length)];
+        const bb = bboxOf(it.layers), cx = (bb[0] + bb[2]) / 2, cy = (bb[1] + bb[3]) / 2;
+        const from = [lerp(p[0], cx, 0.15), lerp(p[1], cy, 0.15)];
+        B.task = { kind: 'drag', from, to: [40 + rng() * 310, 120 + rng() * 460], t: 0, dur: sp(0.7), phase0: G.phase };
+        return;
+      }
+      const spc = TYPES[it.type].folds[it.step];
+      let n = spc.n.slice(); const M = [TC[0] + spc.M[0], TC[1] + spc.M[1]];
+      if (rng() < sk.wrong) n = [-n[0], -n[1]];
+      let mx = -1e9, cx = 0, cy = 0, cnt = 0;
+      for (const L of it.layers) for (const p of L.poly) { const s = (p[0] - M[0]) * n[0] + (p[1] - M[1]) * n[1]; if (s > mx) mx = s; cx += p[0]; cy += p[1]; cnt++; }
+      if (mx <= 2) { B.wait = 0.3; return; }
+      cx /= cnt; cy /= cnt;
+      const tv = [-n[1], n[0]], along = (cx - M[0]) * tv[0] + (cy - M[1]) * tv[1];
+      let Gp = null;
+      const frs = [0.85, 0.7, 0.55, 0.4], shs = [0, 12, -12, 25, -25, 40, -40, 55, -55];
+      if (rng() < 0.5) shs.sort(() => rng() - 0.5);
+      outer: for (const fr of frs) for (const sh of shs) {
+        const P = [M[0] + tv[0] * (along + sh) + n[0] * mx * fr, M[1] + tv[1] * (along + sh) + n[1] * mx * fr];
+        if (inLayers(it.layers, P[0], P[1])) { Gp = P; break outer; }
+      }
+      if (!Gp) Gp = [M[0] + tv[0] * along + n[0] * mx * 0.8, M[1] + tv[1] * along + n[1] * mx * 0.8];
+      const Rs = reflPt(Gp, M, n), f = sk.fing || 0;
+      const R = [Rs[0] + gauss(rng) * f, Rs[1] + gauss(rng) * f];
+      B.task = { kind: 'drag', from: Gp, to: R, t: 0, dur: sp(0.85), phase0: G.phase };
+    }
+  }
+  return B;
+}
+
+/* ================= 自動テスト用の公開 ================= */
+const API = { newGame, update, onDown, onMove, onUp, onCancel, makeBot, SK, TYPES, DAYS, computeResult, shoulderX, activePin, basketItem,
+  foldLayers, bboxOf, consts: { POLE_Y, POLE_L, POLE_R, BASKET, TC, HANG_TIME, FOLD_TIME } };
+if (typeof window !== 'undefined') window.__sentaku = API;
+let liveEl = null;
+function announce(G, msg) { if (G && G.demo) return; if (liveEl) liveEl.textContent = msg; }
+const RM = !TEST && typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (TEST) return;
+API.cur = () => G;
+API.view = () => ({ S, OX, OY, state });
+
+/* ================= 画面 ================= */
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+liveEl = document.getElementById('live');
+let dpr = 1, CW = 390, CH = 760, S = 1, OX = 0, OY = 0, bgCache = {};
+let cssv = {};
+function readCss() {
+  const cs = getComputedStyle(document.documentElement), g = n => cs.getPropertyValue(n).trim();
+  cssv = { hud: g('--hud'), hudInk: g('--hud-ink'), ink: g('--ink'), sub: g('--sub'), card: g('--card'), line: g('--line'), accent: g('--accent'), accentInk: g('--accent-ink') };
+}
+function resize() {
+  const r = cv.getBoundingClientRect();
+  CW = Math.max(1, r.width); CH = Math.max(1, r.height); dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(CW * dpr); cv.height = Math.round(CH * dpr);
+  S = Math.min(CW / W, CH / H, 520 / W); OX = (CW - W * S) / 2; OY = (CH - H * S) / 2; bgCache = {};
+}
+function setView(c) { c.setTransform(S * dpr, 0, 0, S * dpr, OX * dpr, OY * dpr); }
+function vis() { return { x: -OX / S, y: -OY / S, w: CW / S, h: CH / S }; }
+const FONT = '"Zen Maru Gothic","Hiragino Maru Gothic ProN","BIZ UDPGothic","Meiryo",sans-serif';
+function font(size, w) { return (w || 700) + ' ' + size + 'px ' + FONT; }
+function rr(c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function pathPts(c, pts) { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) c.lineTo(pts[i][0], pts[i][1]); c.closePath(); }
+function cached(name, fn) {
+  let b = bgCache[name];
+  if (!b) { b = document.createElement('canvas'); b.width = cv.width; b.height = cv.height; const c = b.getContext('2d'); setView(c); fn(c, vis()); bgCache[name] = b; }
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(b, 0, 0); setView(ctx);
+}
+
+/* ---- ベランダ ---- */
+function drawHangBg(c, v) {
+  const g = c.createLinearGradient(0, v.y, 0, 620);
+  g.addColorStop(0, '#5DAFE4'); g.addColorStop(0.55, '#A7DAF4'); g.addColorStop(1, '#E3F3FB');
+  c.fillStyle = g; c.fillRect(v.x, v.y, v.w, v.h);
+  // 遠くの町
+  let x = v.x - 10, k = 0;
+  c.fillStyle = '#BCD8E8';
+  while (x < v.x + v.w + 10) { const w = 34 + (k * 37 % 29), h = 40 + (k * 53 % 70); c.fillRect(x, 600 - h, w, h + 10); x += w + 4; k++; }
+  x = v.x - 30; k = 3; c.fillStyle = '#A6C8DC';
+  while (x < v.x + v.w + 10) { const w = 46 + (k * 31 % 33), h = 24 + (k * 41 % 46); c.fillRect(x, 604 - h, w, h + 10); for (let wy = 604 - h + 8; wy < 596; wy += 12) for (let wx = x + 7; wx < x + w - 8; wx += 12) { c.fillStyle = '#C7DEEA'; c.fillRect(wx, wy, 5, 6); c.fillStyle = '#A6C8DC'; } x += w + 6; k++; }
+  // 床
+  c.fillStyle = '#BDB7AC'; c.fillRect(v.x, 640, v.w, v.y + v.h - 640);
+  c.strokeStyle = 'rgba(120,112,100,.35)'; c.lineWidth = 1; c.beginPath();
+  for (let y = 668; y < v.y + v.h; y += 28) { c.moveTo(v.x, y); c.lineTo(v.x + v.w, y); }
+  for (let xx = Math.floor(v.x / 56) * 56; xx < v.x + v.w; xx += 56) { c.moveTo(xx, 640); c.lineTo(xx, v.y + v.h); }
+  c.stroke();
+  // 手すり（すりガラス）
+  c.fillStyle = 'rgba(236,246,251,.62)'; c.fillRect(v.x, 598, v.w, 42);
+  c.fillStyle = '#8C9AA4'; c.fillRect(v.x, 592, v.w, 7); c.fillRect(v.x, 638, v.w, 4);
+  c.fillStyle = 'rgba(140,154,164,.55)'; for (let xx = Math.floor(v.x / 64) * 64; xx < v.x + v.w; xx += 64) c.fillRect(xx, 598, 3, 40);
+  // 物干しスタンド
+  for (const px of [POLE_L - 9, POLE_R + 9]) {
+    c.fillStyle = '#7C8993'; c.fillRect(px - 3, POLE_Y - 10, 6, 666 - POLE_Y + 10);
+    rr(c, px - 24, 662, 48, 9, 4); c.fill();
+  }
+  // 竿
+  rr(c, POLE_L - 16, POLE_Y - 4, POLE_R - POLE_L + 32, 8, 4); c.fillStyle = '#A9B4BC'; c.fill();
+  c.strokeStyle = '#E8EEF2'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(POLE_L - 12, POLE_Y - 1.5); c.lineTo(POLE_R + 12, POLE_Y - 1.5); c.stroke();
+}
+function drawSky(c, G) {
+  // 太陽
+  let sx = 70, sy = 128;
+  if (G.phase === 'dry') { const p = clamp(G.phaseT / 3.1, 0, 1); sx = lerp(70, 320, p); sy = 150 - 52 * Math.sin(Math.PI * p); }
+  else if (G.phase === 'wipe') { sx = 320; sy = 150; }
+  const rg = c.createRadialGradient(sx, sy, 6, sx, sy, 46); rg.addColorStop(0, 'rgba(255,240,170,.95)'); rg.addColorStop(1, 'rgba(255,240,170,0)');
+  c.fillStyle = rg; c.fillRect(sx - 46, sy - 46, 92, 92);
+  c.fillStyle = '#FFE38A'; c.beginPath(); c.arc(sx, sy, 19, 0, 6.283); c.fill();
+  // 雲
+  const drift = RM ? 0 : G.t * 7;
+  const clouds = [[40, 104, 1], [250, 92, 0.8], [430, 140, 0.65]];
+  c.fillStyle = 'rgba(255,255,255,.88)';
+  for (const cl of clouds) {
+    const x = ((cl[0] + drift * cl[2]) % 520 + 520) % 520 - 70, y = cl[1], s = cl[2];
+    c.beginPath(); c.arc(x, y, 16 * s, 0, 6.283); c.arc(x + 20 * s, y - 8 * s, 20 * s, 0, 6.283); c.arc(x + 44 * s, y, 15 * s, 0, 6.283); c.rect(x, y, 44 * s, 12 * s); c.fill();
+  }
+}
+function drawWind(c, G) {
+  if (RM) return;
+  const D = DAYS[G.day]; const n = D.lv * 3 + (G.gust > 0 ? 10 : 0);
+  c.strokeStyle = 'rgba(255,255,255,.55)'; c.lineWidth = 2; c.lineCap = 'round'; c.beginPath();
+  const sp = 120 + D.lv * 50 + G.gust * 320;
+  for (let k = 0; k < n; k++) {
+    const x = ((G.t * sp + k * 97) % 520) - 60, y = 112 + (k * 61) % 430, L = 18 + D.lv * 5 + G.gust * 30;
+    c.moveTo(x, y); c.lineTo(x + L, y + Math.sin(k + G.t * 3) * 2);
+  }
+  c.stroke(); c.lineCap = 'butt';
+}
+function hangPts(it, t, gust, base) {
+  const T = TYPES[it.type], src = base || it.dpoly || T.sub, pts = [];
+  const A = DAYS[it.day].A;
+  for (const p of src) {
+    const x = p[0], yy = p[1] - T.top;
+    let off;
+    if (!it.anch) off = sway(it, t);
+    else {
+      off = it.anchOff;
+      if (!it.fixed) { const pl = it.anchSide * T.pinX, fl = -pl; off += flutter(it, t) * clamp((x - pl) / (fl - pl), 0, 1.2); }
+    }
+    if (it.state === 'hung') off += Math.sin(t * 2.3 + it.ph1 + yy * 0.03) * (A * 0.12 + gust * 7) * (yy / T.h);
+    pts.push([it.cx + x * KH + off, POLE_Y + 2 + yy * KH]);
+  }
+  return pts;
+}
+function drawPattern(c, type, pal, back) {
+  c.globalAlpha = back ? 0.45 : 1;
+  c.fillStyle = pal.ink; c.strokeStyle = pal.ink;
+  if (type === 'towel') {
+    c.fillRect(-93, -60, 7, 120); c.fillRect(-82, -60, 3, 120); c.fillRect(86, -60, 7, 120); c.fillRect(79, -60, 3, 120);
+  } else if (type === 'tee') {
+    c.lineWidth = 2.4; c.beginPath(); c.moveTo(-22, -83); c.quadraticCurveTo(0, -71, 22, -83); c.stroke();
+    c.lineWidth = 1.6; c.setLineDash([4, 3]); c.beginPath(); c.moveTo(64, -78); c.lineTo(70, -34); c.moveTo(-64, -78); c.lineTo(-70, -34); c.moveTo(-68, 78); c.lineTo(68, 78); c.stroke(); c.setLineDash([]);
+    c.lineWidth = 1.8; c.strokeRect(22, -54, 18, 20);
+  } else {
+    c.lineWidth = 1.8; c.beginPath(); c.moveTo(-61, -100); c.lineTo(61, -100); c.stroke();
+    c.setLineDash([4, 3]); c.beginPath(); c.moveTo(0, -100); c.lineTo(0, -40); c.moveTo(-56, -98); c.quadraticCurveTo(-38, -88, -44, -64); c.moveTo(56, -98); c.quadraticCurveTo(38, -88, 44, -64);
+    c.moveTo(-57, 102); c.lineTo(-7, 102); c.moveTo(7, 102); c.lineTo(57, 102); c.stroke(); c.setLineDash([]);
+    for (const bx of [-40, -14, 14, 40]) c.fillRect(bx - 2, -110, 4, 12);
+  }
+  c.globalAlpha = 1;
+}
+function drawHangItem(c, it, t, wet, gust) {
+  const T = TYPES[it.type], pts = hangPts(it, t, gust);
+  const fill = rgb(mixc(it.pal.wet, it.pal.b, 1 - wet));
+  c.save(); pathPts(c, pts); c.shadowColor = 'rgba(20,40,60,.22)'; c.shadowBlur = 5 * S * dpr; c.shadowOffsetY = 3 * S * dpr; c.fillStyle = fill; c.fill(); c.restore();
+  c.save(); pathPts(c, pts); c.clip();
+  const off = it.anch ? it.anchOff : sway(it, t);
+  c.translate(it.cx + off, POLE_Y + 2 - T.top * KH); c.scale(KH, KH); drawPattern(c, T.key, it.pal, false);
+  c.restore();
+  pathPts(c, pts); c.strokeStyle = it.pal.edge; c.lineWidth = 1.2; c.lineJoin = 'round'; c.stroke();
+}
+function drawClip(c, x, ci, alpha) {
+  c.save(); c.globalAlpha = alpha == null ? 1 : alpha;
+  rr(c, x - 4.5, POLE_Y - 10, 9, 23, 2.5); c.fillStyle = CLIP_COLORS[ci % 4]; c.fill();
+  c.strokeStyle = 'rgba(0,0,0,.35)'; c.lineWidth = 1; c.stroke();
+  c.fillStyle = 'rgba(255,255,255,.85)'; c.beginPath(); c.arc(x, POLE_Y + 1, 2.2, 0, 6.283); c.fill();
+  c.restore();
+}
+function drawBasket(c, G) {
+  const B = BASKET, drag = G.hang.drag;
+  const inB = dayItems(G).filter(it => (it.state === 'basket' || it.state === 'forgot') && !(drag && drag.it === it));
+  // 中身
+  inB.forEach((it, k) => {
+    const x = B.x - 34 + k * 30, y = B.y - 34 - (k % 2) * 5;
+    c.fillStyle = it.state === 'forgot' ? rgb(shade(it.pal.wet, -0.15)) : rgb(it.pal.wet);
+    c.beginPath(); c.ellipse(x, y, 30, 17, (k - 1) * 0.25, 0, 6.283); c.fill();
+    c.strokeStyle = it.pal.edge; c.lineWidth = 1.2; c.stroke();
+  });
+  // かご
+  c.beginPath(); c.moveTo(B.x - B.w / 2, B.y - B.h / 2 + 12); c.lineTo(B.x + B.w / 2, B.y - B.h / 2 + 12);
+  c.lineTo(B.x + B.w / 2 - 16, B.y + B.h / 2); c.lineTo(B.x - B.w / 2 + 16, B.y + B.h / 2); c.closePath();
+  c.fillStyle = '#C9975B'; c.fill();
+  c.save(); c.clip(); c.strokeStyle = 'rgba(120,80,35,.45)'; c.lineWidth = 2; c.beginPath();
+  for (let y = B.y - B.h / 2 + 22; y < B.y + B.h / 2; y += 10) { c.moveTo(B.x - B.w / 2, y); c.lineTo(B.x + B.w / 2, y); }
+  for (let x = B.x - B.w / 2; x < B.x + B.w / 2; x += 14) { c.moveTo(x, B.y - B.h / 2); c.lineTo(x + 4, B.y + B.h / 2); }
+  c.stroke(); c.restore();
+  rr(c, B.x - B.w / 2 - 6, B.y - B.h / 2 + 6, B.w + 12, 11, 5); c.fillStyle = '#A8763F'; c.fill();
+}
+function drawLens(c, G) {
+  const h = G.hang.hold, g = activePin(G); if (!h || !g) return;
+  const lx = clamp(h.x, 50, 340), ly = POLE_Y - 68, r = 40, z = 3;
+  c.save(); c.beginPath(); c.arc(lx, ly, r, 0, 6.283); c.clip();
+  c.fillStyle = '#A7DAF4'; c.fillRect(lx - r, ly - r, 2 * r, 2 * r);
+  c.translate(lx, ly); c.scale(z, z); c.translate(-h.x, -(POLE_Y + 3));
+  c.fillStyle = '#A9B4BC'; c.fillRect(h.x - 30, POLE_Y - 4, 60, 8);
+  drawHangItem(c, g, G.t, 1, 0);
+  g.pins.forEach((p, k) => { if (p.x !== null) drawClip(c, p.x, k + g.k * 2); });
+  drawClip(c, h.x, g.pins.length + g.k * 2, 0.32);
+  c.restore();
+  // 洗濯ばさみの中心を示す細い線
+  c.lineCap = 'round';
+  c.strokeStyle = 'rgba(255,255,255,.9)'; c.lineWidth = 3.2; c.beginPath(); c.moveTo(lx, ly - r + 6); c.lineTo(lx, ly + r - 6); c.stroke();
+  c.strokeStyle = '#1C2A35'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(lx, ly - r + 6); c.lineTo(lx, ly + r - 6); c.stroke();
+  c.lineCap = 'butt';
+  c.lineWidth = 3; c.strokeStyle = '#FFFFFF'; c.beginPath(); c.arc(lx, ly, r, 0, 6.283); c.stroke();
+  c.lineWidth = 1.5; c.strokeStyle = '#1C2A35'; c.beginPath(); c.arc(lx, ly, r + 1.5, 0, 6.283); c.stroke();
+}
+function drawDrips(c, G, wet) {
+  if (wet < 0.15 || RM) return;
+  c.fillStyle = 'rgba(60,130,195,' + (0.75 * wet).toFixed(2) + ')';
+  for (const it of dayItems(G)) {
+    if (it.state !== 'pinning' && it.state !== 'hung') continue;
+    const T = TYPES[it.type], hem = POLE_Y + 2 + T.h * KH, off = it.anch ? it.anchOff : sway(it, G.t);
+    for (let k = 0; k < 3; k++) {
+      const per = 0.8 + k * 0.23, ph = ((G.t / per + it.ph1 + k * 0.37) % 1 + 1) % 1;
+      const x = it.cx + off + (k - 1) * T.w * KH * 0.28, y = hem - 2 + ph * ph * (596 - hem);
+      c.beginPath(); c.moveTo(x, y - 5); c.quadraticCurveTo(x + 3, y, x, y + 2.5); c.quadraticCurveTo(x - 3, y, x, y - 5); c.fill();
+    }
+  }
+}
+function drawHangScene(c, G) {
+  cached('hang', drawHangBg);
+  drawSky(c, G);
+  if (G.phase === 'hang' || G.phase === 'dry' || G.phase === 'intro') drawWind(c, G);
+  const wet = G.phase === 'dry' ? 1 - clamp((G.phaseT - 0.2) / 2.4, 0, 1) : (G.phase === 'wipe' || G.phase === 'dayEnd') ? 0 : 1;
+  for (const it of dayItems(G)) {
+    if (it.state === 'pinning' || it.state === 'hung') drawHangItem(c, it, G.t, wet, G.gust);
+  }
+  for (const it of dayItems(G)) it.pins.forEach((p, k) => { if (p.x !== null && it.state !== 'wait') drawClip(c, p.x, k + it.k * 2); });
+  drawDrips(c, G, wet);
+  // 飛んでいく服
+  for (const f of G.flying) {
+    const T = TYPES[f.it.type], t = f.t;
+    const x = f.x0 + (260 * t + 70 * t * t) * f.dir, y = f.y0 - 170 * t + 30 * t * t, rot = 2.2 * t * f.dir;
+    c.save(); c.globalAlpha = clamp(2.4 - t, 0, 1); c.translate(x, y); c.rotate(rot); c.scale(KH, KH);
+    pathPts(c, (f.it.dpoly || T.sub).map(p => [p[0], p[1]])); c.fillStyle = f.it.pal.base; c.fill(); c.strokeStyle = f.it.pal.edge; c.lineWidth = 2.6; c.stroke();
+    c.restore();
+  }
+  if (G.phase !== 'wipe' || G.phaseT < 0.35) drawBasket(c, G);
+  // 運んでいる服
+  const d = G.hang.drag;
+  if (d) {
+    const T = TYPES[d.it.type];
+    const pts = T.sub.map(p => [d.x + p[0] * KH, d.y - 14 + (p[1] - T.top) * KH]);
+    c.save(); pathPts(c, pts); c.shadowColor = 'rgba(20,40,60,.25)'; c.shadowBlur = 8 * S * dpr; c.shadowOffsetY = 6 * S * dpr; c.fillStyle = rgb(d.it.pal.wet); c.fill(); c.restore();
+    c.save(); pathPts(c, pts); c.clip(); c.translate(d.x, d.y - 14 - T.top * KH); c.scale(KH, KH); drawPattern(c, T.key, d.it.pal, false); c.restore();
+    pathPts(c, pts); c.strokeStyle = d.it.pal.edge; c.lineWidth = 1.2; c.stroke();
+  }
+  const h = G.hang.hold, ag = activePin(G);
+  if (h && ag) { drawClip(c, h.x, ag.pins.length + ag.k * 2, 0.7); drawLens(c, G); }
+}
+
+/* ---- たたみ ---- */
+function drawTatamiBg(c, v) {
+  c.fillStyle = '#B9B175'; c.fillRect(v.x, v.y, v.w, v.h);
+  const mw = 240, mh = 120; let row = 0;
+  for (let y = Math.floor((v.y - 40) / mh) * mh + 20; y < v.y + v.h + mh; y += mh, row++) {
+    const shift = (row % 2) ? mw / 2 : 0;
+    for (let x = Math.floor((v.x - mw) / mw) * mw + shift - 10; x < v.x + v.w + mw; x += mw) {
+      c.fillStyle = '#CFC78F'; c.fillRect(x + 1, y + 1, mw - 2, mh - 2);
+      c.strokeStyle = 'rgba(140,130,70,.16)'; c.lineWidth = 0.8; c.beginPath();
+      for (let yy = y + 8; yy < y + mh - 7; yy += 3.5) { c.moveTo(x + 2, yy); c.lineTo(x + mw - 2, yy); }
+      c.stroke();
+      c.fillStyle = '#4A5D4C'; c.fillRect(x, y, mw, 5); c.fillRect(x, y + mh - 5, mw, 5);
+      c.fillStyle = 'rgba(255,255,255,.12)'; c.fillRect(x, y + 1.5, mw, 1);
+      c.fillStyle = 'rgba(90,80,40,.35)'; c.fillRect(x, y, 1.2, mh);
+    }
+  }
+}
+function drawLayers(c, layers, it, alpha) {
+  c.save(); if (alpha != null) c.globalAlpha = alpha;
+  for (const L of layers) {
+    c.save(); pathPts(c, L.poly); c.shadowColor = 'rgba(50,40,10,.34)'; c.shadowBlur = 7 * S * dpr; c.shadowOffsetY = 3 * S * dpr;
+    c.fillStyle = L.back ? it.pal.back : it.pal.base; c.fill(); c.restore();
+    c.save(); pathPts(c, L.poly); c.clip(); c.transform(L.T[0], L.T[1], L.T[2], L.T[3], L.T[4], L.T[5]); drawPattern(c, it.type, it.pal, L.back); c.restore();
+    pathPts(c, L.poly); c.strokeStyle = it.pal.edge; c.lineWidth = 1.4; c.lineJoin = 'round'; c.stroke();
+  }
+  c.restore();
+}
+function dashedLine(c, a, b, dash, w, col, under) {
+  c.save(); c.lineCap = 'round';
+  if (under) { c.setLineDash(dash || []); c.strokeStyle = under; c.lineWidth = w + 2.6; c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke(); }
+  c.setLineDash(dash || []); c.strokeStyle = col; c.lineWidth = w; c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.stroke();
+  c.restore();
+}
+function drawGuide(c, G, it) {
+  const sp = TYPES[it.type].folds[it.step], M = [TC[0] + sp.M[0], TC[1] + sp.M[1]], n = sp.n, t = [-n[1], n[0]], ext = sp.len / 2 + 30;
+  dashedLine(c, [M[0] - t[0] * ext, M[1] - t[1] * ext], [M[0] + t[0] * ext, M[1] + t[1] * ext], [7, 6], 2.4, '#FFFFFF', 'rgba(28,42,53,.85)');
+  if (G.fold.drag && G.fold.drag.prev) return;
+  // 折る向きの矢印
+  const A = [M[0] + n[0] * 38 + t[0] * 0, M[1] + n[1] * 38], B = [M[0] - n[0] * 30, M[1] - n[1] * 30];
+  const C = [M[0] + n[0] * 4 + t[0] * 34, M[1] + n[1] * 4 + t[1] * 34];
+  const pulse = RM ? 0 : Math.sin(G.t * 5) * 2;
+  for (const pass of [0, 1]) {
+    c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+    c.strokeStyle = pass ? '#FFFFFF' : 'rgba(28,42,53,.85)'; c.lineWidth = pass ? 3.2 : 6;
+    c.beginPath(); c.moveTo(A[0], A[1]); c.quadraticCurveTo(C[0], C[1] + pulse, B[0], B[1]); c.stroke();
+    const dx = B[0] - C[0], dy = B[1] - C[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L;
+    c.beginPath(); c.moveTo(B[0] - ux * 11 - uy * 7, B[1] - uy * 11 + ux * 7); c.lineTo(B[0], B[1]); c.lineTo(B[0] - ux * 11 + uy * 7, B[1] - uy * 11 - ux * 7); c.stroke();
+    c.restore();
+  }
+}
+function drawPile(c, G) {
+  const P = G.pile;
+  for (const s of P.fallen) {
+    const p = ease(s.fa), x = lerp(s.fx0, s.fx1, p), y = lerp(s.fy0, s.fy1, p), r = lerp(s.fr0, s.fr1, p);
+    drawSlab(c, s, x, y, r);
+  }
+  let y = PILE_Y;
+  for (const s of P.slabs) {
+    y -= s.h; const drop = (1 - ease(s.a)) * -50;
+    drawSlab(c, s, s.x, y + s.h / 2 + drop, s.rot);
+  }
+}
+function drawSlab(c, s, x, y, rot) {
+  c.save(); c.translate(x, y); c.rotate(rot);
+  rr(c, -s.w / 2, -s.h / 2, s.w, s.h, 3); c.fillStyle = s.pal.base; c.fill(); c.strokeStyle = s.pal.edge; c.lineWidth = 1.2; c.stroke();
+  if (s.q < 0.7) {
+    const k = (1 - s.q) * 14;
+    c.beginPath(); c.moveTo(s.sgn * s.w / 2 - s.sgn * 6, -s.h / 2); c.lineTo(s.sgn * (s.w / 2 + k), -s.h / 2 - k * 0.3); c.lineTo(s.sgn * s.w / 2, s.h / 2 - 1); c.closePath();
+    c.fillStyle = s.pal.back; c.fill(); c.stroke();
+  }
+  c.restore();
+}
+function drawFoldScene(c, G) {
+  cached('tatami', drawTatamiBg);
+  drawPile(c, G);
+  const F = G.fold;
+  if (G.phase === 'fold' && F.cur !== null) {
+    const it = G.items[F.cur];
+    const layers = F.drag && F.drag.prev ? F.drag.prev.layers : it.layers;
+    const a = ease(F.appear);
+    c.save(); c.translate(TC[0], TC[1] - 18 * (1 - a)); c.scale(0.94 + 0.06 * a, 0.94 + 0.06 * a); c.translate(-TC[0], -TC[1]);
+    drawLayers(c, layers, it);
+    c.restore();
+    if (it.step < 3) drawGuide(c, G, it);
+    const d = F.drag;
+    if (d && d.prev) {
+      const dx = d.g[0] - d.r[0], dy = d.g[1] - d.r[1], L = Math.hypot(dx, dy), n = [dx / L, dy / L], t = [-n[1], n[0]], M = [(d.g[0] + d.r[0]) / 2, (d.g[1] + d.r[1]) / 2];
+      const ext = TYPES[it.type].folds[Math.min(2, it.step)].len / 2 + 30;
+      dashedLine(c, [M[0] - t[0] * ext, M[1] - t[1] * ext], [M[0] + t[0] * ext, M[1] + t[1] * ext], null, 1.6, '#1C2A35', 'rgba(255,255,255,.9)');
+    }
+  }
+  if (F.anim) {
+    const it = G.items[F.anim.i], T = TYPES[it.type], p = ease(F.anim.t / 0.5);
+    const topY = PILE_Y - G.pile.slabs.reduce((s, x) => s + x.h, 0);
+    const tx = lerp(T.idealC[0], PILE_X + G.pile.lean, p), ty = lerp(T.idealC[1], topY, p), sc = lerp(1, 0.45, p);
+    c.save(); c.translate(tx, ty); c.scale(sc, sc); c.translate(-T.idealC[0], -T.idealC[1]); drawLayers(c, it.layers, it, 1 - p * 0.6); c.restore();
+  }
+}
+
+/* ---- 文字と枠 ---- */
+function pill(c, x, y, w, h, fill, stroke) { rr(c, x, y, w, h, h / 2); c.fillStyle = fill; c.fill(); if (stroke) { c.strokeStyle = stroke; c.lineWidth = 1.5; c.stroke(); } }
+function phaseLabel(G) { return { intro: '干す', hang: '干す', dry: '乾かす', wipe: 'たたむ', fold: 'たたむ', dayEnd: 'しあがり', end: 'しあがり' }[G.phase] || ''; }
+function hintText(G) {
+  if (G.phase === 'hang') {
+    const g = activePin(G);
+    if (g) return TYPES[g.type].pinHint + '（あと' + (2 - g.pins.length) + 'か所）';
+    if (basketItem(G)) return 'かごの服を、竿まで引っぱる';
+    return '';
+  }
+  if (G.phase === 'dry') return G.gustDone ? '' : '乾くまで待つ';
+  if (G.phase === 'fold' && G.fold.cur !== null) {
+    const it = G.items[G.fold.cur]; if (it.step >= 3) return '';
+    return TYPES[it.type].folds[it.step].hint + '（' + (it.step + 1) + '/3回目）';
+  }
+  return '';
+}
+function drawHUD(c, G) {
+  const D = DAYS[G.day];
+  c.textBaseline = 'middle';
+  c.font = font(16, 900); const t1 = (G.day + 1) + '日目';
+  c.font = font(14, 700); const t2 = phaseLabel(G);
+  const t3 = '風 ' + '●'.repeat(D.lv) + '○'.repeat(4 - D.lv);
+  c.font = font(16, 900); const w1 = c.measureText(t1).width; c.font = font(14, 700); const w2 = c.measureText(t2).width; c.font = font(12, 700); const w3 = c.measureText(t3).width;
+  const pw = 14 + w1 + 10 + w2 + 12 + w3 + 14;
+  pill(c, 10, 10, pw, 36, cssv.hud, cssv.line);
+  c.fillStyle = cssv.hudInk; c.textAlign = 'left';
+  c.font = font(16, 900); c.fillText(t1, 24, 28.5);
+  c.font = font(14, 700); c.fillText(t2, 24 + w1 + 10, 28.5);
+  c.fillStyle = cssv.sub; c.font = font(12, 700); c.fillText(t3, 24 + w1 + 10 + w2 + 12, 28.5);
+  // 残り時間
+  if (G.phase === 'hang' || G.phase === 'fold') {
+    const full = G.phase === 'hang' ? HANG_TIME : FOLD_TIME, rem = Math.max(0, G.timer), low = rem <= 5;
+    const tx = 'あと' + Math.ceil(rem) + '秒';
+    c.font = font(14, 900); const tw = c.measureText(tx).width + 26;
+    const x = Math.min(322 - tw, 10 + pw + 8);
+    pill(c, x, 10, tw, 36, low ? cssv.accent : cssv.hud, cssv.line);
+    c.fillStyle = low ? cssv.accentInk : cssv.hudInk; c.textAlign = 'center'; c.fillText(tx, x + tw / 2, 28.5);
+    // バー
+    rr(c, 12, 51, 310, 6, 3); c.fillStyle = cssv.hud; c.fill();
+    rr(c, 12, 51, 310 * clamp(rem / full, 0, 1), 6, 3); c.fillStyle = cssv.accent; c.fill();
+  }
+  const hint = hintText(G);
+  if (hint) {
+    c.font = font(13.5, 700); const hw = Math.min(370, c.measureText(hint).width + 28);
+    pill(c, 195 - hw / 2, 64, hw, 28, cssv.hud, cssv.line);
+    c.fillStyle = cssv.hudInk; c.textAlign = 'center'; c.fillText(hint, 195, 78.5, 350);
+  }
+  c.textAlign = 'left';
+}
+function drawBanner(c, G) {
+  let l1 = '', l2 = '', p = 0;
+  if (G.phase === 'intro') { const D = DAYS[G.day]; l1 = (G.day + 1) + '日目'; l2 = '風：' + D.txt + '　' + '●'.repeat(D.lv) + '○'.repeat(4 - D.lv); p = G.phaseT; }
+  else if (G.phase === 'dayEnd') { l1 = (G.day + 1) + '日目のしあがり'; l2 = dayItems(G).map(it => it.mark).join('　'); p = G.phaseT; }
+  else return;
+  const end = G.phase === 'intro' ? 1.3 : 1.8;
+  const a = clamp(p / 0.2, 0, 1) * clamp((end - p) / 0.25, 0, 1);
+  if (a <= 0) return;
+  c.save(); c.globalAlpha = a;
+  const y = G.phase === 'intro' ? 400 : 380, big = G.phase === 'dayEnd';
+  rr(c, 65, y - 56, 260, 112, 18); c.fillStyle = cssv.card; c.fill(); c.strokeStyle = cssv.line; c.lineWidth = 2; c.stroke();
+  c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = cssv.ink;
+  c.font = font(big ? 20 : 34, 900); c.fillText(l1, 195, y - (big ? 20 : 14));
+  c.fillStyle = big ? cssv.ink : cssv.sub; c.font = font(big ? 30 : 15, big ? 900 : 700); c.fillText(l2, 195, y + (big ? 20 : 26));
+  c.restore(); c.textAlign = 'left';
+}
+function drawFx(c, G) {
+  c.textAlign = 'center'; c.textBaseline = 'middle';
+  for (const f of G.fx) {
+    if (f.spark) { c.fillStyle = f.c; c.globalAlpha = 1 - f.t / f.life; c.fillRect(f.x - 2.5, f.y - 2.5, 5, 5); c.globalAlpha = 1; continue; }
+    const k = f.t / f.life, y = f.y - 18 * k;
+    c.globalAlpha = k > 0.75 ? (1 - k) / 0.25 : 1;
+    c.font = font(f.size, 900); c.lineWidth = 4.5; c.lineJoin = 'round'; c.strokeStyle = 'rgba(255,255,255,.95)'; c.strokeText(f.text, f.x, y);
+    c.fillStyle = '#1C2A35'; c.fillText(f.text, f.x, y);
+    c.globalAlpha = 1;
+  }
+  c.textAlign = 'left';
+}
+function drawFinger(c, B) {
+  if (!B) return;
+  c.save(); c.globalAlpha = 0.9;
+  c.fillStyle = 'rgba(255,255,255,.55)'; c.strokeStyle = 'rgba(28,42,53,.7)'; c.lineWidth = 2;
+  c.beginPath(); c.arc(B.fx, B.fy, B.down ? 15 : 18, 0, 6.283); c.fill(); c.stroke();
+  if (B.down) { c.fillStyle = 'rgba(28,42,53,.6)'; c.beginPath(); c.arc(B.fx, B.fy, 4, 0, 6.283); c.fill(); }
+  c.restore();
+}
+function sceneOf(G) {
+  if (G.phase === 'fold' || G.phase === 'end') return 'fold';
+  if (G.phase === 'dayEnd') return G.dayScene;
+  return 'hang';
+}
+function render() {
+  const c = ctx;
+  c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, cv.width, cv.height); setView(c);
+  const v = vis();
+  if (G.phase === 'wipe') {
+    drawHangScene(c, G);
+    const p = ease(G.phaseT / 0.7);
+    c.save(); c.beginPath(); c.rect(v.x, v.y + v.h * (1 - p), v.w, v.h * p + 1); c.clip(); drawFoldScene(c, G); c.restore();
+  } else if (G.phase === 'intro' && G.lastScene === 'fold' && G.phaseT < 0.6) {
+    drawHangScene(c, G);
+    const p = ease(G.phaseT / 0.6);
+    c.save(); c.beginPath(); c.rect(v.x, v.y + v.h * p, v.w, v.h); c.clip(); drawFoldScene(c, G); c.restore();
+  } else if (sceneOf(G) === 'fold') drawFoldScene(c, G);
+  else drawHangScene(c, G);
+  drawFx(c, G);
+  if (state === 'playing') { drawBanner(c, G); drawHUD(c, G); }
+  if (state === 'title') drawFinger(c, bot);
+}
+
+/* ================= 画面の切り替え ================= */
+let state = 'title', G = null, bot = null;
+const $ = id => document.getElementById(id);
+const titleEl = $('title'), resultEl = $('result');
+function best() { return parseInt(load(KEY_BEST, '0'), 10) || 0; }
+function startDemo() { G = newGame({ demo: true }); bot = makeBot(SK.demo); }
+function startGame() {
+  ensureAudio();
+  state = 'playing'; G = newGame({}); bot = null;
+  titleEl.hidden = true; resultEl.hidden = true; $('toast').hidden = true;
+  announce(G, '1日目。風は' + DAYS[0].txt + '。');
+}
+let countTimer = null;
+function finish() {
+  state = 'over';
+  const r = computeResult(G);
+  const prev = best(), isBest = r.score > prev;
+  if (isBest) save(KEY_BEST, r.score);
+  $('rTitle').textContent = '「' + r.title + '」';
+  $('stPin').textContent = r.stats.pinPerfect + ' / 24';
+  $('stFold').textContent = r.stats.foldPerfect + ' / 36';
+  $('stFly').textContent = r.stats.flown + '枚';
+  $('stTop').textContent = r.stats.toppled + '回';
+  const days = $('days'); days.textContent = '';
+  r.marks.forEach((m, i) => { const d = document.createElement('div'); d.className = 'day'; const s = document.createElement('small'); s.textContent = (i + 1) + '日目'; const sp = document.createElement('span'); sp.textContent = m; d.appendChild(s); d.appendChild(sp); days.appendChild(d); });
+  $('bestR').textContent = isBest ? '自己ベスト更新（前回まで ' + prev + '点）' : 'ベスト ' + Math.max(prev, r.score) + '点';
+  const num = $('scoreNum');
+  if (countTimer) clearInterval(countTimer);
+  if (RM) num.textContent = r.score;
+  else {
+    let k = 0; const steps = 24; num.textContent = '0';
+    countTimer = setInterval(() => { k++; num.textContent = Math.round(r.score * Math.min(1, k / steps)); if (k >= steps) { clearInterval(countTimer); countTimer = null; } }, 40);
+  }
+  resultEl.hidden = false; $('toast').hidden = true;
+  SFX.result(r.score);
+  announce(null, r.score + '点。称号は' + r.title + '。');
+  setTimeout(() => { try { $('againBtn').focus({ preventScroll: true }); } catch (e) {} }, 60);
+}
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 2200); }
+async function share() {
+  const r = G && G.result; if (!r) return;
+  const url = location.href.split('#')[0];
+  const text = 'せんたく日和で' + r.score + '点\n称号「' + r.title + '」\n' + r.marks.join(' ') + '\n#せんたく日和\n' + url;
+  if (navigator.share) {
+    try { await navigator.share({ text }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  try {
+    const w = window.open('https://x.com/intent/post?text=' + encodeURIComponent(text), '_blank');
+    if (w) { try { w.opener = null; } catch (e) {} return; }
+  } catch (e) {}
+  try { await navigator.clipboard.writeText(text); toast('コピーしました'); return; } catch (e) {}
+  try {
+    const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast('コピーしました');
+  } catch (e) { toast('コピーできませんでした'); }
+}
+const ICON_ON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7M18.5 6a8 8 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const ICON_OFF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+function syncMute() { const b = $('muteBtn'); b.innerHTML = muted ? ICON_OFF : ICON_ON; b.setAttribute('aria-label', muted ? '音を出す' : '音を消す'); b.setAttribute('aria-pressed', muted ? 'true' : 'false'); }
+
+/* ================= 起動 ================= */
+let activePid = null;
+function toLogical(e) { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left - OX) / S, (e.clientY - r.top - OY) / S]; }
+cv.addEventListener('pointerdown', e => {
+  if (state !== 'playing' || activePid !== null) return;
+  ensureAudio(); activePid = e.pointerId;
+  try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+  const p = toLogical(e); onDown(G, p[0], p[1]); e.preventDefault();
+});
+cv.addEventListener('pointermove', e => { if (e.pointerId !== activePid || state !== 'playing') return; const p = toLogical(e); onMove(G, p[0], p[1]); });
+cv.addEventListener('pointerup', e => { if (e.pointerId !== activePid) return; activePid = null; if (state !== 'playing') return; const p = toLogical(e); onUp(G, p[0], p[1]); });
+cv.addEventListener('pointercancel', e => { if (e.pointerId !== activePid) return; activePid = null; if (G) onCancel(G); });
+document.addEventListener('contextmenu', e => e.preventDefault());
+$('startBtn').addEventListener('click', startGame);
+$('againBtn').addEventListener('click', startGame);
+$('shareBtn').addEventListener('click', share);
+$('muteBtn').addEventListener('click', () => { muted = !muted; save(KEY_MUTE, muted ? '1' : '0'); syncMute(); if (!muted) { ensureAudio(); tone(880, 0.08, 'triangle', 0.1); } });
+window.addEventListener('resize', resize);
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readCss); } catch (e) {}
+try { new MutationObserver(readCss).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] }); } catch (e) {}
+
+$('bestT').textContent = best();
+syncMute(); readCss(); resize(); startDemo();
+let last = 0;
+function frame(ts) {
+  const now = ts / 1000; let dt = last ? now - last : 0; last = now; dt = Math.min(dt, 0.05);
+  if (window.__sentakuSpeed) dt *= window.__sentakuSpeed;
+  if (state === 'title') {
+    if (bot) bot.step(G, dt);
+    update(G, dt);
+    if (G.phase === 'end') startDemo();
+  } else if (state === 'playing') {
+    if (window.__sentakuHook) window.__sentakuHook(G, dt);
+    update(G, dt);
+    if (G.phase === 'end') finish();
+  } else {
+    updateFx(G, dt);
+  }
+  render();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
