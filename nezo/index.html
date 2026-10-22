@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>寝相コントロール</title>
+<meta name="description" content="一晩の寝返りを早送りで見守る1分ミニゲーム。クッションで止めて、毛布で引き寄せて、布団から落ちないように寝かせよう。朝7時の寝姿が1枚の写真になります。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="寝相コントロール">
+<meta property="og:title" content="寝相コントロール">
+<meta property="og:description" content="クッションと毛布で、寝返りする人を布団の上に寝かせ続ける1分ミニゲーム。朝7時の寝姿が写真になります。">
+<meta property="og:url" content="https://takase-00.github.io/games/nezo/">
+<meta property="og:image" content="https://takase-00.github.io/games/nezo/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="布団の上で眠る人と、寝相コントロールのタイトル">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Ctext%20x%3D%2750%27%20y%3D%27.9em%27%20font-size%3D%2788%27%20text-anchor%3D%27middle%27%3E%F0%9F%98%B4%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yusei+Magic&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+<style>
+:root{
+  --bg:#ECE7F3; --panel:#FFFFFF; --ink:#1E1B2E; --sub:#5C5672; --line:#D4CDE2; --chip:#F4F1F9;
+  --accent:#3B368A; --accent-ink:#FFFFFF; --bar:#3B368A;
+  --shadow:0 8px 24px rgba(30,27,46,.14);
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#13121D; --panel:#1F1D2D; --ink:#EEEBF8; --sub:#ABA6C4; --line:#38344D; --chip:#28253A;
+    --accent:#BDB8FF; --accent-ink:#16142A; --bar:#BDB8FF;
+    --shadow:0 8px 24px rgba(0,0,0,.45);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#13121D; --panel:#1F1D2D; --ink:#EEEBF8; --sub:#ABA6C4; --line:#38344D; --chip:#28253A;
+  --accent:#BDB8FF; --accent-ink:#16142A; --bar:#BDB8FF;
+  --shadow:0 8px 24px rgba(0,0,0,.45);
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html{height:100%;background:var(--bg);scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic UI","Meiryo",system-ui,sans-serif;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;overflow:hidden}
+h1,p,ol,figure{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#app{position:relative;height:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;overflow:hidden}
+
+/* ---- HUD ---- */
+#hud{flex:none;display:flex;align-items:center;gap:10px;padding:8px 10px 4px;min-height:56px}
+#clock{display:block;width:104px;height:40px;flex:none;border-radius:9px}
+#nightWrap{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+#statusRow{display:flex;justify-content:space-between;align-items:baseline;gap:6px;font-size:12.5px;font-weight:700;white-space:nowrap}
+#stSleep{min-width:0;overflow:hidden;text-overflow:ellipsis}
+#stPos{flex:none;color:var(--sub)}
+#barRow{display:flex;align-items:center;gap:5px;color:var(--sub)}
+#barRow svg{display:block;flex:none}
+#nightbar{position:relative;flex:1;height:9px;border-radius:6px;background:var(--chip);border:1px solid var(--line);overflow:hidden}
+#nightfill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#2C2F70,#6C62B8 62%,#F0A45C)}
+.iconbtn{flex:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;padding:0}
+
+/* ---- ticker ---- */
+#ticker{flex:none;display:flex;align-items:center;height:30px;padding:0 14px;font-size:14px}
+#tickText{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
+
+/* ---- field ---- */
+#field{position:relative;flex:1;min-height:0;touch-action:none}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+/* ---- tray ---- */
+#tray{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 10px 8px}
+.tool{position:relative;min-height:58px;display:flex;align-items:center;gap:9px;padding:6px 10px;border-radius:14px;border:2px solid var(--line);background:var(--panel);text-align:left}
+.tool svg{display:block;flex:none}
+.tool .tx{display:flex;flex-direction:column;line-height:1.25}
+.tool .nm{font-weight:900;font-size:15.5px}
+.tool .ct{font-size:12px;color:var(--sub)}
+.tool .sel{position:absolute;top:-8px;right:8px;font-size:10.5px;font-weight:900;padding:1px 7px;border-radius:999px;background:var(--accent);color:var(--accent-ink);visibility:hidden}
+.tool[aria-pressed="true"]{border-color:var(--accent);background:var(--chip)}
+.tool[aria-pressed="true"] .sel{visibility:visible}
+#hint{grid-column:1/-1;font-size:11.5px;color:var(--sub);text-align:center;line-height:1.3}
+
+/* ---- overlays ---- */
+.overlay{position:absolute;inset:0;z-index:5}
+#titleScr{display:flex;flex-direction:column;pointer-events:none}
+#titleTop{pointer-events:auto;padding:22px 18px 34px;text-align:center;background:linear-gradient(var(--bg) 62%,rgba(0,0,0,0))}
+#titleTop .kicker{font-size:13px;color:var(--sub);font-weight:700;margin-bottom:6px}
+#titleTop h1{font-family:"Yusei Magic","Zen Maru Gothic",sans-serif;font-weight:400;font-size:46px;line-height:1.02;letter-spacing:.03em}
+#titleTop h1 span{display:block;font-size:30px;letter-spacing:.12em;margin-top:4px}
+#demoArea{flex:1;position:relative}
+#demoTag{position:absolute;left:12px;top:0;font-size:12px;font-weight:900;padding:3px 10px;border-radius:999px;background:rgba(20,18,40,.72);color:#F2EFFF}
+#titleCard{pointer-events:auto;margin:0 10px 10px;padding:14px 16px 16px;background:var(--panel);border-radius:22px;border:1px solid var(--line);box-shadow:var(--shadow)}
+.rules{list-style:none;padding:0;display:flex;flex-direction:column;gap:7px;font-size:14px;line-height:1.5}
+.rules li{display:flex;gap:9px;align-items:flex-start}
+.rules li svg{flex:none;margin-top:1px}
+#titleBest{margin:11px 0 10px;font-size:13px;color:var(--sub);text-align:center}
+.primary{display:block;width:100%;min-height:54px;border:0;border-radius:16px;background:var(--accent);color:var(--accent-ink);font-weight:900;font-size:17px;letter-spacing:.04em}
+.secondary{display:block;width:100%;min-height:54px;border-radius:16px;border:2px solid var(--accent);background:var(--panel);color:var(--ink);font-weight:900;font-size:16px}
+
+#resultScr{background:var(--bg);overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:14px 16px 18px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.reshead{font-size:14px;color:var(--sub);font-weight:700;text-align:center;outline:none}
+.polaroid{flex:none;background:#FBFAF5;color:#2A2622;padding:10px 10px 10px;border-radius:3px;box-shadow:0 12px 28px rgba(0,0,0,.24),0 1px 2px rgba(0,0,0,.2);transform:rotate(-1.6deg);width:min(290px,80vw)}
+#photo{display:block;width:100%;background:#2B2420}
+#photo.dev{animation:develop 1.6s ease-out}
+@keyframes develop{0%{filter:brightness(2.1) saturate(0) contrast(.55)}100%{filter:none}}
+.polaroid figcaption{display:flex;flex-direction:column;align-items:center;padding:8px 2px 2px;min-height:64px}
+.cap{font-family:"Yusei Magic","Zen Maru Gothic",sans-serif;font-size:27px;line-height:1.15;text-align:center}
+.capsub{font-size:12.5px;color:#6A635A;margin-top:3px;text-align:center}
+.scores{width:min(340px,100%);display:flex;flex-direction:column;gap:8px}
+.srow{display:grid;grid-template-columns:76px 1fr 58px;align-items:center;gap:8px}
+.slbl{font-size:14px;font-weight:900}
+.bar{position:relative;height:14px;border-radius:8px;background:var(--chip);border:1px solid var(--line);overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--bar);transition:width .9s ease-out}
+.sval{font-size:18px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sval small{font-size:12px;color:var(--sub);font-weight:700;margin-left:1px}
+.total{text-align:center;font-size:15px;font-weight:700;margin-bottom:2px}
+.total b{font-size:30px;font-variant-numeric:tabular-nums;margin:0 2px}
+#newBest{display:inline-block;margin-left:8px;font-size:12px;font-weight:900;padding:2px 8px;border-radius:999px;background:var(--accent);color:var(--accent-ink);vertical-align:4px}
+.rstats{text-align:center;font-size:12.5px;color:var(--sub);line-height:1.55;white-space:pre-line}
+.btns{width:min(340px,100%);display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rfoot{font-size:12.5px;color:var(--sub);display:flex;gap:10px;align-items:center}
+.linkbtn{background:none;border:0;color:var(--ink);text-decoration:underline;min-height:44px;padding:0 6px;font-size:13px}
+#toast{position:sticky;bottom:6px;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;background:var(--ink);color:var(--bg)}
+#flash{position:absolute;inset:0;z-index:8;background:#FFFFFF;opacity:0;pointer-events:none}
+#flash.go{animation:flash .75s ease-out}
+@keyframes flash{0%{opacity:.95}100%{opacity:0}}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important;transition:none !important}
+}
+@media (max-height:700px){
+  #titleTop{padding:14px 18px 26px}
+  #titleTop h1{font-size:40px}
+  #titleTop h1 span{font-size:26px}
+  .rules{font-size:13.5px;gap:5px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="hud">
+    <canvas id="clock" role="img" aria-label="時刻 23:00"></canvas>
+    <div id="nightWrap">
+      <div id="statusRow"><span id="stSleep">安眠度 100%</span><span id="stPos">○布団の上</span></div>
+      <div id="barRow" aria-hidden="true">
+        <svg width="12" height="12" viewBox="0 0 12 12"><path d="M8.5 1.2A5 5 0 1 0 10.8 8 4 4 0 0 1 8.5 1.2z" fill="currentColor"/></svg>
+        <div id="nightbar"><div id="nightfill"></div></div>
+        <svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="2.6" fill="currentColor"/><g stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M6 .8v1.4M6 9.8v1.4M.8 6h1.4M9.8 6h1.4M2.3 2.3l1 1M8.7 8.7l1 1M2.3 9.7l1-1M8.7 3.3l1-1"/></g></svg>
+      </div>
+    </div>
+    <button id="muteBtn" class="iconbtn" aria-label="音を消す" aria-pressed="false"></button>
+  </header>
+  <div id="ticker"><span id="tickText" aria-live="off">スヤスヤ…</span></div>
+  <div id="field"><canvas id="cv" role="img" aria-label="寝室。タップしてクッションや毛布を置きます"></canvas></div>
+  <div id="tray">
+    <button class="tool" id="toolCushion" aria-pressed="true">
+      <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><rect x="3" y="3" width="30" height="30" rx="8" fill="#4E9C95"/><rect x="7" y="7" width="22" height="22" rx="6" fill="none" stroke="#fff" stroke-opacity=".45" stroke-dasharray="2 2"/><circle cx="18" cy="18" r="2.6" fill="#2D6A64"/></svg>
+      <span class="tx"><span class="nm" id="nmC">クッション ×3</span><span class="ct" id="ctC">寝返りを止める</span></span>
+      <span class="sel" aria-hidden="true">選択中</span>
+    </button>
+    <button class="tool" id="toolBlanket" aria-pressed="false">
+      <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><rect x="3" y="7" width="30" height="22" rx="3" fill="#C4553E"/><g fill="#FFECD2" fill-opacity=".4"><rect x="9" y="7" width="3" height="22"/><rect x="21" y="7" width="3" height="22"/><rect x="3" y="12" width="30" height="3"/><rect x="3" y="21" width="30" height="3"/></g></svg>
+      <span class="tx"><span class="nm" id="nmB">毛布 ×1</span><span class="ct" id="ctB">引き寄せる／かける</span></span>
+      <span class="sel" aria-hidden="true">選択中</span>
+    </button>
+    <p id="hint">畳や布団をタップして置く。置いた物をタップすると回収</p>
+  </div>
+
+  <section id="titleScr" class="overlay" aria-labelledby="ttl">
+    <div id="titleTop">
+      <p class="kicker">一晩の寝返りを、早送りで見守る</p>
+      <h1 id="ttl">寝相<span>コントロール</span></h1>
+    </div>
+    <div id="demoArea"><span id="demoTag" aria-hidden="true">お手本デモ</span></div>
+    <div id="titleCard">
+      <ol class="rules">
+        <li><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M13.6 2.4A7.5 7.5 0 1 0 17.6 12a6 6 0 0 1-4-9.6z" fill="#6C62B8"/></svg><span>夜11時から朝7時まで、寝返りする人を見守る</span></li>
+        <li><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="16" height="16" rx="4.5" fill="#4E9C95"/><circle cx="10" cy="10" r="1.8" fill="#2D6A64"/></svg><span><b>クッション</b>で止めて、<b>毛布</b>で引き寄せる（体にかけると静かになる）</span></li>
+        <li><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="2.5" width="15" height="15" rx="1.5" fill="#FBFAF5" stroke="#8C847A"/><rect x="4.5" y="4.5" width="11" height="8.5" fill="#C9BB7E"/></svg><span>布団の上で眠れた時間と、落ちずにぐっすり眠れたかで<b>安眠スコア</b>を採点</span></li>
+      </ol>
+      <p id="titleBest">ベスト記録はまだありません</p>
+      <button id="startBtn" class="primary">おやすみなさい（スタート）</button>
+    </div>
+  </section>
+
+  <section id="resultScr" class="overlay" hidden aria-labelledby="resHead">
+    <p id="resHead" class="reshead" tabindex="-1">おはようございます。朝7時の寝相です</p>
+    <figure class="polaroid">
+      <canvas id="photo" role="img" aria-label="朝の寝姿の写真"></canvas>
+      <figcaption><span id="capTitle" class="cap"></span><span id="capSub" class="capsub"></span></figcaption>
+    </figure>
+    <div class="scores" aria-live="polite">
+      <p class="total">安眠スコア<b id="valT">0</b>点<span id="newBest" hidden>ベスト更新</span></p>
+      <div class="srow"><span class="slbl">安眠度</span><span class="bar"><i id="bar1"></i></span><b class="sval"><span id="val1">0</span><small>/60</small></b></div>
+      <div class="srow"><span class="slbl">ぐっすり</span><span class="bar"><i id="bar2"></i></span><b class="sval"><span id="val2">0</span><small>/20</small></b></div>
+      <div class="srow"><span class="slbl">朝の寝姿</span><span class="bar"><i id="bar3"></i></span><b class="sval"><span id="val3">0</span><small>/20</small></b></div>
+      <p id="resStats" class="rstats"></p>
+    </div>
+    <div class="btns">
+      <button id="shareBtn" class="secondary">結果をシェア</button>
+      <button id="againBtn" class="primary">もう一度</button>
+    </div>
+    <p class="rfoot"><span id="collect"></span><button id="toTitle" class="linkbtn">タイトルへ</button></p>
+    <p id="toast" role="status" hidden></p>
+  </section>
+  <div id="flash" aria-hidden="true"></div>
+</div>
+
+<script>
+'use strict';
+/* =========================================================
+   寝相コントロール
+   座標はすべて「部屋のcm」。部屋 320×440、布団 120×214。
+   ========================================================= */
+const ROOM = { w: 320, h: 440 };
+const FUTON = { x: 100, y: 118, w: 120, h: 214 };
+const PILLOW = { x: 129, y: 126, w: 62, h: 28 };
+const HOME = { x: 160, y: 198 };
+const NIGHT_SEC = 72;              // 23:00 → 7:00 を72秒で
+const MAX_CUSHION = 3, MAX_BLANKET = 1;
+const CUSH_R = 17, BL_W = 64, BL_H = 48;
+const G = { headY: 58, headR: 13, shX: 17, shY: 33, hipX: 9, hipY: -14, ua: 24, fa: 22, th: 38, sh: 37 };
+const DEG = Math.PI / 180, TAU = Math.PI * 2;
+
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, t) => a + (b - a) * t;
+const rand = (a, b) => a + Math.random() * (b - a);
+const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const wrapA = a => { a = (a + Math.PI) % TAU; if (a < 0) a += TAU; return a - Math.PI; };
+
+/* ---- 寝姿（手足の角度）----
+   [左腕, 左ひじ, 右腕, 右ひじ, 左脚, 左ひざ, 右脚, 右ひざ]（度）
+   0 = 足の方向、90 = 体の右、180 = 頭の方向 */
+const POSES = {
+  kiotsuke: { name: '気をつけ', a: [-9, 0, 9, 0, -3, 0, 3, 0], odd: false },
+  daiji:    { name: '大の字',   a: [-82, -8, 82, 8, -27, 3, 27, -3], odd: false },
+  banzai:   { name: 'バンザイ', a: [-160, -12, 160, 12, -5, 0, 5, 0], odd: true },
+  hikouki:  { name: 'ひこうき', a: [-94, 0, 94, 0, -2, 0, 2, 0], odd: false },
+  yon:      { name: '4の字',   a: [-30, 100, 98, -8, -4, 0, 46, -118], odd: true },
+  hashiri:  { name: '全力疾走', a: [-140, 65, 40, 85, -48, 82, 14, -36], odd: true },
+  maru:     { name: 'まるまり', a: [58, 72, 74, 62, 56, -122, 70, -120], odd: true },
+};
+for (const k in POSES) POSES[k].ang = POSES[k].a.map(v => v * DEG);
+const mirrorA = A => [-A[2], -A[3], -A[0], -A[1], -A[6], -A[7], -A[4], -A[5]];
+const FACING = ['あおむけ', '横向き', 'うつぶせ', '横向き'];
+
+const TITLES = [
+  ['minomushi_out', '毛布ごと家出', '布団の外でみのむしになった'],
+  ['minomushi', '朝のみのむし', '毛布にくるまったまま起きない'],
+  ['sakasa_out', '逆さまで布団の外', '布団がどこにあるか忘れた'],
+  ['daiji', '美しい大の字', '教科書に載せたい寝姿'],
+  ['kiotsuke', '直立不動の眠り', '一晩たっても気をつけ'],
+  ['sakasa_in', 'まくら逆転の名人', '足のほうがまくらで寝ていた'],
+  ['hashiri', '夢の中で全力疾走', 'いったい何から逃げていたのか'],
+  ['dive', '布団ダイブ常習犯', '一晩で{f}回落ちた'],
+  ['kabedon', '夜通し壁ドン', '壁に{w}回ぶつかった'],
+  ['tjiro', '布団にT字路', '横向きに橋をかけた'],
+  ['tekiheki', '鉄壁のクッション', 'ボヨンと受け止めた{c}回'],
+  ['hotel', 'ホテルの朝', 'ベッドメイクいらずの寝相'],
+  ['artist', '寝相の芸術家', 'この形には名前が必要だ'],
+  ['mystery', '朝のミステリー', '夜のあいだに何があった'],
+  ['anmin', 'まあまあ安眠', 'だいたい布団の中'],
+  ['tatami', '畳で寝る人', '布団はずっと空いていた'],
+  ['futsu', 'ふつうの朝', 'いつもどおりの寝相'],
+];
+
+/* =========================================================
+   シミュレーション（画面に依存しない部分）
+   ========================================================= */
+function newSim(demo) {
+  const S = {
+    demo: !!demo, t: 0, phase: 'night',
+    x: HOME.x, y: HOME.y, ang: 0, facing: 0,
+    poseKey: 'kiotsuke', poseMir: false, cur: POSES.kiotsuke.ang.slice(), poseFrom: null, poseTo: null, poseK: 1, poseDur: .5,
+    ev: null, nextEv: 1.6, cushions: [], blankets: [], seq: 0,
+    pers: {
+      side: (Math.random() < .5 ? -1 : 1) * rand(.08, .2),   // 転がりやすい方向（画面の左右）
+      spin: (Math.random() < .5 ? -1 : 1) * rand(.04, .12),  // 回りやすい向き
+      slide: rand(.06, .16),                                  // ずり下がりやすさ
+    },
+    stats: { rolls: 0, falls: 0, wallHits: 0, cushionHits: 0, kicks: 0, wraps: 0, rot: 0, onSum: 0, onDur: 0 },
+    torsoOn: true, onFrac: 1, lastBump: -9, fx: [], zT: 1, shake: 0, log: [], ai: { t: 1.2 },
+  };
+  S.poseFrom = S.cur.slice(); S.poseTo = S.cur.slice();
+  return S;
+}
+function emit(S, k) { S.log.push(k); if (S.log.length > 40) S.log.shift(); }
+function toW(S, lx, ly) { const s = Math.sin(S.ang), c = Math.cos(S.ang); return [S.x + lx * c + ly * s, S.y + lx * s - ly * c]; }
+function limbs(A) {
+  const seg = (j, a, l) => [j[0] + Math.sin(a) * l, j[1] - Math.cos(a) * l];
+  const sL = [-G.shX, G.shY], sR = [G.shX, G.shY], pL = [-G.hipX, G.hipY], pR = [G.hipX, G.hipY];
+  const eL = seg(sL, A[0], G.ua), hL = seg(eL, A[0] + A[1], G.fa);
+  const eR = seg(sR, A[2], G.ua), hR = seg(eR, A[2] + A[3], G.fa);
+  const kL = seg(pL, A[4], G.th), fL = seg(kL, A[4] + A[5], G.sh);
+  const kR = seg(pR, A[6], G.th), fR = seg(kR, A[6] + A[7], G.sh);
+  return { sL, sR, pL, pR, eL, hL, eR, hR, kL, fL, kR, fR };
+}
+/* 当たり判定用の円（頭・胸・お腹・腰・ひざ・足） */
+function core(S) {
+  const L = limbs(S.cur);
+  const P = [[0, G.headY, 13], [0, 28, 17], [0, 6, 16], [0, -14, 15], [L.kL[0], L.kL[1], 7], [L.kR[0], L.kR[1], 7], [L.fL[0], L.fL[1], 7], [L.fR[0], L.fR[1], 7]];
+  const s = Math.sin(S.ang), c = Math.cos(S.ang);
+  return P.map(p => [S.x + p[0] * c + p[1] * s, S.y + p[0] * s - p[1] * c, p[2]]);
+}
+function inFuton(x, y, m) { m = m || 0; return x >= FUTON.x - m && x <= FUTON.x + FUTON.w + m && y >= FUTON.y - m && y <= FUTON.y + FUTON.h + m; }
+function onFracOf(S) {
+  const L = limbs(S.cur);
+  const P = [[0, G.headY, 2], [0, 30, 2], [0, 6, 2], [0, -14, 2], [L.kL[0], L.kL[1], 1], [L.kR[0], L.kR[1], 1], [L.fL[0], L.fL[1], 1], [L.fR[0], L.fR[1], 1], [L.hL[0], L.hL[1], .5], [L.hR[0], L.hR[1], .5]];
+  let s = 0, w = 0;
+  for (const p of P) { const q = toW(S, p[0], p[1]); w += p[2]; if (inFuton(q[0], q[1], 3)) s += p[2]; }
+  return s / w;
+}
+function pen(S) {
+  const C = core(S); let cs = 0, ws = 0, ci = -1, mv = 0, hx = 0, hy = 0;
+  for (const q of C) {
+    const x = q[0], y = q[1], r = q[2];
+    ws += Math.max(0, r - x) + Math.max(0, x + r - ROOM.w) + Math.max(0, r - y) + Math.max(0, y + r - ROOM.h);
+    for (let i = 0; i < S.cushions.length; i++) {
+      const k = S.cushions[i]; if (k.fly) continue;
+      const o = r + CUSH_R - Math.hypot(x - k.x, y - k.y);
+      if (o > 0) { cs += o; if (o > mv) { mv = o; ci = i; hx = x; hy = y; } }
+    }
+  }
+  return { cs, ws, ci, hx, hy };
+}
+function tryStep(S, dx, dy, da) {
+  const b = pen(S);
+  S.x += dx; S.y += dy; S.ang += da;
+  const a = pen(S);
+  const hc = a.cs > b.cs + .02, hw = a.ws > b.ws + .02;
+  if (hc || hw) { S.x -= dx; S.y -= dy; S.ang -= da; return { ci: hc ? a.ci : -1, hx: a.hx, hy: a.hy, w: hw }; }
+  return null;
+}
+/* 手足の形が変わって壁からはみ出したら、体ごと部屋の中へ戻す */
+function settle(S) {
+  const C = core(S); let px = 0, nx = 0, py = 0, ny = 0;
+  for (const q of C) {
+    px = Math.max(px, q[2] - q[0]); nx = Math.max(nx, q[0] + q[2] - ROOM.w);
+    py = Math.max(py, q[2] - q[1]); ny = Math.max(ny, q[1] + q[2] - ROOM.h);
+  }
+  S.x += px - nx; S.y += py - ny;
+}
+function overlapsBody(S, x, y, r) { for (const q of core(S)) { if (Math.hypot(q[0] - x, q[1] - y) < q[2] + r) return true; } return false; }
+function landFix(S, o, r) {
+  let i = 0;
+  while (overlapsBody(S, o.x, o.y, r) && i < 30) {
+    const dx = o.x - S.x, dy = o.y - S.y, m = Math.hypot(dx, dy) || 1;
+    o.x = clamp(o.x + dx / m * 6, r, ROOM.w - r); o.y = clamp(o.y + dy / m * 6, r, ROOM.h - r); i++;
+  }
+}
+function isWrapped(S) { return S.blankets.some(b => b.wrapped); }
+function lure(S) {
+  let best = null, bd = 1e9;
+  for (const b of S.blankets) { if (b.wrapped || b.fly) continue; const d = Math.hypot(b.x - S.x, b.y - S.y); if (d < bd) { bd = d; best = b; } }
+  return best;
+}
+function choosePose(S, bumped) {
+  const side = S.facing % 2 === 1, wrapped = isWrapped(S), calm = S.t - S.lastBump > 4;
+  const w = { kiotsuke: 2, daiji: 2, banzai: 1.5, hikouki: 1, yon: 1.3, hashiri: 1, maru: 0 };
+  if (side) { w.maru = 4.2; w.daiji *= .3; w.hikouki *= .4; w.banzai *= .6; }
+  else if (S.onFrac > .85 && calm) { w.daiji *= 2.8; w.kiotsuke *= 1.5; }
+  if (S.onFrac < .5) { w.maru *= 1.8; w.hashiri *= 1.8; w.daiji *= .5; }
+  if (bumped) { w.banzai *= 2; w.hashiri *= 2.2; }
+  if (wrapped) { w.kiotsuke *= 2.2; w.maru *= 1.5; w.hashiri *= .3; w.daiji *= .6; }
+  let tot = 0; for (const k in w) tot += w[k];
+  let r = Math.random() * tot, key = 'kiotsuke';
+  for (const k in w) { r -= w[k]; if (r <= 0) { key = k; break; } }
+  let mir = false;
+  if (key === 'maru') mir = S.facing === 3; else if (key === 'yon' || key === 'hashiri') mir = Math.random() < .5;
+  return { key, mir };
+}
+function setPose(S, sel) {
+  S.poseFrom = S.cur.slice(); S.poseKey = sel.key; S.poseMir = sel.mir;
+  const A = POSES[sel.key].ang; S.poseTo = sel.mir ? mirrorA(A) : A.slice();
+  S.poseK = 0; S.poseDur = rand(.35, .6);
+}
+function fixPoseFacing(S) {
+  if (S.poseKey !== 'maru') return;
+  if (S.facing % 2 === 0) setPose(S, choosePose(S, false));
+  else if (S.poseMir !== (S.facing === 3)) setPose(S, { key: 'maru', mir: S.facing === 3 });
+}
+function nextFacing(S, dir, big) {
+  const comfy = S.onFrac > .8, r = Math.random(), side = dir > 0 ? 1 : 3;
+  if (big) return r < .4 ? 2 : (r < .75 ? 0 : side);
+  if (S.facing === 0) return r < (comfy ? .55 : .7) ? side : (r < .93 ? 0 : 2);
+  if (S.facing === 2) return r < .6 ? side : 2;
+  return r < (comfy ? .62 : .4) ? 0 : (r < .82 ? side : 2);
+}
+function interval(S) {
+  const k = S.t / NIGHT_SEC;
+  return lerp(2.5, 1.55, k) * rand(.75, 1.25) * (isWrapped(S) ? 1.75 : 1) * (S.onFrac < .5 ? .85 : 1);
+}
+function nearFeetCushion(S) {
+  const L = limbs(S.cur), f1 = toW(S, L.fL[0], L.fL[1]), f2 = toW(S, L.fR[0], L.fR[1]);
+  let best = null, bd = 36;
+  for (const c of S.cushions) {
+    if (c.fly || c.slide) continue;
+    const d = Math.min(Math.hypot(c.x - f1[0], c.y - f1[1]), Math.hypot(c.x - f2[0], c.y - f2[1]));
+    if (d < bd) { bd = d; best = c; }
+  }
+  return best;
+}
+function kickCushion(S, c) {
+  const L = limbs(S.cur), f1 = toW(S, L.fL[0], L.fL[1]), f2 = toW(S, L.fR[0], L.fR[1]);
+  const f = Math.hypot(c.x - f1[0], c.y - f1[1]) < Math.hypot(c.x - f2[0], c.y - f2[1]) ? f1 : f2;
+  const a = Math.atan2(c.y - f[1], c.x - f[0]) + rand(-.5, .5), d = rand(60, 95);
+  c.fly = { fx: c.x, fy: c.y, tx: clamp(c.x + Math.cos(a) * d, CUSH_R, ROOM.w - CUSH_R), ty: clamp(c.y + Math.sin(a) * d, CUSH_R, ROOM.h - CUSH_R), p: 0, dur: .5, spin: rand(-7, 7) };
+  c.ai = undefined;
+}
+function kickBlanket(S, b) {
+  const bel = toW(S, 0, 6), a = rand(0, TAU), d = rand(75, 115);
+  const tx = clamp(bel[0] + Math.cos(a) * d, 34, ROOM.w - 34), ty = clamp(bel[1] + Math.sin(a) * d, 28, ROOM.h - 28);
+  b.wrapped = false; b.fly = { fx: bel[0], fy: bel[1], tx, ty, p: 0, dur: .55, spin: rand(-5, 5) }; b.noWrap = S.t + 3;
+  S.stats.kicks++; emit(S, 'kickb');
+  S.ev = { type: 'kick', dur: .35, p: 0, dx: rand(-4, 4), dy: rand(-4, 4), da: rand(-.1, .1), ax: 0, ay: 0, aa: 0 };
+  setPose(S, choosePose(S, true));
+}
+function shove(c, hx, hy) {
+  const dx = c.x - hx, dy = c.y - hy, m = Math.hypot(dx, dy) || 1, d = rand(7, 13);
+  c.slide = { fx: c.x, fy: c.y, tx: clamp(c.x + dx / m * d, CUSH_R, ROOM.w - CUSH_R), ty: clamp(c.y + dy / m * d, CUSH_R, ROOM.h - CUSH_R), p: 0 };
+  c.sq = 1;
+}
+
+/* ---- 寝返りなどの動きを1つ始める ---- */
+function startEvent(S) {
+  const k = S.t / NIGHT_SEC, wrapped = isWrapped(S), amp = wrapped ? .55 : 1;
+  const s = Math.sin(S.ang), c = Math.cos(S.ang), hx = s, hy = -c, rx = c, ry = s;
+  const bl = lure(S);
+  let vr = 0, vh = 0, bw = 0;
+  if (bl) { const dx = bl.x - S.x, dy = bl.y - S.y, m = Math.hypot(dx, dy) || 1; vr = (dx * rx + dy * ry) / m; vh = (dx * hx + dy * hy) / m; bw = m < 40 ? .3 : 1; }
+  const ev = { type: '', dur: .5, p: 0, dx: 0, dy: 0, da: 0, ax: 0, ay: 0, aa: 0 };
+  let poseP = .7, kind = '';
+  const kc = nearFeetCushion(S), r = Math.random();
+  if (kc && Math.random() < .4) {
+    ev.type = 'kick'; ev.dur = .4; ev.dx = rand(-3, 3); ev.dy = rand(-3, 3); ev.da = rand(-.08, .08);
+    kickCushion(S, kc); S.stats.kicks++; kind = 'kickc'; poseP = 1;
+  } else if (r < .47) {
+    const p = clamp(.5 + S.pers.side * rx + .36 * vr * bw, .08, .92);
+    const dir = Math.random() < p ? 1 : -1;
+    const big = k > .2 && !wrapped && Math.random() < .1;
+    const dist = rand(26, 40) * amp * (big ? 1.85 : 1);
+    ev.type = big ? 'bigroll' : 'roll'; ev.dur = big ? .85 : .55;
+    ev.dx = rx * dir * dist; ev.dy = ry * dir * dist; ev.da = rand(-.2, .2) * amp;
+    S.facing = nextFacing(S, dir, big);
+    S.stats.rolls += big ? 2 : 1; kind = ev.type; poseP = .75;
+  } else if (r < .69) {
+    const a = wrapA(S.ang);
+    let p = .5 + S.pers.spin;
+    if (S.onFrac > .6 && Math.abs(a) > .12 && Math.abs(a) < 2.7) p += a < 0 ? .17 : -.17;
+    if (bl) { p += .34 * vr * bw; if (vh < -.5) p += vr >= 0 ? .1 : -.1; }
+    p = clamp(p, .08, .92);
+    const dir = Math.random() < p ? 1 : -1;
+    const big = k > .3 && !wrapped && Math.random() < .12;
+    ev.type = big ? 'bigspin' : 'spin'; ev.dur = big ? 1 : .7;
+    ev.da = dir * (big ? rand(2.3, 3.2) : rand(.45, 1.1)) * amp;
+    ev.dx = rand(-6, 6); ev.dy = rand(-6, 6);
+    kind = ev.type; poseP = .6;
+  } else if (r < .85) {
+    const pd = clamp(.5 + S.pers.slide - .36 * vh * bw, .08, .92);
+    const dir = Math.random() < pd ? -1 : 1;
+    const dist = rand(14, 28) * amp;
+    ev.type = dir < 0 ? 'scootdown' : 'scootup'; ev.dur = .45;
+    ev.dx = hx * dir * dist; ev.dy = hy * dir * dist; ev.da = rand(-.1, .1);
+    kind = ev.type; poseP = .5;
+  } else {
+    ev.type = 'fidget'; ev.dur = .4; ev.da = rand(-.12, .12) * amp; ev.dx = rand(-3, 3); ev.dy = rand(-3, 3);
+    if (S.facing % 2 === 1 && Math.random() < .35) S.facing = 0;
+    kind = 'fidget'; poseP = 1;
+  }
+  S.ev = ev;
+  if (Math.random() < poseP) setPose(S, choosePose(S, false));
+  fixPoseFacing(S);
+  emit(S, kind);
+}
+function progressEvent(S, dt) {
+  const ev = S.ev;
+  ev.p = Math.min(1, ev.p + dt / ev.dur);
+  const e = ease(ev.p);
+  const ddx = ev.dx * e - ev.ax, ddy = ev.dy * e - ev.ay, dda = ev.da * e - ev.aa;
+  const n = Math.max(1, Math.ceil(Math.max(Math.hypot(ddx, ddy), Math.abs(dda) * 95) / 5));
+  for (let i = 0; i < n; i++) {
+    const hit = tryStep(S, ddx / n, ddy / n, dda / n);
+    if (hit) { onHit(S, hit, ddx, ddy, dda); return; }
+    ev.ax += ddx / n; ev.ay += ddy / n; ev.aa += dda / n; S.stats.rot += Math.abs(dda / n);
+  }
+  if (ev.p >= 1) S.ev = null;
+}
+function onHit(S, hit, ddx, ddy, dda) {
+  if (S.ev.type === 'rebound') { S.ev = null; return; }
+  if (hit.ci >= 0) { shove(S.cushions[hit.ci], hit.hx, hit.hy); S.stats.cushionHits++; emit(S, 'bounce'); }
+  else if (hit.w) { S.stats.wallHits++; emit(S, 'wall'); S.shake = .3; }
+  S.lastBump = S.t;
+  const m = Math.hypot(ddx, ddy);
+  const rx = m > 1e-6 ? -ddx / m * 8 : 0, ry = m > 1e-6 ? -ddy / m * 8 : 0;
+  const ra = Math.abs(dda) > 1e-6 ? -Math.sign(dda) * .1 : 0;
+  S.ev = { type: 'rebound', dur: .22, p: 0, dx: rx, dy: ry, da: ra, ax: 0, ay: 0, aa: 0 };
+  if (Math.random() < .5) { setPose(S, choosePose(S, true)); fixPoseFacing(S); }
+}
+
+function update(S, dt) {
+  if (S.phase !== 'night') return;
+  S.t += dt;
+  if (S.shake > 0) S.shake = Math.max(0, S.shake - dt);
+  if (S.poseK < 1) {
+    S.poseK = Math.min(1, S.poseK + dt / S.poseDur);
+    const e = ease(S.poseK);
+    for (let i = 0; i < 8; i++) S.cur[i] = lerp(S.poseFrom[i], S.poseTo[i], e);
+  }
+  for (const c of S.cushions) {
+    if (c.sq > 0) c.sq = Math.max(0, c.sq - dt * 4);
+    if (c.fly) {
+      const f = c.fly; f.p = Math.min(1, f.p + dt / f.dur);
+      c.x = lerp(f.fx, f.tx, f.p); c.y = lerp(f.fy, f.ty, f.p); c.rot += f.spin * dt;
+      if (f.p >= 1) { c.fly = null; landFix(S, c, CUSH_R + 1); c.sq = 1; }
+    } else if (c.slide) {
+      const f = c.slide; f.p = Math.min(1, f.p + dt / .18);
+      const e = ease(f.p); c.x = lerp(f.fx, f.tx, e); c.y = lerp(f.fy, f.ty, e);
+      if (f.p >= 1) c.slide = null;
+    }
+  }
+  if (S.ev) progressEvent(S, dt);
+  else if (S.t < NIGHT_SEC) { S.nextEv -= dt; if (S.nextEv <= 0) { startEvent(S); S.nextEv = interval(S); } }
+  settle(S);
+
+  S.onFrac = onFracOf(S);
+  if (S.t <= NIGHT_SEC) { S.stats.onSum += sleepQ(S.onFrac) * dt; S.stats.onDur += dt; }   // 安眠度＝眠りの質の平均
+  const bel = toW(S, 0, 6), on = inFuton(bel[0], bel[1], 0);
+  if (S.torsoOn && !on) { S.stats.falls++; emit(S, 'fall'); S.shake = .35; }
+  else if (!S.torsoOn && on) emit(S, 'back');
+  S.torsoOn = on;
+
+  for (const b of S.blankets) {
+    if (b.fly) {
+      const f = b.fly; f.p = Math.min(1, f.p + dt / f.dur);
+      b.x = lerp(f.fx, f.tx, f.p); b.y = lerp(f.fy, f.ty, f.p); b.rot += f.spin * dt;
+      if (f.p >= 1) b.fly = null;
+      continue;
+    }
+    if (b.wrapped) {
+      b.x = bel[0]; b.y = bel[1]; b.wrapT -= dt;
+      if (b.wrapT <= 0 && !S.ev && S.t < NIGHT_SEC - .3) kickBlanket(S, b);
+      continue;
+    }
+    if (S.t >= b.noWrap && Math.hypot(bel[0] - b.x, bel[1] - b.y) < 30) {
+      b.wrapped = true; b.wrapT = rand(12, 17); S.stats.wraps++; emit(S, 'wrap');
+      setPose(S, { key: S.facing % 2 ? 'maru' : 'kiotsuke', mir: S.facing === 3 });
+    }
+  }
+
+  S.zT -= dt;
+  if (S.zT <= 0) {
+    S.zT = rand(1.1, 1.8);
+    const h = toW(S, 0, G.headY);
+    S.fx.push({ k: 'z', x: h[0] + 6, y: h[1] - 6, t: 0, life: 1.8, cold: !S.torsoOn });
+  }
+  for (const f of S.fx) f.t += dt;
+  S.fx = S.fx.filter(f => f.t < f.life);
+
+  if (S.t >= NIGHT_SEC && !S.ev && !S.cushions.some(c => c.fly || c.slide) && !S.blankets.some(b => b.fly)) {
+    S.t = NIGHT_SEC; S.phase = 'done';
+  }
+}
+
+/* ---- プレイヤーのタップ（AIも同じ関数を使う） ---- */
+function inBlanket(b, x, y, m) {
+  const dx = x - b.x, dy = y - b.y, c = Math.cos(-b.rot), s = Math.sin(-b.rot);
+  const lx = dx * c - dy * s, ly = dx * s + dy * c;
+  return Math.abs(lx) <= BL_W / 2 + m && Math.abs(ly) <= BL_H / 2 + m;
+}
+function handleTap(S, x, y, tool) {
+  if (S.phase !== 'night') return 'none';
+  if (x < 0 || y < 0 || x > ROOM.w || y > ROOM.h) return 'out';
+  S.fx.push({ k: 'tap', x, y, t: 0, life: .45 });
+  for (let i = S.cushions.length - 1; i >= 0; i--) {
+    const c = S.cushions[i]; if (c.fly) continue;
+    if (Math.hypot(c.x - x, c.y - y) < 24) { S.cushions.splice(i, 1); S.fx.push({ k: 'poof', x: c.x, y: c.y, t: 0, life: .4 }); emit(S, 'pick_c'); return 'pick'; }
+  }
+  for (let i = S.blankets.length - 1; i >= 0; i--) {
+    const b = S.blankets[i]; if (b.fly) continue;
+    if (b.wrapped) { if (Math.hypot(b.x - x, b.y - y) < 30) { S.blankets.splice(i, 1); emit(S, 'peel_b'); return 'pick'; } }
+    else if (inBlanket(b, x, y, 6)) { S.blankets.splice(i, 1); S.fx.push({ k: 'poof', x: b.x, y: b.y, t: 0, life: .4 }); emit(S, 'pick_b'); return 'pick'; }
+  }
+  if (tool === 'cushion') {
+    const nx = clamp(x, CUSH_R, ROOM.w - CUSH_R), ny = clamp(y, CUSH_R, ROOM.h - CUSH_R);
+    if (overlapsBody(S, nx, ny, CUSH_R + 1)) { S.fx.push({ k: 'no', x: nx, y: ny, t: 0, life: .6 }); emit(S, 'invalid'); return 'invalid'; }
+    let moved = false;
+    if (S.cushions.length >= MAX_CUSHION) {
+      let i = S.cushions.findIndex(c => !c.fly); if (i < 0) i = 0;
+      const o = S.cushions.splice(i, 1)[0]; S.fx.push({ k: 'poof', x: o.x, y: o.y, t: 0, life: .4 }); moved = true;
+    }
+    S.cushions.push({ x: nx, y: ny, rot: rand(-.3, .3), sq: 1, fly: null, slide: null, id: ++S.seq });
+    emit(S, moved ? 'move_c' : 'place_c'); return moved ? 'move' : 'place';
+  }
+  const nx = clamp(x, 30, ROOM.w - 30), ny = clamp(y, 24, ROOM.h - 24);
+  let moved = false;
+  if (S.blankets.length >= MAX_BLANKET) { const o = S.blankets.shift(); if (!o.wrapped) S.fx.push({ k: 'poof', x: o.x, y: o.y, t: 0, life: .4 }); moved = true; }
+  const bel = toW(S, 0, 6), onBody = Math.hypot(bel[0] - nx, bel[1] - ny) < 30;
+  S.blankets.push({ x: nx, y: ny, rot: rand(-.3, .3), wrapped: false, wrapT: 0, fly: null, noWrap: 0, id: ++S.seq });
+  emit(S, onBody ? 'cover_b' : (moved ? 'move_b' : 'place_b')); return moved ? 'move' : 'place';
+}
+
+/* ---- お手本デモのCPU ---- */
+function aiTick(S, dt) {
+  if (S.phase !== 'night') return;
+  S.ai.t -= dt; if (S.ai.t > 0) return;
+  S.ai.t = rand(.5, .9);
+  const bel = toW(S, 0, 6), b = S.blankets[0];
+  if (S.t > 2 && S.t < NIGHT_SEC - 8) {
+    if (!b) { handleTap(S, bel[0], bel[1], 'blanket'); return; }
+    if (!b.wrapped && !b.fly && S.t >= b.noWrap - 1) { handleTap(S, b.x, b.y, 'blanket'); return; }
+  }
+  const yy = clamp(bel[1], FUTON.y + 30, FUTON.y + FUTON.h - 30);
+  const ft = toW(S, 0, -116);
+  const want = [[FUTON.x - 15, yy], [FUTON.x + FUTON.w + 15, yy], [clamp(ft[0], 25, ROOM.w - 25), clamp(ft[1], 25, ROOM.h - 25)]];
+  for (let i = 0; i < 3; i++) {
+    const w = want[i], k = S.cushions.find(c => c.ai === i);
+    if (k && !k.fly && Math.hypot(k.x - w[0], k.y - w[1]) < 24) continue;
+    if (overlapsBody(S, w[0], w[1], CUSH_R + 2)) continue;
+    if (S.cushions.some(c => c !== k && Math.hypot(c.x - w[0], c.y - w[1]) < 26)) continue;
+    if (k) S.cushions.splice(S.cushions.indexOf(k), 1);
+    else if (S.cushions.length >= MAX_CUSHION) { const o = S.cushions.find(c => c.ai === undefined) || S.cushions[0]; S.cushions.splice(S.cushions.indexOf(o), 1); }
+    if (handleTap(S, w[0], w[1], 'cushion') === 'place') S.cushions[S.cushions.length - 1].ai = i;
+    return;
+  }
+}
+
+/* ---- 朝の採点：安眠スコア（100点満点） ----
+   安眠度（夜のあいだの眠りの質の平均）60 ＋ ぐっすり（落下・壁ドンで減点）20 ＋ 朝の寝姿 20 */
+const SCORE = { timeMax: 60, calmMax: 20, fallPen: 5, wallPen: 3, mornOn: 8, mornAlign: 6, mornPillow: 6 };
+/* その瞬間の眠りの質：体の95%以上が布団の上なら1、半分以下なら0 */
+function sleepQ(on) { return clamp((on - .5) / .45, 0, 1); }
+function onAvgOf(S) { return S.stats.onDur > 0 ? clamp(S.stats.onSum / S.stats.onDur, 0, 1) : 1; }
+function calmLeft(S) { return Math.max(0, SCORE.calmMax - S.stats.falls * SCORE.fallPen - S.stats.wallHits * SCORE.wallPen); }
+function evaluate(S) {
+  const on = onFracOf(S), a = wrapA(S.ang), al = Math.cos(a);
+  const head = toW(S, 0, G.headY), bel = toW(S, 0, 6), wrapped = isWrapped(S);
+  const pillow = al > .6 && head[0] > PILLOW.x - 10 && head[0] < PILLOW.x + PILLOW.w + 10 && head[1] > PILLOW.y - 12 && head[1] < PILLOW.y + PILLOW.h + 12;
+  const ox = Math.max(FUTON.x - bel[0], 0, bel[0] - FUTON.x - FUTON.w), oy = Math.max(FUTON.y - bel[1], 0, bel[1] - FUTON.y - FUTON.h);
+  const far = Math.hypot(ox, oy), onAvg = onAvgOf(S);
+  const ptTime = Math.round(onAvg * SCORE.timeMax);
+  const ptCalm = calmLeft(S);
+  const ptMorn = Math.round(on * SCORE.mornOn + Math.pow(Math.max(0, al), 2) * SCORE.mornAlign + (pillow ? SCORE.mornPillow : 0));
+  const score = clamp(ptTime + ptCalm + ptMorn, 0, 100);
+  // 称号用：朝の寝姿の「変さ」がいくつ重なっているか
+  const P = POSES[S.poseKey], prone = S.facing === 2 && !wrapped;
+  const odd = [al < -.7, on < .3, far > 45, prone, !wrapped && P.odd, wrapped, Math.abs(Math.sin(a)) > .85 && on >= .35].filter(Boolean).length;
+  const R = {
+    score, ptTime, ptCalm, ptMorn, onAvg, odd, on, al, upside: al < -.7, perp: Math.abs(Math.sin(a)) > .85, wrapped, pillow,
+    poseKey: S.poseKey, poseName: wrapped ? 'みのむし' : P.name, facing: S.facing,
+    falls: S.stats.falls, wallHits: S.stats.wallHits, cushionHits: S.stats.cushionHits, rolls: S.stats.rolls, kicks: S.stats.kicks,
+  };
+  const T = pickTitle(R); R.titleKey = T[0]; R.title = T[1]; R.sub = T[2];
+  return R;
+}
+/* 称号は「朝の写真の名前」。点数とは別に、変な寝相にも名前をつける */
+function pickTitle(R) {
+  const T = k => { const t = TITLES.find(x => x[0] === k); return [t[0], t[1], t[2].replace('{f}', R.falls).replace('{w}', R.wallHits).replace('{c}', R.cushionHits)]; };
+  const neat = R.facing === 0 && R.on >= .85 && R.pillow;
+  if (R.wrapped && R.on < .5) return T('minomushi_out');
+  if (R.wrapped) return T('minomushi');
+  if (R.upside && R.on < .35) return T('sakasa_out');
+  if (R.score >= 85 && neat && R.poseKey === 'daiji') return T('daiji');
+  if (R.score >= 85 && neat && R.poseKey === 'kiotsuke') return T('kiotsuke');
+  if (R.upside && R.on >= .75) return T('sakasa_in');
+  if (R.poseKey === 'hashiri' && R.on < .6) return T('hashiri');
+  if (R.falls >= 4) return T('dive');
+  if (R.wallHits >= 5) return T('kabedon');
+  if (R.perp && R.on >= .35) return T('tjiro');
+  if (R.score >= 80 && R.falls === 0 && R.cushionHits >= 8) return T('tekiheki');
+  if (R.score >= 80) return T('hotel');
+  if (R.odd >= 3) return T('artist');
+  if (R.odd >= 2) return T('mystery');
+  if (R.on < .3) return T('tatami');
+  if (R.score >= 60) return T('anmin');
+  return T('futsu');
+}
+
+/* =========================================================
+   描画（部屋のcm単位で描く）
+   ========================================================= */
+const COL = { pj: '#8DB3E8', pjS: '#5F86C6', pants: '#7FA5DD', skin: '#F3CBA6', skinD: '#E2AF88', hair: '#2E2621', mouth: '#C8665A', cheek: 'rgba(240,120,110,.38)', line: '#3A2A22' };
+let reduceMotion = false;
+
+function rr(c, x, y, w, h, r) {
+  c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+}
+function drawRoomBG(c, edge) {
+  c.fillStyle = edge; c.fillRect(-500, -500, ROOM.w + 1000, ROOM.h + 1000);
+  c.save(); c.shadowColor = 'rgba(0,0,0,.28)'; c.shadowBlur = 10; c.shadowOffsetY = 2;
+  c.fillStyle = '#C9BB7E'; rr(c, 0, 0, ROOM.w, ROOM.h, 5); c.fill(); c.restore();
+  c.save(); rr(c, 0, 0, ROOM.w, ROOM.h, 5); c.clip();
+  const tones = ['#CDBF83', '#C7B97B', '#D2C68B'];
+  for (let col = 0; col < 4; col++) {
+    const x = col * 80, off = col % 2 ? -80 : 0;
+    for (let y = off, n = 0; y < ROOM.h; y += 160, n++) {
+      c.fillStyle = tones[(col * 2 + n) % 3]; c.fillRect(x, y, 80, 160);
+      c.strokeStyle = 'rgba(95,82,30,.11)'; c.lineWidth = .6; c.beginPath();
+      for (let yy = y + 2; yy < y + 160; yy += 3.2) { c.moveTo(x + 3, yy); c.lineTo(x + 77, yy); }
+      c.stroke();
+      c.fillStyle = '#34402F'; c.fillRect(x, y, 3, 160); c.fillRect(x + 77, y, 3, 160);
+      c.fillStyle = 'rgba(60,50,20,.35)'; c.fillRect(x, y, 80, .8);
+    }
+  }
+  c.restore();
+  c.strokeStyle = '#5A4636'; c.lineWidth = 3; rr(c, 1.5, 1.5, ROOM.w - 3, ROOM.h - 3, 4); c.stroke();
+  // 敷布団（青海波）
+  c.save(); c.shadowColor = 'rgba(40,30,10,.35)'; c.shadowBlur = 10; c.shadowOffsetX = 2; c.shadowOffsetY = 4;
+  c.fillStyle = '#E2D9C6'; rr(c, FUTON.x, FUTON.y, FUTON.w, FUTON.h, 7); c.fill(); c.restore();
+  c.fillStyle = '#F6F2E8'; rr(c, FUTON.x, FUTON.y, FUTON.w - 2, FUTON.h - 3, 7); c.fill();
+  c.save(); rr(c, FUTON.x + 7, FUTON.y + 7, FUTON.w - 16, FUTON.h - 17, 4); c.clip();
+  const R = 9;
+  for (let row = 0, y = FUTON.y + 7 - R; y < FUTON.y + FUTON.h + R; row++, y += R * .5) {
+    for (let x = FUTON.x - R + (row % 2 ? R : 0); x < FUTON.x + FUTON.w + R; x += 2 * R) {
+      c.fillStyle = '#F6F2E8'; c.beginPath(); c.arc(x, y, R, 0, TAU); c.fill();
+      c.strokeStyle = 'rgba(70,105,170,.17)'; c.lineWidth = .8;
+      for (const f of [1, .68, .36]) { c.beginPath(); c.arc(x, y, R * f, Math.PI, TAU); c.stroke(); }
+    }
+  }
+  c.restore();
+  c.strokeStyle = 'rgba(80,100,150,.3)'; c.lineWidth = 1; rr(c, FUTON.x + 5, FUTON.y + 5, FUTON.w - 12, FUTON.h - 13, 5); c.stroke();
+  // まくら
+  c.save(); c.shadowColor = 'rgba(40,30,10,.3)'; c.shadowBlur = 5; c.shadowOffsetY = 2;
+  c.fillStyle = '#E8DCC0'; rr(c, PILLOW.x, PILLOW.y, PILLOW.w, PILLOW.h, 10); c.fill(); c.restore();
+  c.fillStyle = 'rgba(255,255,255,.4)'; rr(c, PILLOW.x + 5, PILLOW.y + 3, PILLOW.w - 10, PILLOW.h * .42, 6); c.fill();
+  c.setLineDash([2, 2]); c.strokeStyle = 'rgba(120,95,60,.45)'; c.lineWidth = .7; rr(c, PILLOW.x + 3, PILLOW.y + 3, PILLOW.w - 6, PILLOW.h - 6, 8); c.stroke(); c.setLineDash([]);
+}
+function plaid(c, x0, y0, x1, y1) {
+  c.fillStyle = 'rgba(255,236,210,.3)';
+  for (let x = x0 + 6; x < x1; x += 14) c.fillRect(x, y0, 4, y1 - y0);
+  for (let y = y0 + 6; y < y1; y += 14) c.fillRect(x0, y, x1 - x0, 4);
+  c.fillStyle = 'rgba(70,15,5,.25)';
+  for (let x = x0 + 7.5; x < x1; x += 14) c.fillRect(x, y0, 1, y1 - y0);
+  for (let y = y0 + 7.5; y < y1; y += 14) c.fillRect(x0, y, x1 - x0, 1);
+}
+function drawBlanket(c, b) {
+  c.save(); c.translate(b.x, b.y);
+  const lift = b.fly ? Math.sin(b.fly.p * Math.PI) * 16 : 0;
+  c.save(); c.rotate(b.rot); c.fillStyle = 'rgba(40,25,10,.2)'; rr(c, -BL_W / 2 + 2, -BL_H / 2 + 3, BL_W, BL_H, 5); c.fill(); c.restore();
+  c.translate(0, -lift); c.rotate(b.rot); const sc = 1 + lift / 80; c.scale(sc, sc);
+  rr(c, -BL_W / 2, -BL_H / 2, BL_W, BL_H, 5); c.fillStyle = '#C4553E'; c.fill();
+  c.save(); rr(c, -BL_W / 2, -BL_H / 2, BL_W, BL_H, 5); c.clip(); plaid(c, -BL_W / 2, -BL_H / 2, BL_W / 2, BL_H / 2); c.restore();
+  c.strokeStyle = '#F0DCC4'; c.lineWidth = 1; c.beginPath();
+  for (let y = -BL_H / 2 + 3; y < BL_H / 2; y += 3.2) { c.moveTo(-BL_W / 2, y); c.lineTo(-BL_W / 2 - 3, y); c.moveTo(BL_W / 2, y); c.lineTo(BL_W / 2 + 3, y); }
+  c.stroke();
+  c.restore();
+}
+function drawCushion(c, k) {
+  c.save(); c.translate(k.x, k.y);
+  const lift = k.fly ? Math.sin(k.fly.p * Math.PI) * 18 : 0;
+  c.save(); c.translate(2 + lift * .4, 3 + lift * .5); c.rotate(k.rot); c.fillStyle = 'rgba(40,25,10,.24)'; rr(c, -16, -16, 32, 32, 9); c.fill(); c.restore();
+  c.translate(0, -lift); c.rotate(k.rot);
+  const sq = reduceMotion ? 0 : k.sq; c.scale(1 + .16 * sq, 1 - .14 * sq);
+  rr(c, -17, -17, 34, 34, 9); c.fillStyle = '#4E9C95'; c.fill();
+  const g = c.createLinearGradient(-17, -17, 17, 17); g.addColorStop(0, 'rgba(255,255,255,.3)'); g.addColorStop(1, 'rgba(0,0,0,.14)');
+  c.fillStyle = g; rr(c, -17, -17, 34, 34, 9); c.fill();
+  c.strokeStyle = 'rgba(255,255,255,.4)'; c.lineWidth = .9; c.setLineDash([2, 2]); rr(c, -13, -13, 26, 26, 7); c.stroke(); c.setLineDash([]);
+  c.fillStyle = '#2D6A64'; c.beginPath(); c.arc(0, 0, 2.6, 0, TAU); c.fill();
+  c.restore();
+}
+function torsoPath(c, w) {
+  const r = w / 2; c.beginPath(); c.moveTo(-r, 13); c.lineTo(-r, -31); c.arc(0, -31, r, Math.PI, TAU); c.lineTo(r, 13); c.arc(0, 13, r, 0, Math.PI); c.closePath();
+}
+function drawHead(c, F) {
+  const hy = -G.headY, r = G.headR;
+  c.fillStyle = COL.skin; c.beginPath(); c.arc(0, hy, r, 0, TAU); c.fill();
+  c.fillStyle = COL.hair; c.strokeStyle = COL.hair;
+  if (F === 2) {
+    c.beginPath(); c.arc(0, hy, r + .8, 0, TAU); c.fill();
+    c.strokeStyle = 'rgba(255,255,255,.2)'; c.lineWidth = 1; c.beginPath(); c.arc(1.5, hy - 1, 3.5, 0, Math.PI * 1.6); c.stroke();
+    c.strokeStyle = COL.hair; c.lineWidth = 1.6; c.beginPath(); c.moveTo(0, hy - r); c.quadraticCurveTo(5, hy - r - 7, 9, hy - r - 3); c.stroke();
+    return;
+  }
+  if (F === 0) {
+    c.beginPath(); c.arc(0, hy, r + .8, Math.PI * .92, Math.PI * 2.08);
+    c.lineTo(r * .7, hy - 3); c.lineTo(r * .35, hy - 5.5); c.lineTo(0, hy - 3.5); c.lineTo(-r * .35, hy - 5.5); c.lineTo(-r * .7, hy - 3); c.closePath(); c.fill();
+    c.lineWidth = 1.6; c.beginPath(); c.moveTo(1, hy - r); c.quadraticCurveTo(6, hy - r - 8, 10, hy - r - 4); c.stroke();
+    c.strokeStyle = COL.line; c.lineWidth = 1.3;
+    for (const ex of [-4.6, 4.6]) { c.beginPath(); c.arc(ex, hy + 1.5, 2.5, Math.PI * .15, Math.PI * .85); c.stroke(); }
+    c.fillStyle = COL.cheek; for (const ex of [-7.6, 7.6]) { c.beginPath(); c.arc(ex, hy + 5, 2.4, 0, TAU); c.fill(); }
+    c.fillStyle = COL.mouth; c.beginPath(); c.ellipse(0, hy + 7.4, 1.8, 1.4, 0, 0, TAU); c.fill();
+    return;
+  }
+  c.save(); c.scale(F === 1 ? 1 : -1, 1);
+  c.beginPath(); c.arc(0, hy, r + .8, Math.PI * .45, Math.PI * 1.95); c.lineTo(r * .55, hy - 4); c.lineTo(2, hy - 1); c.closePath(); c.fill();
+  c.fillStyle = COL.skinD; c.beginPath(); c.arc(-1.5, hy + 1, 2.6, 0, TAU); c.fill();
+  c.strokeStyle = COL.line; c.lineWidth = 1.3; c.beginPath(); c.arc(7, hy + 1.5, 2.3, Math.PI * .15, Math.PI * .85); c.stroke();
+  c.fillStyle = COL.mouth; c.beginPath(); c.ellipse(8.6, hy + 7, 1.4, 1.1, 0, 0, TAU); c.fill();
+  c.restore();
+}
+function drawSleeper(c, S, time) {
+  const L = limbs(S.cur), F = S.facing, side = F % 2 === 1, wrapped = isWrapped(S);
+  c.save();
+  const jx = (!S.torsoOn && !reduceMotion && S.phase === 'night') ? Math.sin(time * 50) * .6 : 0;
+  const m = c.getTransform(), ks = Math.hypot(m.a, m.b);
+  const shOn = () => { c.shadowColor = 'rgba(35,22,8,.3)'; c.shadowBlur = 3 * ks; c.shadowOffsetX = 1.6 * ks; c.shadowOffsetY = 2.6 * ks; };
+  const shOff = () => { c.shadowColor = 'rgba(0,0,0,0)'; c.shadowBlur = 0; c.shadowOffsetX = 0; c.shadowOffsetY = 0; };
+  c.translate(S.x + jx, S.y); c.rotate(S.ang);
+  c.lineCap = 'round'; c.lineJoin = 'round';
+  shOn();
+  c.strokeStyle = COL.pants; c.lineWidth = 14;
+  for (const [p, k, f] of [[L.pL, L.kL, L.fL], [L.pR, L.kR, L.fR]]) { c.beginPath(); c.moveTo(p[0], -p[1]); c.lineTo(k[0], -k[1]); c.lineTo(f[0], -f[1]); c.stroke(); }
+  c.fillStyle = COL.skin; for (const f of [L.fL, L.fR]) { c.beginPath(); c.arc(f[0], -f[1], 6.3, 0, TAU); c.fill(); }
+  const tw = side ? 27 : 33;
+  torsoPath(c, tw); c.fillStyle = COL.pj; c.fill(); shOff();
+  c.save(); torsoPath(c, tw); c.clip(); c.strokeStyle = COL.pjS; c.lineWidth = 1.5; c.beginPath();
+  for (let x = -tw / 2 + 3; x < tw / 2; x += 6) { c.moveTo(x, 32); c.lineTo(x, -50); }
+  c.stroke(); c.restore();
+  if (F === 0) {
+    c.fillStyle = '#F4F6FB'; for (const y of [-22, -10, 2]) { c.beginPath(); c.arc(0, y, 1.7, 0, TAU); c.fill(); }
+    c.strokeStyle = '#F4F6FB'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(-6, -44); c.lineTo(0, -37); c.lineTo(6, -44); c.stroke();
+  }
+  shOn(); c.strokeStyle = COL.pj; c.lineWidth = 10.5;
+  for (const [s, e, h] of [[L.sL, L.eL, L.hL], [L.sR, L.eR, L.hR]]) { c.beginPath(); c.moveTo(s[0], -s[1]); c.lineTo(e[0], -e[1]); c.lineTo(h[0], -h[1]); c.stroke(); }
+  c.fillStyle = COL.skin; for (const h of [L.hL, L.hR]) { c.beginPath(); c.arc(h[0], -h[1], 5.2, 0, TAU); c.fill(); }
+  if (wrapped) {
+    const x0 = -31, y0 = -42, x1 = 31, y1 = 74;
+    rr(c, x0, y0, x1 - x0, y1 - y0, 12); c.fillStyle = '#C4553E'; c.fill(); shOff();
+    c.save(); rr(c, x0, y0, x1 - x0, y1 - y0, 12); c.clip(); plaid(c, x0, y0, x1, y1); c.restore();
+    c.fillStyle = 'rgba(255,236,210,.5)'; rr(c, x0, y0, x1 - x0, 8, 5); c.fill();
+  }
+  shOn(); c.fillStyle = COL.skin; c.beginPath(); c.arc(0, -G.headY, G.headR, 0, TAU); c.fill(); shOff();
+  drawHead(c, F);
+  c.restore();
+}
+function drawWorld(c, S, time) {
+  for (const b of S.blankets) if (!b.wrapped && !b.fly) drawBlanket(c, b);
+  for (const k of S.cushions) if (!k.fly) drawCushion(c, k);
+  drawSleeper(c, S, time);
+  for (const b of S.blankets) if (b.fly) drawBlanket(c, b);
+  for (const k of S.cushions) if (k.fly) drawCushion(c, k);
+}
+function drawTint(c, k) {
+  const a = k < .72 ? .46 : lerp(.46, 0, sstep(.72, 1, k));
+  if (a > 0) { c.fillStyle = `rgba(14,18,50,${a.toFixed(3)})`; c.fillRect(0, 0, ROOM.w, ROOM.h); }
+  const d = Math.sin(clamp((k - .75) / .25, 0, 1) * Math.PI) * .1;
+  if (d > 0) { c.fillStyle = `rgba(255,150,80,${d.toFixed(3)})`; c.fillRect(0, 0, ROOM.w, ROOM.h); }
+}
+/* 障子ごしの月明かり → 朝日 */
+function drawLight(c, k, photo) {
+  const moon = photo ? 0 : .1 * (1 - sstep(.72, .9, k)), sun = photo ? .15 : .2 * sstep(.75, 1, k);
+  const W0 = [0, 58], W1 = [0, 236], F0 = [150, 118], F1 = [150, 300];
+  const P = (u, v) => { const ax = lerp(W0[0], F0[0], u), ay = lerp(W0[1], F0[1], u), bx = lerp(W1[0], F1[0], u), by = lerp(W1[1], F1[1], u); return [lerp(ax, bx, v), lerp(ay, by, v)]; };
+  c.save(); c.globalCompositeOperation = 'lighter';
+  for (const [col, al] of [[[150, 170, 255], moon], [[255, 196, 120], sun]]) {
+    if (al <= .005) continue;
+    c.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${al.toFixed(3)})`;
+    const NU = 3, NV = 4, g = .035;
+    for (let i = 0; i < NU; i++) for (let j = 0; j < NV; j++) {
+      const p1 = P(i / NU + g, j / NV + g), p2 = P((i + 1) / NU - g, j / NV + g), p3 = P((i + 1) / NU - g, (j + 1) / NV - g), p4 = P(i / NU + g, (j + 1) / NV - g);
+      c.beginPath(); c.moveTo(p1[0], p1[1]); c.lineTo(p2[0], p2[1]); c.lineTo(p3[0], p3[1]); c.lineTo(p4[0], p4[1]); c.closePath(); c.fill();
+    }
+  }
+  c.restore();
+}
+function drawFx(c, S) {
+  c.save(); c.textAlign = 'center'; c.textBaseline = 'middle'; c.lineCap = 'round';
+  for (const f of S.fx) {
+    const p = f.t / f.life;
+    if (f.k === 'z') {
+      if (reduceMotion) continue;
+      c.globalAlpha = (1 - p) * .95;
+      c.font = `900 ${f.cold ? 8 + p * 3 : 9 + p * 7}px "Zen Maru Gothic",sans-serif`;
+      c.lineWidth = 2.4; c.strokeStyle = 'rgba(20,22,60,.55)'; c.fillStyle = f.cold ? '#D6E8FF' : '#F2F3FF';
+      const tx = f.x + p * 12, ty = f.y - p * 26, s = f.cold ? 'さむい' : 'Z';
+      c.strokeText(s, tx, ty); c.fillText(s, tx, ty); c.globalAlpha = 1;
+    } else if (f.k === 'tap') {
+      c.strokeStyle = `rgba(255,255,255,${((1 - p) * .9).toFixed(3)})`; c.lineWidth = 1.8; c.beginPath(); c.arc(f.x, f.y, 6 + p * 20, 0, TAU); c.stroke();
+    } else if (f.k === 'no') {
+      const a = 1 - p;
+      for (const [col, lw] of [[`rgba(255,255,255,${a})`, 5.5], [`rgba(214,52,40,${a})`, 3]]) {
+        c.strokeStyle = col; c.lineWidth = lw; c.beginPath(); c.moveTo(f.x - 8, f.y - 8); c.lineTo(f.x + 8, f.y + 8); c.moveTo(f.x + 8, f.y - 8); c.lineTo(f.x - 8, f.y + 8); c.stroke();
+      }
+    } else if (f.k === 'poof') {
+      c.fillStyle = `rgba(255,255,255,${((1 - p) * .8).toFixed(3)})`;
+      for (let i = 0; i < 6; i++) { const a = i / 6 * TAU, d = 8 + p * 18; c.beginPath(); c.arc(f.x + Math.cos(a) * d, f.y + Math.sin(a) * d, 3.2 * (1 - p) + .5, 0, TAU); c.fill(); }
+    }
+  }
+  c.restore();
+}
+/* ---- 7セグ数字（目覚まし時計と写真の日付） ---- */
+const SEG = { 0: 'abcdef', 1: 'bc', 2: 'abged', 3: 'abgcd', 4: 'fgbc', 5: 'afgcd', 6: 'afgedc', 7: 'abc', 8: 'abcdefg', 9: 'abcdfg', ' ': '' };
+function w7(str, h) { let w = 0; for (const ch of str) w += ch === ':' ? h * .3 : ch === "'" ? h * .28 : h * .62; return w; }
+function seg7(c, x, s, w, h, t, g) {
+  const ht = t / 2; let x0 = 0, y0 = 0, x1 = 0, y1 = 0, hor = false;
+  if (s === 'a') { hor = true; x0 = x + ht; x1 = x + w - ht; y0 = ht; }
+  else if (s === 'g') { hor = true; x0 = x + ht; x1 = x + w - ht; y0 = h / 2; }
+  else if (s === 'd') { hor = true; x0 = x + ht; x1 = x + w - ht; y0 = h - ht; }
+  else if (s === 'f') { y0 = ht; y1 = h / 2; x0 = x + ht; }
+  else if (s === 'b') { y0 = ht; y1 = h / 2; x0 = x + w - ht; }
+  else if (s === 'e') { y0 = h / 2; y1 = h - ht; x0 = x + ht; }
+  else { y0 = h / 2; y1 = h - ht; x0 = x + w - ht; }
+  c.beginPath();
+  if (hor) { const a = x0 + g, b = x1 - g; c.moveTo(a, y0); c.lineTo(a + ht, y0 - ht); c.lineTo(b - ht, y0 - ht); c.lineTo(b, y0); c.lineTo(b - ht, y0 + ht); c.lineTo(a + ht, y0 + ht); }
+  else { const a = y0 + g, b = y1 - g; c.moveTo(x0, a); c.lineTo(x0 + ht, a + ht); c.lineTo(x0 + ht, b - ht); c.lineTo(x0, b); c.lineTo(x0 - ht, b - ht); c.lineTo(x0 - ht, a + ht); }
+  c.closePath(); c.fill();
+}
+function draw7(c, str, x, y, h, col) {
+  const dw = h * .5, t = h * .13, gp = t * .3;
+  c.save(); c.translate(x, y); c.transform(1, 0, -.08, 1, h * .08, 0); c.fillStyle = col;
+  let cx = 0;
+  for (const ch of str) {
+    if (ch === ':') { const r = t * .55; c.beginPath(); c.arc(cx + h * .12, h * .32, r, 0, TAU); c.arc(cx + h * .12, h * .7, r, 0, TAU); c.fill(); cx += h * .3; continue; }
+    if (ch === "'") { c.beginPath(); c.moveTo(cx + h * .1, 0); c.lineTo(cx + h * .2, 0); c.lineTo(cx + h * .1, h * .28); c.closePath(); c.fill(); cx += h * .28; continue; }
+    const segs = SEG[ch] || '';
+    for (const sn of segs) seg7(c, cx, sn, dw, h, t, gp);
+    cx += h * .62;
+  }
+  c.restore();
+}
+function photoFrame(S, asp) {
+  let x0 = FUTON.x, y0 = FUTON.y, x1 = FUTON.x + FUTON.w, y1 = FUTON.y + FUTON.h;
+  const L = limbs(S.cur), pts = core(S).concat([[...toW(S, L.hL[0], L.hL[1]), 6], [...toW(S, L.hR[0], L.hR[1]), 6]]);
+  for (const q of pts) { x0 = Math.min(x0, q[0] - q[2]); y0 = Math.min(y0, q[1] - q[2]); x1 = Math.max(x1, q[0] + q[2]); y1 = Math.max(y1, q[1] + q[2]); }
+  for (const b of S.blankets) if (!b.wrapped) { x0 = Math.min(x0, b.x - 36); x1 = Math.max(x1, b.x + 36); y0 = Math.min(y0, b.y - 30); y1 = Math.max(y1, b.y + 30); }
+  const pad = 16; x0 -= pad; y0 -= pad; x1 += pad; y1 += pad + 38;   // 下側は日付の分だけ余白を足す
+  let w = x1 - x0, h = y1 - y0;
+  if (w / h < asp) { const nw = h * asp; x0 -= (nw - w) / 2; w = nw; } else { const nh = w / asp; y0 -= (nh - h) / 2; h = nh; }
+  return { x0, y0, w, h };
+}
+function drawPhoto(c, S, w, h, dpr) {
+  const f = photoFrame(S, w / h), s = w / f.w;
+  c.setTransform(dpr * s, 0, 0, dpr * s, -f.x0 * s * dpr, -f.y0 * s * dpr);
+  drawRoomBG(c, '#3B302A');
+  drawWorld(c, S, 0);
+  c.save(); c.beginPath(); c.rect(0, 0, ROOM.w, ROOM.h); c.clip(); drawLight(c, 1, true); c.restore();
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  c.fillStyle = 'rgba(255,180,110,.08)'; c.fillRect(0, 0, w, h);
+  const g = c.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .35, w / 2, h / 2, Math.max(w, h) * .75);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(25,12,0,.38)'); c.fillStyle = g; c.fillRect(0, 0, w, h);
+  const d = new Date();
+  const str = "'" + String(d.getFullYear() % 100).padStart(2, '0') + ' ' + String(d.getMonth() + 1).padStart(2, ' ') + ' ' + String(d.getDate()).padStart(2, ' ');
+  const dh = Math.max(11, Math.round(w * .05));
+  c.save(); c.shadowColor = 'rgba(255,120,30,.9)'; c.shadowBlur = 5;
+  draw7(c, str, w - 12 - w7(str, dh), h - 12 - dh, dh, '#FF8F2E');
+  c.restore();
+}
+
+/* =========================================================
+   画面・入力・音
+   ========================================================= */
+function load(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+function save(k, v) { try { localStorage.setItem(k, String(v)); } catch (e) {} }
+
+let actx = null, muted = false, noiseBuf = null;
+function ensureAudio() {
+  try {
+    if (!actx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) actx = new AC(); }
+    if (actx && actx.state === 'suspended') actx.resume();
+  } catch (e) {}
+}
+// 周波数, 長さ(秒), 波形, 音量, 終わりの周波数(任意), 開始の遅れ(任意)
+function tone(f, dur, type, vol, f2, delay) {
+  if (muted || !actx) return;
+  try {
+    const t = actx.currentTime + (delay || 0), o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t); o.stop(t + dur + 0.03);
+  } catch (e) {}
+}
+function noise(dur, vol, freq, delay) {
+  if (muted || !actx) return;
+  try {
+    if (!noiseBuf) { noiseBuf = actx.createBuffer(1, Math.floor(actx.sampleRate * .5), actx.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+    const t = actx.currentTime + (delay || 0), s = actx.createBufferSource(), fl = actx.createBiquadFilter(), g = actx.createGain();
+    s.buffer = noiseBuf; fl.type = 'lowpass'; fl.frequency.value = freq || 1200;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(fl); fl.connect(g); g.connect(actx.destination); s.start(t); s.stop(t + dur + .03);
+  } catch (e) {}
+}
+const SFX = {
+  roll() { tone(110, .22, 'sine', .16, 70); noise(.18, .05, 600); },
+  bigroll() { tone(110, .2, 'sine', .18, 70); tone(100, .22, 'sine', .16, 60, .22); noise(.4, .06, 500); },
+  spin() { tone(240, .28, 'triangle', .05, 140); noise(.2, .03, 900); },
+  bigspin() { tone(300, .5, 'triangle', .07, 120); noise(.45, .04, 800); },
+  scoot() { noise(.2, .05, 1400); noise(.16, .04, 1100, .16); },
+  fidget() { tone(330, .12, 'sine', .025, 290); },
+  bounce() { tone(240, .2, 'sine', .22, 520); tone(520, .14, 'sine', .08, 300, .09); },
+  wall() { tone(150, .12, 'square', .09, 90); noise(.1, .08, 500); },
+  fall() { tone(80, .35, 'sine', .32, 38); noise(.25, .1, 300); },
+  back() { tone(392, .1, 'triangle', .06); tone(523, .12, 'triangle', .06, 0, .08); },
+  wrap() { tone(420, .35, 'sine', .07, 820); },
+  kickb() { noise(.25, .09, 2200); tone(500, .18, 'triangle', .06, 220); },
+  kickc() { tone(380, .16, 'sine', .12, 900); noise(.08, .05, 1500); },
+  place() { tone(200, .1, 'sine', .16, 150); noise(.08, .04, 700); },
+  placeb() { noise(.2, .05, 1800); tone(330, .16, 'triangle', .05, 480); },
+  pick() { tone(520, .08, 'sine', .08, 760); },
+  invalid() { tone(180, .12, 'square', .05); tone(150, .12, 'square', .05, 0, .1); },
+  alarm() { for (let i = 0; i < 4; i++) tone(1760, .07, 'square', .05, 0, i * .12); for (let i = 0; i < 4; i++) tone(1760, .07, 'square', .05, 0, .62 + i * .12); },
+  shutter() { noise(.05, .2, 4000); noise(.07, .15, 2500, .07); },
+  result() { [523, 659, 784, 1046].forEach((f, i) => tone(f, .18, 'triangle', .07, 0, i * .09)); },
+  start() { [392, 330, 262].forEach((f, i) => tone(f, .22, 'sine', .07, 0, i * .14)); },
+};
+const LOGMAP = {
+  roll: ['ゴロン（寝返り）', 1, 'roll'], bigroll: ['ゴロゴロッ！大寝返り', 2, 'bigroll'],
+  spin: ['クルッ（向きが変わった）', 1, 'spin'], bigspin: ['グルンッ！大回転', 2, 'bigspin'],
+  scootdown: ['ズリズリ…（足のほうへずれた）', 1, 'scoot'], scootup: ['ズリズリ…（頭のほうへずれた）', 1, 'scoot'],
+  fidget: ['ムニャムニャ…', 0, 'fidget'],
+  kickc: ['ポーン！クッションをけとばした', 2, 'kickc'], kickb: ['バサッ！毛布をけとばした', 2, 'kickb'],
+  bounce: ['ボヨン！クッションで止まった', 2, 'bounce'], wall: ['ゴンッ！壁にぶつかった', 2, 'wall'],
+  fall: ['ドスン！布団から落ちた', 3, 'fall'], back: ['もぞもぞ…布団に戻った', 2, 'back'],
+  wrap: ['ぬくぬく…毛布でおとなしくなった', 2, 'wrap'],
+  place_c: ['クッションを置いた', 2, 'place'], move_c: ['いちばん古いクッションを動かした', 2, 'place'],
+  place_b: ['毛布を置いた。寝ている人が寄ってくる', 2, 'placeb'], move_b: ['毛布を動かした', 2, 'placeb'], cover_b: ['毛布をかけた', 2, 'placeb'],
+  pick_c: ['クッションを回収した', 2, 'pick'], pick_b: ['毛布を回収した', 2, 'pick'], peel_b: ['毛布をはがした', 2, 'pick'],
+  invalid: ['体の上にクッションは置けません（毛布はかけられます）', 3, 'invalid'],
+};
+
+const UI = { timeScale: 1 };
+
+function initUI() {
+  const $ = id => document.getElementById(id);
+  const app = $('app'), field = $('field'), cv = $('cv'), ctx = cv.getContext('2d');
+  const clockCv = $('clock'), cctx = clockCv.getContext('2d');
+  const tickText = $('tickText'), stSleep = $('stSleep'), stPos = $('stPos'), nightfill = $('nightfill');
+  const titleScr = $('titleScr'), resultScr = $('resultScr'), flash = $('flash');
+  const toolC = $('toolCushion'), toolB = $('toolBlanket'), ctC = $('ctC'), ctB = $('ctB'), nmC = $('nmC'), nmB = $('nmB');
+  const muteBtn = $('muteBtn');
+  const mq = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  reduceMotion = !!(mq && mq.matches);
+  if (mq && mq.addEventListener) mq.addEventListener('change', () => { reduceMotion = mq.matches; });
+
+  let state = 'title', sim = newSim(true), tool = 'cushion', W = 1, H = 1, dpr = 1;
+  const view = { s: 1, ox: 0, oy: 0 };
+  let bg = document.createElement('canvas'), edgeColor = '#ECE7F3';
+  let morningT = 0, flashed = false, lastR = null;
+  let tick = { pri: 0, until: 0, idle: true }, statusT = 0, lastClock = '';
+
+  muted = load('nezo-muted', '0') === '1';
+  let best = parseInt(load('nezo-score', '0'), 10) || 0;   // v1.0の nezo-best（2軸の合計）は使わない
+  let titles = []; try { titles = JSON.parse(load('nezo-titles', '[]')) || []; if (!Array.isArray(titles)) titles = []; } catch (e) { titles = []; }
+  titles = titles.filter(k => TITLES.some(t => t[0] === k));
+
+  const SVG_ON = '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.6 6a8.6 8.6 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  const SVG_OFF = '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  function renderMute() {
+    muteBtn.innerHTML = muted ? SVG_OFF : SVG_ON;
+    muteBtn.setAttribute('aria-label', muted ? '音を出す' : '音を消す');
+    muteBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+  }
+  renderMute();
+  muteBtn.addEventListener('click', () => { ensureAudio(); muted = !muted; save('nezo-muted', muted ? '1' : '0'); renderMute(); if (!muted) SFX.pick(); });
+
+  function readTheme() {
+    edgeColor = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#ECE7F3';
+    buildBg();
+  }
+  function buildBg() {
+    bg.width = cv.width; bg.height = cv.height;
+    const b = bg.getContext('2d');
+    b.setTransform(1, 0, 0, 1, 0, 0); b.clearRect(0, 0, bg.width, bg.height);
+    b.setTransform(dpr * view.s, 0, 0, dpr * view.s, dpr * view.ox, dpr * view.oy);
+    drawRoomBG(b, edgeColor);
+  }
+  function onResize() {
+    const r = field.getBoundingClientRect();
+    W = Math.max(1, r.width); H = Math.max(1, r.height);
+    dpr = Math.min(2.5, window.devicePixelRatio || 1);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    view.s = Math.min(W / ROOM.w, H / ROOM.h); view.ox = (W - ROOM.w * view.s) / 2; view.oy = (H - ROOM.h * view.s) / 2;
+    clockCv.width = Math.round(104 * dpr); clockCv.height = Math.round(40 * dpr); lastClock = '';
+    readTheme();
+    if (state === 'over' && lastR) renderPhoto();
+  }
+  window.addEventListener('resize', onResize);
+  if (window.ResizeObserver) new ResizeObserver(onResize).observe(field);
+  if (window.matchMedia) { const dm = window.matchMedia('(prefers-color-scheme: dark)'); if (dm.addEventListener) dm.addEventListener('change', readTheme); }
+  if (window.MutationObserver) new MutationObserver(readTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
+
+  function drawClock(str, blink) {
+    const c = cctx, w = 104, h = 40;
+    c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
+    rr(c, 0, 0, w, h, 9); c.fillStyle = '#1C1517'; c.fill();
+    c.fillStyle = 'rgba(255,255,255,.06)'; rr(c, 3, 3, w - 6, 13, 6); c.fill();
+    const dh = 24, x = (w - w7('88:88', dh)) / 2, y = (h - dh) / 2;
+    draw7(c, '88:88', x, y, dh, 'rgba(255,90,54,.07)');
+    if (!blink) { c.save(); c.shadowColor = 'rgba(255,80,40,.75)'; c.shadowBlur = 6; draw7(c, str, x, y, dh, '#FF5A36'); c.restore(); }
+  }
+  function say(text, pri, now) {
+    if (now < tick.until && pri < tick.pri) return;
+    tickText.textContent = text; tick.pri = pri; tick.until = now + (pri >= 2 ? 1700 : 1100); tick.idle = false;
+  }
+  function updateTray() {
+    const nc = MAX_CUSHION - sim.cushions.length, nb = MAX_BLANKET - sim.blankets.length;
+    nmC.textContent = `クッション ×${nc}`; nmB.textContent = `毛布 ×${nb}`;
+    ctC.textContent = nc > 0 ? '寝返りを止める' : '古い物から動かす';
+    ctB.textContent = nb > 0 ? '引き寄せる／かける' : 'タップで置き直す';
+    toolC.setAttribute('aria-pressed', tool === 'cushion' ? 'true' : 'false');
+    toolB.setAttribute('aria-pressed', tool === 'blanket' ? 'true' : 'false');
+  }
+  toolC.addEventListener('click', () => { ensureAudio(); tool = 'cushion'; updateTray(); });
+  toolB.addEventListener('click', () => { ensureAudio(); tool = 'blanket'; updateTray(); });
+
+  cv.addEventListener('pointerdown', e => {
+    ensureAudio();
+    if (state !== 'playing') return;
+    e.preventDefault();
+    const r = cv.getBoundingClientRect();
+    const wx = (e.clientX - r.left - view.ox) / view.s, wy = (e.clientY - r.top - view.oy) / view.s;
+    handleTap(sim, wx, wy, tool);
+    updateTray();
+  });
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('gesturestart', e => e.preventDefault());
+
+  function updateTitleInfo() {
+    $('titleBest').textContent = best > 0 ? `ベスト ${best}点　集めた称号 ${titles.length}/${TITLES.length}` : 'ベスト記録はまだありません';
+  }
+  updateTitleInfo();
+
+  function start() {
+    ensureAudio();
+    sim = newSim(false); state = 'playing'; tool = 'cushion'; morningT = 0; flashed = false;
+    titleScr.hidden = true; resultScr.hidden = true;
+    tick = { pri: 0, until: 0, idle: false }; tickText.textContent = 'おやすみなさい…';
+    updateTray(); SFX.start();
+  }
+  function toTitle() {
+    state = 'title'; sim = newSim(true); resultScr.hidden = true; titleScr.hidden = false; updateTitleInfo();
+    $('startBtn').focus();
+  }
+  $('startBtn').addEventListener('click', start);
+  $('againBtn').addEventListener('click', start);
+  $('toTitle').addEventListener('click', toTitle);
+  $('shareBtn').addEventListener('click', share);
+
+  function beginMorning() {
+    state = 'morning'; morningT = 0; flashed = false;
+    say('ピピピピッ　朝7時！', 9, performance.now());
+    SFX.alarm();
+  }
+  function renderPhoto() {
+    const pc = $('photo');
+    const w = Math.max(120, pc.clientWidth || 260), h = Math.round(w * 1.08);
+    pc.style.height = h + 'px'; pc.width = Math.round(w * dpr); pc.height = Math.round(h * dpr);
+    drawPhoto(pc.getContext('2d'), sim, w, h, dpr);
+  }
+  function showResult() {
+    state = 'over';
+    const R = evaluate(sim); lastR = R;
+    let isBest = false;
+    if (R.score > best) { best = R.score; save('nezo-score', best); isBest = true; }
+    if (!titles.includes(R.titleKey)) { titles.push(R.titleKey); save('nezo-titles', JSON.stringify(titles)); }
+    $('capTitle').textContent = R.title; $('capSub').textContent = R.sub;
+    $('newBest').hidden = !isBest;
+    $('resStats').textContent = `安眠度 ${Math.round(R.onAvg * 100)}%（布団からはみ出すほど下がる）\n落下${R.falls}回、壁ドン${R.wallHits}回、クッションで受け止めた${R.cushionHits}回`;
+    $('collect').textContent = `集めた称号 ${titles.length}/${TITLES.length}`;
+    $('photo').setAttribute('aria-label', `朝の写真。${FACING[sim.facing]}で${R.poseName}。${R.on >= .85 ? '布団の上' : R.on >= .45 ? '布団からはみ出している' : '布団の外'}`);
+    resultScr.hidden = false; resultScr.scrollTop = 0;
+    renderPhoto();
+    const pc = $('photo'); pc.classList.remove('dev'); void pc.offsetWidth; if (!reduceMotion) pc.classList.add('dev');
+    const bars = [[$('bar1'), R.ptTime / SCORE.timeMax], [$('bar2'), R.ptCalm / SCORE.calmMax], [$('bar3'), R.ptMorn / 20]];
+    for (const [el] of bars) el.style.width = '0%';
+    void bars[0][0].offsetWidth;
+    for (const [el, v] of bars) el.style.width = (clamp(v, 0, 1) * 100).toFixed(1) + '%';
+    countUp(R);
+    SFX.result();
+    $('resHead').focus({ preventScroll: true });
+  }
+  function countUp(R) {
+    const els = [[$('val1'), R.ptTime], [$('val2'), R.ptCalm], [$('val3'), R.ptMorn], [$('valT'), R.score]];
+    if (reduceMotion) { for (const [el, v] of els) el.textContent = v; return; }
+    const t0 = performance.now();
+    const stepF = now => {
+      const p = clamp((now - t0) / 900, 0, 1), e = 1 - Math.pow(1 - p, 3);
+      for (const [el, v] of els) el.textContent = Math.round(v * e);
+      if (p < 1) requestAnimationFrame(stepF);
+    };
+    requestAnimationFrame(stepF);
+  }
+  function toast(msg) {
+    const t = $('toast'); t.textContent = msg; t.hidden = false;
+    clearTimeout(toast.tm); toast.tm = setTimeout(() => { t.hidden = true; }, 2200);
+  }
+  async function share() {
+    if (!lastR) return;
+    const R = lastR;
+    const pageUrl = location.href.split('#')[0];
+    const text = `寝相コントロールで安眠スコア${R.score}点。\n朝7時の寝姿は「${R.title}」でした（落下${R.falls}回、壁ドン${R.wallHits}回）\n#寝相コントロール\n${pageUrl}`;
+    if (navigator.share) {
+      try { await navigator.share({ text }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    try {
+      const w = window.open('https://x.com/intent/post?text=' + encodeURIComponent(text), '_blank');
+      if (w) { try { w.opener = null; } catch (e) {} return; }
+    } catch (e) {}
+    let ok = false;
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); ok = true; } } catch (e) {}
+    if (!ok) {
+      try {
+        const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); document.body.removeChild(ta);
+      } catch (e) {}
+    }
+    toast(ok ? '投稿文をコピーしました' : 'コピーできませんでした');
+  }
+
+  function consumeLog(now) {
+    while (sim.log.length) {
+      const k = sim.log.shift(), m = LOGMAP[k];
+      if (!m || state !== 'playing') continue;
+      let text = m[0];
+      if (k === 'fall' || k === 'wall') {
+        const pen = k === 'fall' ? SCORE.fallPen : SCORE.wallPen;
+        const used = sim.stats.falls * SCORE.fallPen + sim.stats.wallHits * SCORE.wallPen;
+        const before = Math.max(0, SCORE.calmMax - (used - pen)), after = Math.max(0, SCORE.calmMax - used);
+        if (before > after) text += `（ぐっすり −${before - after}）`;
+      }
+      say(text, m[1], now);
+      const f = SFX[m[2]]; if (f) f();
+      if (k === 'fall' && navigator.vibrate) { try { navigator.vibrate(40); } catch (e) {} }
+      if (k.startsWith('kick') || k === 'bounce') updateTray();
+    }
+  }
+  function idleText() {
+    if (isWrapped(sim)) return 'ぬくぬく…';
+    if (!sim.torsoOn) return 'さむい…（布団の外）';
+    return 'スヤスヤ…';
+  }
+  function updateHud(now) {
+    const k = Math.min(1, sim.t / NIGHT_SEC);
+    const m = 23 * 60 + Math.floor(k * 480), hh = Math.floor(m / 60) % 24, mm = m % 60;
+    const str = (hh < 10 ? ' ' : '') + hh + ':' + String(mm).padStart(2, '0');
+    const blink = state === 'morning' && Math.floor(now / 220) % 2 === 1;
+    const key = str + (blink ? 'b' : '') + dpr;
+    if (key !== lastClock) { lastClock = key; drawClock(str, blink); clockCv.setAttribute('aria-label', '時刻 ' + str.trim()); }
+    nightfill.style.width = (k * 100).toFixed(1) + '%';
+    if (state === 'playing' && now > tick.until + 700 && !tick.idle) { tickText.textContent = idleText(); tick.idle = true; tick.pri = 0; }
+    if (now - statusT > 200) {
+      statusT = now;
+      const pos = sim.onFrac >= .85 ? '○布団の上' : sim.onFrac >= .45 ? '△はみ出し' : '×布団の外';
+      stSleep.textContent = `安眠度 ${Math.round(onAvgOf(sim) * 100)}%`; stPos.textContent = pos;
+    }
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    let dt = (now - last) / 1000; last = now;
+    if (!(dt > 0)) dt = 0; if (dt > .05) dt = .05;
+    let steps = Math.max(1, Math.round(UI.timeScale));
+    for (let i = 0; i < steps; i++) {
+      if (state === 'title') {
+        aiTick(sim, dt); update(sim, dt);
+        if (sim.phase === 'done') sim = newSim(true);
+      } else if (state === 'playing') {
+        update(sim, dt);
+        if (sim.phase === 'done') { beginMorning(); break; }
+      }
+    }
+    if (state === 'title') sim.log.length = 0;
+    if (state === 'playing') consumeLog(now);
+    if (state === 'morning') {
+      morningT += dt;
+      if (morningT > .95 && !flashed) {
+        flashed = true; SFX.shutter();
+        if (!reduceMotion) { flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go'); }
+      }
+      if (morningT > 1.55) showResult();
+    }
+    if (state !== 'over') draw(now);
+    updateHud(now);
+    requestAnimationFrame(frame);
+  }
+  function draw(now) {
+    const c = ctx, time = now / 1000;
+    c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, cv.width, cv.height);
+    let sx = 0, sy = 0;
+    if (sim.shake > 0 && !reduceMotion) { sx = (Math.random() * 2 - 1) * sim.shake * 10; sy = (Math.random() * 2 - 1) * sim.shake * 10; }
+    c.setTransform(1, 0, 0, 1, sx * dpr, sy * dpr); c.drawImage(bg, 0, 0);
+    c.setTransform(dpr * view.s, 0, 0, dpr * view.s, dpr * (view.ox + sx), dpr * (view.oy + sy));
+    const k = sim.t / NIGHT_SEC;
+    drawWorld(c, sim, time);
+    c.save(); c.beginPath(); c.rect(0, 0, ROOM.w, ROOM.h); c.clip(); drawTint(c, k); drawLight(c, k, false); c.restore();
+    drawFx(c, sim);
+  }
+
+  onResize(); updateTray();
+  requestAnimationFrame(frame);
+
+  // 動作確認用のフック
+  window.__nezo = {
+    get sim() { return sim; }, set sim(v) { sim = v; }, get state() { return state; },
+    setState(s) { state = s; }, showResult, renderPhoto, evaluate, newSim, setPose, UI,
+  };
+}
+
+if (typeof document !== 'undefined' && document.getElementById) initUI();
+</script>
+</body>
+</html>
