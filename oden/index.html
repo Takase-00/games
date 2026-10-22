@@ -107,8 +107,6 @@ button{font:inherit;color:inherit}
 .ing-ic{width:38px;height:38px;display:block;pointer-events:none}
 .ing-name{font-weight:900;font-size:min(12px,2.9vw);letter-spacing:-.04em;white-space:nowrap;line-height:1.25}
 .ing-sec{font-size:min(10.5px,2.6vw);font-weight:700;color:var(--sub);line-height:1.1}
-.ing-badge{position:absolute;top:-7px;right:-3px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;
-  background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:900;line-height:20px;text-align:center}
 .cell:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
 .ing:focus-visible,.btn:focus-visible,#mute:focus-visible,.btn-link:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 
@@ -1352,17 +1350,6 @@ function updateHud(g){
   }
   el.timeFill.style.transform = `scaleX(${g.timeLeft/g.duration})`;
 }
-function updateTray(g){
-  const { need, have } = demandOf(g);
-  for (const k of TYPE_KEYS){
-    const n = Math.max(0, (need[k]||0) - (have[k]||0)), t = trayBtns[k];
-    if (n !== t.last){
-      t.last = n; t.badge.hidden = n === 0; t.badge.textContent = n;
-      const T = TYPES[k];
-      t.b.setAttribute('aria-label', `${T.name}を鍋に入れる（食べ頃まで約${Math.round(T.ready)}秒）` + (n ? `。注文に足りない数 ${n}` : ''));
-    }
-  }
-}
 function updateCellLabels(g){
   for (let i=0; i<CELLS; i++){
     const it = g.cells[i], key = it ? it.type + it.stage : '-';
@@ -1391,7 +1378,6 @@ function startGame(){
   resetFx();
   state = 'playing'; lastHud = ''; lastTick = -1;
   el.title.hidden = true; el.result.hidden = true; el.hud.classList.remove('idle');
-  for (const k of TYPE_KEYS) trayBtns[k].last = -1;
   sfx('clap'); showBanner('開店！');
 }
 function beginClosing(){
@@ -1490,7 +1476,7 @@ function frame(ts){
     update(demo, dt); processEvents(demo, true); stepParticles(demo, dt); render(demo, dt);
   } else if (state === 'playing'){
     update(game, dt); processEvents(game, false); stepParticles(game, dt); render(game, dt);
-    updateHud(game); updateTray(game); updateCellLabels(game);
+    updateHud(game); updateCellLabels(game);
     if (game.ended) beginClosing();
   } else if (state === 'closing'){
     closingT += dt; stepParticles(game, dt); render(game, dt); updateHud(game);
@@ -1521,12 +1507,11 @@ function boot(){
     const ic = document.createElement('canvas'); ic.className = 'ing-ic'; ic.setAttribute('aria-hidden','true');
     const nm = document.createElement('span'); nm.className = 'ing-name'; nm.textContent = T.name; nm.setAttribute('aria-hidden','true');
     const sc = document.createElement('span'); sc.className = 'ing-sec'; sc.textContent = Math.round(T.ready) + '秒'; sc.setAttribute('aria-hidden','true');
-    const bd = document.createElement('span'); bd.className = 'ing-badge'; bd.hidden = true; bd.setAttribute('aria-hidden','true');
-    b.append(ic, nm, sc, bd);
+    b.append(ic, nm, sc);
     b.setAttribute('aria-label', `${T.name}を鍋に入れる（食べ頃まで約${Math.round(T.ready)}秒）`);
     bindTap(b, () => tapTray(k));
     el.tray.appendChild(b);
-    trayBtns[k] = { b, cv:ic, badge:bd, last:-1, ft:0 };
+    trayBtns[k] = { b, cv:ic, ft:0 };
   }
 
   const mqR = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
@@ -1570,7 +1555,7 @@ globalThis.__oden = {
   newGame, update, addItem, serveCell, aiDecide, aiAct, stageOf, judge, demandOf, TYPES, VALUE,
   get state(){ return state; }, get game(){ return game; },
   decide(){ return game ? aiDecide(game) : null; },
-  show(g, st){ game = g; state = st || 'frozen'; resetFx(); el.title.hidden = true; el.result.hidden = true; el.hud.classList.remove('idle'); updateHud(g); updateTray(g); },
+  show(g, st){ game = g; state = st || 'frozen'; resetFx(); el.title.hidden = true; el.result.hidden = true; el.hud.classList.remove('idle'); updateHud(g); },
   result(g){ game = g; resetFx(); el.title.hidden = true; el.hud.classList.remove('idle'); updateHud(g); showResult(); },
 };
 
