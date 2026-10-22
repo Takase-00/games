@@ -91,6 +91,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .note{margin:12px 0 0;font-size:12.5px;color:var(--sub);line-height:1.5}
 .best-line{margin:8px 0 0;font-size:14px;font-weight:700;color:var(--sub)}
 .best-line b{color:var(--ink);font-size:18px}
+.ver{margin:8px 0 0;font-size:11px;color:var(--sub)}
 .btn{
   display:block;width:100%;min-height:52px;margin-top:14px;border-radius:12px;border:2px solid var(--accent);
   background:var(--card);color:var(--accent);font-size:18px;font-weight:900;cursor:pointer;touch-action:manipulation;
@@ -155,6 +156,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
       <p class="note"><span class="ph">100点は、</span><span class="ph">24回のとめと</span><span class="ph">36回の折りが</span><span class="ph">全部ぴったりの</span><span class="ph">ときだけ。</span></p>
       <p class="best-line">ベスト <b id="bestT">0</b>点</p>
       <button id="startBtn" class="btn primary" type="button">あそぶ</button>
+      <p class="ver" id="verLine"></p>
     </div>
     <div class="spacer" style="flex:0 0 14px"></div>
   </section>
@@ -189,6 +191,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 (function(){
 'use strict';
 const TEST = typeof window !== 'undefined' && !!window.__SENTAKU_TEST;
+const VERSION = 'v1.0';
 
 /* ================= 定数 ================= */
 const W = 390, H = 760;          // 論理サイズ
@@ -1355,6 +1358,7 @@ try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', read
 try { new MutationObserver(readCss).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] }); } catch (e) {}
 
 $('bestT').textContent = best();
+$('verLine').textContent = VERSION;
 syncMute(); readCss(); resize(); startDemo();
 let last = 0;
 function frame(ts) {
