@@ -138,6 +138,7 @@ button{font:inherit;color:inherit}
 #startBtn{width:100%;max-width:340px;font-size:18px}
 .best{margin:9px 0 0;font-size:13px;font-weight:700;color:var(--sub)}
 .best b{font-weight:900;color:var(--ink)}
+.ver{margin:4px 0 0;font-size:11px;font-weight:700;color:var(--sub)}
 
 .result{background:var(--veil);padding:58px 16px 20px;display:flex;flex-direction:column;align-items:center;gap:16px}
 .slip{position:relative;width:100%;max-width:360px;padding:18px 20px 16px;border-radius:2px;color:#2B2018;
@@ -230,6 +231,7 @@ button{font:inherit;color:inherit}
     <div class="title-bot">
       <button id="startBtn" class="btn primary" type="button">のれんを出す（開店）</button>
       <p class="best">これまでの最高売上 <b id="bestTitle">¥0</b></p>
+      <p class="ver" id="verLine"></p>
     </div>
   </section>
 
@@ -263,6 +265,7 @@ button{font:inherit;color:inherit}
    おでん番
    ロジック（DOMに依存しない部分）
    ========================================================= */
+const VERSION = 'v1.1';
 const DURATION = 60;        // 1回のプレイ時間（秒）
 const MELT = 9;             // 煮すぎになってから、溶けて消えるまでの秒数
 const NAMA_RATIO = 0.55;    // 食べ頃になる時刻のこの割合までは「生」
@@ -1538,6 +1541,7 @@ function boot(){
   setMuted(muted);
 
   el.bestTitle.textContent = '¥' + best.toLocaleString('ja-JP');
+  $('verLine').textContent = VERSION;
   demo = newGame({ demo:true });
   requestAnimationFrame(frame);
 }
