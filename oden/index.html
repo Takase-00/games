@@ -224,7 +224,7 @@ button{font:inherit;color:inherit}
       <ul class="rules">
         <li><span class="tag">入れる</span>下の具をタップすると鍋に入る</li>
         <li><span class="tag">出す</span>食べ頃の具をタップしてお客さんへ。注文にない具を出すと売上から引かれる</li>
-        <li><span class="tag">60秒</span>煮すぎは崩れ、早いと味がしみない</li>
+        <li><span class="tag">60秒</span>煮すぎて溶けると売上から引かれる。早いと味がしみない</li>
       </ul>
     </div>
     <div class="title-mid"><span class="demo-chip">お手本デモ</span></div>
@@ -265,14 +265,14 @@ button{font:inherit;color:inherit}
    おでん番
    ロジック（DOMに依存しない部分）
    ========================================================= */
-const VERSION = 'v2.0';
+const VERSION = 'v2.1';
 const DURATION = 60;        // 1回のプレイ時間（秒）
 const MELT = 9;             // 煮すぎになってから、溶けて消えるまでの秒数
 const NAMA_RATIO = 0.55;    // 食べ頃になる時刻のこの割合までは「生」
 const GOKU_BAND = 0.2;      // 食べ頃の窓の中央 ±20% が「極上」
 const SEATS = 4, COLS = 4, ROWS = 3, CELLS = COLS*ROWS;
 const GOOD = 0.9, BEST = 1.5;
-const MAKANAI_LOSS = 1.0;   // 注文のない具を出した（まかない）ときに、値段のこの割合を売上から引く
+const LOSS_RATE = 1.0;      // 食品ロス（まかない・煮すぎて溶けた具）は、値段のこの割合を売上から引く
 
 // ready: 食べ頃になるまでの秒数 / win: 食べ頃が続く秒数 / price: 値段 / w: 注文される重み
 const TYPES = {
@@ -334,9 +334,15 @@ function newGame(opts){
     cells: new Array(CELLS).fill(null), seats: new Array(SEATS).fill(null),
     spawnCd: [0.4, 1.4, 2.6, 4.0], score:0, uid:0, custCount:0, events:[], aiCd:0.8,
     stats: { served:0, best:0, good:0, nama:0, kata:0, ok:0, goku:0, kuta:0, makanai:0, melted:0, overFail:0,
-             crumble:0, whiteEgg:0, angry:0, happy:0, done:0, ojii:0, kid:0, tips:0, customers:0, loss:0 },
+             crumble:0, whiteEgg:0, angry:0, happy:0, done:0, ojii:0, kid:0, tips:0, customers:0, loss:0, meltLoss:0 },
   };
   return g;
+}
+// 食品ロスで売上から引く額（売上はマイナスにしない）
+function takeLoss(g, type){
+  const loss = Math.min(g.score, Math.round(TYPES[type].price * LOSS_RATE / 10) * 10);
+  g.score -= loss;
+  return loss;
 }
 function mkItem(g, type, t){
   const it = { id:++g.uid, type, t:t||0, stage:null, seed:1+Math.floor(g.rnd()*997) };
@@ -392,7 +398,8 @@ function update(g, dt){
       g.cells[i] = null;
       g.stats.melted++; g.stats.overFail++;
       if (it.type === 'daikon') g.stats.crumble++;
-      g.events.push({ k:'melt', idx:i, type:it.type });
+      const loss = takeLoss(g, it.type); g.stats.meltLoss += loss;
+      g.events.push({ k:'melt', idx:i, type:it.type, loss });
     }
   }
   for (let si=0; si<SEATS; si++){
@@ -457,9 +464,7 @@ function serveCell(g, idx){
   if (st === 'kuta' && it.type === 'daikon') S.crumble++;
   if (!tk.c){
     S.makanai++; if (wasted) S.overFail++;
-    // 売上はマイナスにしない
-    const loss = Math.min(g.score, Math.round(TYPES[it.type].price * MAKANAI_LOSS / 10) * 10);
-    g.score -= loss; S.loss += loss;
+    const loss = takeLoss(g, it.type); S.loss += loss;
     g.events.push({ k:'makanai', idx, type:it.type, stage:st, t:it.t, seed:it.seed, loss });
     return { k:'makanai', loss };
   }
@@ -980,7 +985,13 @@ function processEvents(g, silent){
       }
       case 'angry': { const [rx,ry] = reactPos(e.seat); addPop('もういいよ…', rx, ry, { size:13, fill:'#FFD6CC' }); snd('angry'); break; }
       case 'arrive': snd('arrive'); break;
-      case 'melt': { const [x,y] = cellCenter(e.idx); addPop('溶けて消えた…', x, y, { size:12, fill:'#E9E2D6' }); snd('melt'); break; }
+      case 'melt': {
+        const [x,y] = cellCenter(e.idx);
+        addPop('溶けて消えた…', x, y, { size:12, fill:'#E9E2D6' });
+        if (e.loss > 0) addPop('−¥' + e.loss, x, y + 18, { size:13, delay:0.2, fill:'#FFD6CC', life:0.9 });
+        snd('melt');
+        break;
+      }
       case 'full': {
         addPop('鍋がいっぱい！', L.potX + L.potW/2, L.potY + L.potH/2, { size:16, fill:'#FFD6CC' });
         snd('full');
@@ -1404,7 +1415,7 @@ function showResult(){
     ['満足して帰った客', `${s.happy}人`],
     ['待ちくたびれた客', `${s.angry}人`],
     ['まかない', s.loss ? `${s.makanai}個（−¥${s.loss.toLocaleString('ja-JP')}）` : `${s.makanai}個`],
-    ['煮すぎ・溶けた具', `${s.overFail}個`],
+    ['煮すぎ・溶けた具', s.meltLoss ? `${s.overFail}個（−¥${s.meltLoss.toLocaleString('ja-JP')}）` : `${s.overFail}個`],
   ];
   el.resStats.innerHTML = '';
   for (const [dt, dd] of rows){
