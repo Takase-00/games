@@ -223,7 +223,7 @@ button{font:inherit;color:inherit}
       <p class="catch">具ごとに煮え方がちがう。食べ頃を見きわめよう。</p>
       <ul class="rules">
         <li><span class="tag">入れる</span>下の具をタップすると鍋に入る</li>
-        <li><span class="tag">出す</span>食べ頃の具をタップしてお客さんへ</li>
+        <li><span class="tag">出す</span>食べ頃の具をタップしてお客さんへ。注文にない具を出すと売上から引かれる</li>
         <li><span class="tag">60秒</span>煮すぎは崩れ、早いと味がしみない</li>
       </ul>
     </div>
@@ -265,13 +265,14 @@ button{font:inherit;color:inherit}
    おでん番
    ロジック（DOMに依存しない部分）
    ========================================================= */
-const VERSION = 'v1.1';
+const VERSION = 'v2.0';
 const DURATION = 60;        // 1回のプレイ時間（秒）
 const MELT = 9;             // 煮すぎになってから、溶けて消えるまでの秒数
 const NAMA_RATIO = 0.55;    // 食べ頃になる時刻のこの割合までは「生」
 const GOKU_BAND = 0.2;      // 食べ頃の窓の中央 ±20% が「極上」
 const SEATS = 4, COLS = 4, ROWS = 3, CELLS = COLS*ROWS;
 const GOOD = 0.9, BEST = 1.5;
+const MAKANAI_LOSS = 1.0;   // 注文のない具を出した（まかない）ときに、値段のこの割合を売上から引く
 
 // ready: 食べ頃になるまでの秒数 / win: 食べ頃が続く秒数 / price: 値段 / w: 注文される重み
 const TYPES = {
@@ -333,11 +334,8 @@ function newGame(opts){
     cells: new Array(CELLS).fill(null), seats: new Array(SEATS).fill(null),
     spawnCd: [0.4, 1.4, 2.6, 4.0], score:0, uid:0, custCount:0, events:[], aiCd:0.8,
     stats: { served:0, best:0, good:0, nama:0, kata:0, ok:0, goku:0, kuta:0, makanai:0, melted:0, overFail:0,
-             crumble:0, whiteEgg:0, angry:0, happy:0, done:0, ojii:0, kid:0, tips:0, customers:0 },
+             crumble:0, whiteEgg:0, angry:0, happy:0, done:0, ojii:0, kid:0, tips:0, customers:0, loss:0 },
   };
-  // 開店時の仕込み（少し煮えた具が入っている）
-  const pre = [[0,'daikon',0.55],[5,'tamago',0.75],[3,'konnyaku',0.35],[10,'chikuwa',0.05],[6,'hanpen',0.1]];
-  for (const [i,k,f] of pre) g.cells[i] = mkItem(g, k, TYPES[k].ready*f);
   return g;
 }
 function mkItem(g, type, t){
@@ -459,8 +457,11 @@ function serveCell(g, idx){
   if (st === 'kuta' && it.type === 'daikon') S.crumble++;
   if (!tk.c){
     S.makanai++; if (wasted) S.overFail++;
-    g.events.push({ k:'makanai', idx, type:it.type, stage:st, t:it.t, seed:it.seed });
-    return { k:'makanai' };
+    // 売上はマイナスにしない
+    const loss = Math.min(g.score, Math.round(TYPES[it.type].price * MAKANAI_LOSS / 10) * 10);
+    g.score -= loss; S.loss += loss;
+    g.events.push({ k:'makanai', idx, type:it.type, stage:st, t:it.t, seed:it.seed, loss });
+    return { k:'makanai', loss };
   }
   const c = tk.c, o = c.order[tk.row], v = tk.v;
   const yen = Math.round(TYPES[it.type].price * v / 10) * 10;
@@ -967,6 +968,7 @@ function processEvents(g, silent){
       case 'makanai': {
         const [x,y] = cellCenter(e.idx);
         addPop('まかない（もぐもぐ）', x, y, { size:12 });
+        if (e.loss > 0) addPop('−¥' + e.loss, x, y + 18, { size:13, delay:0.2, fill:'#FFD6CC', life:0.9 });
         snd('makanai');
         break;
       }
@@ -1401,7 +1403,7 @@ function showResult(){
     ['食べ頃率', `${rate}%`],
     ['満足して帰った客', `${s.happy}人`],
     ['待ちくたびれた客', `${s.angry}人`],
-    ['まかない', `${s.makanai}個`],
+    ['まかない', s.loss ? `${s.makanai}個（−¥${s.loss.toLocaleString('ja-JP')}）` : `${s.makanai}個`],
     ['煮すぎ・溶けた具', `${s.overFail}個`],
   ];
   el.resStats.innerHTML = '';
