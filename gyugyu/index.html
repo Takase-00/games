@@ -10,11 +10,14 @@
 <meta property="og:title" content="ぎゅうぎゅう通勤｜満員電車に乗りこめ！">
 <meta property="og:description" content="毎朝どんどん混んでいく満員電車に、長押しでぐいぐい乗りこむミニゲーム。ドアが閉まる前に乗れなければ遅刻。何日連続で出勤できる？">
 <meta property="og:url" content="https://takase-00.github.io/games/gyugyu/">
-<meta property="og:image" content="https://takase-00.github.io/games/gyugyu/ogp.png">
+<meta property="og:image" content="https://takase-00.github.io/games/gyugyu/ogp.png?v=1.1">
+<meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ぎゅうぎゅう通勤：満員電車に、長押しで乗りこめ！何日連続で出勤できる？">
 <meta property="og:locale" content="ja_JP">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://takase-00.github.io/games/gyugyu/ogp.png?v=1.1">
 <meta name="theme-color" content="#13A07A">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9A%83%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -105,6 +108,7 @@ body.is-title .hud{visibility:hidden}
 .btn.ghost{background:var(--panel);color:var(--panel-ink);box-shadow:inset 0 0 0 2px var(--edge),0 4px 0 var(--edge)}
 .btn.ghost:active{transform:translateY(2px);box-shadow:inset 0 0 0 2px var(--edge),0 2px 0 var(--edge)}
 .best{margin:10px 0 0;text-align:center;font-size:13px;color:var(--sub)}
+.ver{margin:8px 0 0;text-align:center;font-size:11px;color:var(--sub)}
 
 #result{justify-content:center;gap:12px;background:var(--dim);overflow-y:auto}
 .res-head{display:flex;align-items:center;gap:12px;width:min(100%,400px)}
@@ -189,6 +193,7 @@ body.is-title .hud{visibility:hidden}
     </ol>
     <button class="btn primary" id="startBtn" type="button">出勤する</button>
     <p class="best" id="bestLine" hidden></p>
+    <p class="ver" id="verLine"></p>
   </div>
 </section>
 
@@ -222,6 +227,7 @@ body.is-title .hud{visibility:hidden}
 <script>
 (() => {
 'use strict';
+const VERSION = 'v1.1';
 
 // ==SIM START==
 // ---- world (1 unit ≒ 4cm). car-local x: 0..100 is the area around our door ----
@@ -1264,6 +1270,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) { act
 $('startBtn').addEventListener('click', startGame);
 $('againBtn').addEventListener('click', startGame);
 $('shareBtn').addEventListener('click', share);
+$('verLine').textContent = VERSION;
 const muteBtn = $('muteBtn');
 function syncMute() {
   muteBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
