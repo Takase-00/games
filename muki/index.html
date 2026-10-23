@@ -205,6 +205,40 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .points li::before{content:"";position:absolute;left:0;top:.3em;width:13px;height:13px;border-radius:50%;background:var(--g);box-shadow:inset 0 0 0 3px rgba(255,255,255,.35)}
 .card .btn{width:100%}
 .ver{margin:10px 0 0;text-align:center;font-size:.75rem;color:var(--muted)}
+/* ---- 実績（共通の部品）。色は --a-* をゲームごとに指定する ---- */
+.achv-ov{position:fixed;inset:0;z-index:80;overflow-y:auto;overscroll-behavior:contain;background:var(--a-veil);color:var(--a-ink);padding:calc(env(safe-area-inset-top,0px) + 18px) 14px calc(env(safe-area-inset-bottom,0px) + 20px);font-family:var(--a-font)}
+.achv-panel{max-width:440px;margin:0 auto}
+.achv-panel h2{margin:0;font-size:24px;font-weight:900;text-align:center}
+.achv-lead{margin:2px 0 4px;text-align:center;font-size:12.5px;font-weight:700;color:var(--a-sub)}
+.achv-sub{margin:14px 0 6px;font-size:13px;font-weight:900;color:var(--a-sub)}
+.achv-stats{margin:0;padding:8px 12px;border-radius:10px;background:var(--a-card);border:1.5px solid var(--a-line);display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:12.5px;font-weight:700;color:var(--a-sub)}
+.achv-stats dd{margin:0;text-align:right;font-weight:900;color:var(--a-ink);font-variant-numeric:tabular-nums}
+.achv-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.achv-grid li,.achv-ladders li{min-height:62px;padding:7px 9px 8px;border-radius:10px;background:var(--a-card);border:1.5px solid var(--a-line);font-size:11.5px;font-weight:700;line-height:1.4;color:var(--a-sub)}
+.achv-grid li b,.achv-ladders li b{display:block;margin:1px 0 2px;font-size:13.5px;font-weight:900;color:var(--a-ink)}
+.achv-grid li.locked,.achv-ladders li.locked{background:var(--a-locked);border-style:dashed}
+.achv-grid li.locked b,.achv-ladders li.locked b{color:var(--a-sub);letter-spacing:.2em}
+.achv-ov .no{font-size:10px;font-weight:700}
+.achv-ov .when{display:block;margin-top:3px;font-size:10.5px;opacity:.85}
+.achv-ladders{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.achv-ladders .next{display:block;margin-top:4px;color:var(--a-ink)}
+.achv-ladders .bar{display:block;height:6px;margin-top:4px;border-radius:3px;background:var(--a-line);overflow:hidden}
+.achv-ladders .bar i{display:block;height:100%;background:var(--a-accent)}
+.achv-close{display:block;width:100%;min-height:50px;margin:16px 0 0;border:0;border-radius:12px;background:var(--a-accent);color:var(--a-accent-ink);font:inherit;font-size:16px;font-weight:900;cursor:pointer}
+.achv-close:focus-visible,.achv-open:focus-visible{outline:3px solid var(--a-accent);outline-offset:2px}
+.achv-open{min-height:40px;padding:4px 12px;border:0;background:none;color:var(--a-sub);font:inherit;font-size:13px;font-weight:700;text-decoration:underline;cursor:pointer}
+.achv-open b{color:var(--a-ink);font-weight:900}
+.achv-new-box{margin:10px 0 0;padding:8px 10px;border-radius:10px;background:var(--a-card);border:1.5px solid var(--a-line);text-align:left;color:var(--a-sub)}
+.achv-new-box > p{margin:0;font-size:12px;font-weight:900}
+.achv-new-list{list-style:none;margin:5px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.achv-new-list li{font-size:12px;font-weight:700;line-height:1.45}
+.achv-tag{display:inline-block;margin-right:6px;padding:0 4px;border-radius:3px;background:var(--a-accent);color:var(--a-accent-ink);font-size:10.5px;font-weight:900;vertical-align:2px}
+.achv-name{display:inline-block;margin-right:6px;padding:1px 7px;border:1.5px solid var(--a-accent);border-radius:4px;color:var(--a-ink);font-size:13.5px;font-weight:900}
+.achv-ov,.achv-open{--a-veil:var(--bg);--a-card:var(--panel);--a-line:var(--line);--a-ink:var(--ink);--a-sub:var(--muted);--a-accent:var(--push);--a-accent-ink:#FFFFFF;--a-locked:var(--bg);--a-font:inherit}
+.card .achv-open{display:block;margin:6px auto 0}
+.final .achv-new-box,.final .achv-open{--a-card:rgba(255,255,255,.08);--a-line:rgba(255,255,255,.2);--a-ink:#FFFFFF;--a-sub:rgba(255,255,255,.75);--a-accent:#FFD86B;--a-accent-ink:#1A1D22}
+.final .achv-new-box{margin:0 0 16px}
+.final .achv-open{display:block;margin:10px auto 0}
 
 .final{
   position:fixed;inset:0;z-index:6;overflow:auto;color:#fff;
@@ -326,6 +360,7 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
       <li style="--g:var(--push)">最後に「美しさ」と「おもしろさ」で体型を診断</li>
     </ul>
     <button class="btn" id="start" type="button">ジムに入る</button>
+    <button id="achvBtn" class="achv-open" type="button">実績 <b id="achvCount">0/0</b> を見る</button>
     <p class="ver" id="verLine"></p>
   </div>
 </div>
@@ -342,10 +377,12 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
       <div><div class="meter-h"><span>おもしろさ</span><b id="fFun">0</b></div><div class="track"><div class="fill" id="fFunBar" style="--c:#FF7A8A"></div></div></div>
     </div>
     <div class="mus" id="fMus"></div>
+    <div class="achv-new-box" id="achvNewBox" hidden><p>新しい実績</p><ul class="achv-new-list" id="achvNewList"></ul></div>
     <div class="f-acts">
       <button class="btn" id="retry" type="button">もう一度</button>
       <button class="btn sub" id="share" type="button">結果をシェア</button>
     </div>
+    <button id="achvBtn2" class="achv-open" type="button">実績 <b id="achvCount2">0/0</b></button>
   </div>
 </div>
 
@@ -368,13 +405,26 @@ button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
   </div>
 </div>
 
+<section id="achvOv" class="achv-ov" hidden aria-labelledby="achvOvHead">
+  <div class="achv-panel">
+    <h2 id="achvOvHead">実績 <span id="achvOvCount">0/0</span></h2>
+    <p class="achv-lead">解除するまで、名前も条件もひみつ。いろいろな遊び方を試してみよう。</p>
+    <h3 class="achv-sub">これまでの記録</h3>
+    <dl class="achv-stats" id="achvStats"></dl>
+    <h3 class="achv-sub">実績</h3>
+    <ol class="achv-grid" id="achvGrid"></ol>
+    <h3 class="achv-sub">積み重ね</h3>
+    <ol class="achv-ladders" id="achvLadders"></ol>
+    <button id="achvClose" class="achv-close" type="button">閉じる</button>
+  </div>
+</section>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (() => {
 'use strict';
 const $ = id => document.getElementById(id);
-const VERSION = 'v1.0';
+const VERSION = 'v2.0';
 const DAYS = 12, SLOTS = 3, VMAX = 8, GROW = .24, FAT0 = .35;
 
 const MU = [
@@ -446,6 +496,7 @@ const SOLO = {
 /* ---------- state ---------- */
 const zero = () => Object.fromEntries(MU.map(m => [m.k, 0]));
 let v = zero(), f = zero(), menu = [], day = 1, restBonus = 1, busy = false, started = false, fat = FAT0;
+let run = { train:0, rest:0, ex:{} };   // その回のトレーニング日数・休養日数・種目ごとの回数（実績用）
 const CAL = [
   { id: 'cut', n: '減量', d: '体脂肪が減る。筋肉の伸びは少し落ちる', g: .8, fat: -.12 },
   { id: 'keep', n: '維持', d: '体脂肪はそのまま', g: 1, fat: 0 },
@@ -747,6 +798,7 @@ function tween(from, to, ms) {
 async function train() {
   if (busy || !menu.length || !started) return;
   busy = true; renderMenu(); clearSay();
+  run.train++; for (const id of menu) run.ex[id] = (run.ex[id] || 0) + 1;
   ensureAudio();
   window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
   const before = { ...v }, next = { ...v }, gain = {}, dm = dietMult();
@@ -775,6 +827,7 @@ async function train() {
 async function rest() {
   if (busy || !started) return;
   busy = true; renderMenu(); clearSay();
+  run.rest++;
   ensureAudio();
   window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
   for (const m of MU) f[m.k] = 0;
@@ -812,17 +865,163 @@ function finish() {
     $('fFunBar').style.width = s.fun + '%';
   }));
   lastResult = { ...d, ...s, pct: fatPct() };
+  const fresh = ACH.record({ d, s, pct: fatPct(), diet, run });
+  ACH.showNew(fresh); showAchvCount(); lastFresh = fresh.map(a => a.title);
   sfx('final');
   try { $('retry').focus({ preventScroll: true }); } catch (e) {}
 }
 let lastResult = null;
 function startGame() {
   ensureAudio();
-  v = zero(); f = zero(); menu = []; day = 1; restBonus = 1; busy = false; started = true; fat = FAT0;
+  v = zero(); f = zero(); menu = []; day = 1; restBonus = 1; busy = false; started = true; fat = FAT0; run = { train:0, rest:0, ex:{} };
   $('titleOv').hidden = true; $('final').hidden = true;
   clearSay(); drawFig(); renderHead(); renderMenu();
   window.scrollTo({ top: 0 });
 }
+
+/* =========================================================
+   実績（共通の部品）
+   解除するまで名前も条件も「？？？」。達成した回数・初めて達成した日・累計を端末に保存する
+   cfg = { prefix, singles:[{key,title,desc,test(ctx,T)}], ladders:[{label,unit,value(T),tiers:[{key,at,title}]}],
+           collectAt, totals:{...}, add(T,ctx), records(T) => [[項目,値],...], migrate(got)（任意） }
+   ========================================================= */
+function makeAchv(cfg){
+  const ls = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e){ return d; } };
+  const ss = (k, v) => { try { localStorage.setItem(k, v); } catch (e){} };
+  const fmt = (v, unit) => unit === '円' ? '¥' + v.toLocaleString('ja-JP') : v.toLocaleString('ja-JP') + unit;
+  const today = () => { const d = new Date(); return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`; };
+  const KA = cfg.prefix + '-achv', KT = cfg.prefix + '-total';
+  const tiers = [];
+  for (const L of cfg.ladders) for (const t of L.tiers){ t.ladder = L; t.desc = `${L.label}が${fmt(t.at, L.unit)}に届いた`; tiers.push(t); }
+  const collector = cfg.collectAt ? { key:'collect', title:'実績コレクター', desc:`実績を${cfg.collectAt}個集めた` } : null;
+  const ALL = cfg.singles.concat(tiers, collector ? [collector] : []);
+  const T = Object.assign({}, cfg.totals);
+  try { const t = JSON.parse(ls(KT, '{}')); for (const k in T) if (Number.isFinite(t[k])) T[k] = t[k]; } catch (e){}
+  const got = {};
+  try {
+    const a = JSON.parse(ls(KA, '{}'));
+    if (a && typeof a === 'object' && !Array.isArray(a)) for (const k in a) if (a[k] && ALL.some(x => x.key === k)) got[k] = { n:Math.max(1, a[k].n | 0), d:String(a[k].d || '') };
+  } catch (e){}
+  // 前の版の記録を実績に移す（移したら保存する）
+  if (cfg.migrate && cfg.migrate(got)) ss(KA, JSON.stringify(got));
+  // 1回分の結果を記録し、初めて解除した実績を返す
+  function record(ctx){
+    cfg.add(T, ctx); ss(KT, JSON.stringify(T));
+    const fresh = [];
+    for (const a of cfg.singles) if (a.test(ctx, T)){ if (got[a.key]) got[a.key].n++; else { got[a.key] = { n:1, d:today() }; fresh.push(a); } }
+    for (const t of tiers) if (!got[t.key] && t.ladder.value(T) >= t.at){ got[t.key] = { n:1, d:today() }; fresh.push(t); }
+    if (collector && !got[collector.key] && Object.keys(got).length >= cfg.collectAt){ got[collector.key] = { n:1, d:today() }; fresh.push(collector); }
+    ss(KA, JSON.stringify(got));
+    return fresh;
+  }
+  const countText = () => `${Object.keys(got).length}/${ALL.length}`;
+  const $ = id => document.getElementById(id);
+  const when = (key, withCount) => `初達成 ${got[key].d || '記録なし'}` + (withCount ? `・${got[key].n.toLocaleString('ja-JP')}回` : '');
+  function render(){
+    $('achvOvCount').textContent = countText();
+    const st = $('achvStats'); st.innerHTML = '';
+    for (const [k, v] of cfg.records(T)){ const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = k; dd.textContent = v; st.append(dt, dd); }
+    const grid = $('achvGrid'); grid.innerHTML = '';
+    cfg.singles.concat(collector ? [collector] : []).forEach((a, i) => {
+      const li = document.createElement('li'), has = !!got[a.key];
+      const no = document.createElement('span'); no.className = 'no'; no.textContent = 'No.' + String(i + 1).padStart(2, '0');
+      const b = document.createElement('b'); b.textContent = has ? a.title : '？？？';
+      li.append(no, b);
+      if (has){ const w = document.createElement('span'); w.className = 'when'; w.textContent = when(a.key, a !== collector); li.append(a.desc, w); }
+      else { li.className = 'locked'; li.setAttribute('aria-label', `No.${i + 1} まだ解除していない実績`); }
+      grid.append(li);
+    });
+    const lad = $('achvLadders'); lad.innerHTML = '';
+    for (const L of cfg.ladders){
+      const li = document.createElement('li'), done = L.tiers.filter(t => got[t.key]), cur = done[done.length - 1], next = L.tiers.find(t => !got[t.key]);
+      const b = document.createElement('b');
+      if (!cur){ li.className = 'locked'; b.textContent = '？？？'; li.append(b); li.setAttribute('aria-label', 'まだ解除していない積み重ねの実績'); lad.append(li); continue; }
+      const lv = document.createElement('span'); lv.className = 'no'; lv.textContent = `${L.label}　${done.length}/${L.tiers.length}段`;
+      b.textContent = cur.title;
+      const w = document.createElement('span'); w.className = 'when'; w.textContent = when(cur.key, false);
+      li.append(lv, b, cur.desc, w);
+      const nx = document.createElement('span'); nx.className = 'next';
+      if (next){
+        const v = L.value(T);
+        nx.textContent = `次は「${next.title}」：${fmt(next.at, L.unit)}（いま ${fmt(v, L.unit)}）`;
+        const bar = document.createElement('span'); bar.className = 'bar'; const fill = document.createElement('i'); fill.style.width = (Math.min(1, v / next.at) * 100).toFixed(1) + '%'; bar.append(fill);
+        li.append(nx, bar);
+      } else { nx.textContent = 'すべての段を達成しました'; li.append(nx); }
+      lad.append(li);
+    }
+  }
+  let from = null;
+  function open(btn){
+    from = btn || null; render();
+    const ov = $('achvOv'); ov.hidden = false; ov.scrollTop = 0;
+    try { $('achvClose').focus({ preventScroll:true }); } catch (e){}
+  }
+  function close(){
+    $('achvOv').hidden = true;
+    try { if (from) from.focus({ preventScroll:true }); } catch (e){}
+  }
+  // 結果画面の「新しい実績」を作る
+  function showNew(fresh){
+    const list = $('achvNewList'); list.innerHTML = '';
+    for (const a of fresh){
+      const li = document.createElement('li');
+      const n = document.createElement('span'); n.className = 'achv-tag'; n.textContent = 'NEW';
+      const b = document.createElement('span'); b.className = 'achv-name'; b.textContent = a.title;
+      li.append(n, b, a.desc); list.append(li);
+    }
+    $('achvNewBox').hidden = !fresh.length;
+  }
+  $('achvClose').addEventListener('click', close);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('achvOv').hidden) close(); });
+  return { record, countText, open, close, showNew, totals:T, all:ALL };
+}
+
+/* ---------- achievements（実績） ---------- */
+// x = { d: 診断, s: 美しさ・おもしろさ, pct: 体脂肪％, diet, run: { train, rest, ex: {種目: 回数}, items } }
+const BODY = [['hyoro','ひょろひょろ'], ['potchaP','ぽっちゃりパワー系'], ['potcha','ぽっちゃりさん']]
+  .concat(MU.map(m => ['solo_' + m.k, SOLO[m.k]]))
+  .concat([['arms','腕だけゴリラ'], ['chicken','チキンレッグ'], ['lower','下半身だけアスリート'], ['kire','キレッキレの仕上がり'], ['bulk','ナイスバルク！モンスター級'],
+           ['golden','黄金比ボディ'], ['hoso','バランス良しの細マッチョ'], ['gyaku','逆三角形ボディ'], ['kosei','個性派ボディ']]);
+const ACH = makeAchv({
+  prefix: 'muki',
+  singles: [
+    // はじめの一歩
+    { key:'first',   title:'ジムに入会',         desc:'はじめて12日間のトレーニングを終えた',     test:() => true },
+    { key:'rest1',   title:'はじめての休養日',   desc:'休養日をとった',                           test:x => x.run.rest >= 1 },
+    // 体型図鑑
+  ].concat(BODY.map(([k, t]) => ({ key:'b_' + k, title:t, desc:`体型の診断が「${t}」になった`, test:x => x.d.t === t }))).concat([
+    // 点数
+    { key:'beauty60',  title:'美のつぼみ',       desc:'美しさ60以上',                             test:x => x.s.beauty >= 60 },
+    { key:'beauty80',  title:'美の求道者',       desc:'美しさ80以上',                             test:x => x.s.beauty >= 80 },
+    { key:'beauty95',  title:'生ける彫刻',       desc:'美しさ95以上',                             test:x => x.s.beauty >= 95 },
+    { key:'fun60',     title:'笑いのつぼみ',     desc:'おもしろさ60以上',                         test:x => x.s.fun >= 60 },
+    { key:'fun80',     title:'ジムの人気者',     desc:'おもしろさ80以上',                         test:x => x.s.fun >= 80 },
+    { key:'fun95',     title:'伝説のネタ体型',   desc:'おもしろさ95以上',                         test:x => x.s.fun >= 95 },
+    // トレーニングのしかた
+    { key:'noRest',    title:'休まない筋トレ',   desc:'12日間、一度も休まなかった',               test:x => x.run.rest === 0 },
+    { key:'allEx',     title:'全種目制覇',       desc:'12日間で18種目すべてをやった',             test:x => Object.keys(x.run.ex).length >= EX.length },
+    { key:'oneEx',     title:'一種目ひとすじ',   desc:'10日以上トレーニングして、1種目だけをやり続けた', test:x => x.run.train >= 10 && Object.keys(x.run.ex).length === 1 },
+    { key:'sleep12',   title:'寝て過ごした12日', desc:'12日間ずっと休養日だった',                 test:x => x.run.rest >= DAYS },
+    // 食事
+    { key:'cut',       title:'バキバキの減量',   desc:'体脂肪6%で12日間を終えた',                 test:x => x.pct <= 6 },
+    { key:'feast',     title:'食べすぎた12日',   desc:'体脂肪35%以上で12日間を終えた',            test:x => x.pct >= 35 },
+  ]),
+  ladders: [
+    { label:'修了した回数',   unit:'回', value:T => T.plays,  tiers:[ { key:'plays10', at:10, title:'ジムの常連' }, { key:'plays30', at:30, title:'ジムの主' }, { key:'plays60', at:60, title:'鉄の会員証' }, { key:'plays100', at:100, title:'名誉会員' } ] },
+    { label:'美しさの合計',   unit:'点', value:T => T.beauty, tiers:[ { key:'bt500', at:500, title:'鏡の前の常連' }, { key:'bt2000', at:2000, title:'ポージングの名手' }, { key:'bt4000', at:4000, title:'大会の常連' }, { key:'bt6000', at:6000, title:'ボディビルの殿堂' } ] },
+    { label:'おもしろさの合計', unit:'点', value:T => T.fun,  tiers:[ { key:'fn500', at:500, title:'ジムのうわさ' }, { key:'fn2000', at:2000, title:'ジムの名物' }, { key:'fn4000', at:4000, title:'町の名物' }, { key:'fn6000', at:6000, title:'筋肉の芸人' } ] },
+    { label:'こなした種目の合計', unit:'回', value:T => T.ex, tiers:[ { key:'ex300', at:300, title:'汗っかき' }, { key:'ex1000', at:1000, title:'鉄を上げる人' }, { key:'ex2000', at:2000, title:'鉄の申し子' }, { key:'ex3000', at:3000, title:'筋トレの化身' } ] },
+  ],
+  collectAt: 30,
+  totals: { plays:0, beauty:0, fun:0, ex:0, rest:0, bestBeauty:0, bestFun:0 },
+  add: (T, x) => { T.plays++; T.beauty += x.s.beauty; T.fun += x.s.fun; T.ex += Object.values(x.run.ex).reduce((a, b) => a + b, 0); T.rest += x.run.rest;
+                   T.bestBeauty = Math.max(T.bestBeauty, x.s.beauty); T.bestFun = Math.max(T.bestFun, x.s.fun); },
+  records: T => [['修了した回数', T.plays + '回'], ['最高の美しさ', T.bestBeauty + '点'], ['最高のおもしろさ', T.bestFun + '点'],
+                 ['美しさの合計', T.beauty.toLocaleString('ja-JP') + '点'], ['おもしろさの合計', T.fun.toLocaleString('ja-JP') + '点'],
+                 ['こなした種目の合計', T.ex.toLocaleString('ja-JP') + '回'], ['休養日の合計', T.rest.toLocaleString('ja-JP') + '日']],
+});
+let lastFresh = [];
+function showAchvCount() { $('achvCount').textContent = ACH.countText(); $('achvCount2').textContent = ACH.countText(); }
 
 /* ---------- meal management (optional) ---------- */
 const mealOv = $('mealOv');
@@ -898,7 +1097,8 @@ async function copyText(t) {
 async function share() {
   if (!lastResult) return;
   const url = location.href.split('#')[0];
-  const text = `12日間の筋トレで「${lastResult.t}」が完成！ 美しさ${lastResult.beauty}・おもしろさ${lastResult.fun}（体脂肪${lastResult.pct}%） #ムキムキ育成ジム`;
+  const ach = lastFresh.length ? ' 実績解除' + lastFresh.slice(0, 3).map(t => '「' + t + '」').join('') + (lastFresh.length > 3 ? `ほか${lastFresh.length - 3}個` : '') : '';
+  const text = `12日間の筋トレで「${lastResult.t}」が完成！ 美しさ${lastResult.beauty}・おもしろさ${lastResult.fun}（体脂肪${lastResult.pct}%）${ach} #ムキムキ育成ジム`;
   if (navigator.share) {
     try { await navigator.share({ text, url }); return; }
     catch (e) { if (e && e.name === 'AbortError') return; }
@@ -925,6 +1125,8 @@ $('rest').addEventListener('click', rest);
 $('start').addEventListener('click', startGame);
 $('verLine').textContent = VERSION;
 $('retry').addEventListener('click', startGame);
+$('achvBtn').addEventListener('click', () => ACH.open($('achvBtn')));
+$('achvBtn2').addEventListener('click', () => ACH.open($('achvBtn2')));
 $('share').addEventListener('click', share);
 $('mealBtn').addEventListener('click', openMeal);
 $('calOpts').addEventListener('click', e => { const b = e.target.closest('[data-cal]'); if (!b) return; diet.cal = b.dataset.cal; dietSet = true; sfx('add'); renderMeal(); renderMealBtn(); });
@@ -939,7 +1141,7 @@ $('mute').addEventListener('click', () => {
 });
 
 /* ---------- boot ---------- */
-buildList(); syncMute(); renderMealBtn(); drawFig('smile'); renderHead(); renderMenu();
+buildList(); syncMute(); renderMealBtn(); drawFig('smile'); renderHead(); renderMenu(); showAchvCount();
 })();
 </script>
 </body>
