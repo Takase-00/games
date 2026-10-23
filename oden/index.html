@@ -159,6 +159,19 @@ button{font:inherit;color:inherit}
 .achv-list li{font-size:12px;font-weight:700;line-height:1.45;color:#4A3A2C}
 .achv-name{display:inline-block;margin-right:6px;padding:1px 7px;border:1.5px solid #B8321C;border-radius:4px;background:#FFF3E6;color:#2B2018;font-size:13.5px;font-weight:900}
 .achv-new{display:inline-block;margin-right:6px;padding:0 4px;border-radius:3px;background:#B8321C;color:#FFF7F0;font-size:10.5px;font-weight:900;vertical-align:2px}
+.achv-btn{min-height:40px;padding:4px 12px;font-size:13px}
+.achv-btn b{font-weight:900;color:var(--ink)}
+.achv-screen{z-index:25;background:var(--veil);padding:58px 14px 20px}
+.achv-panel{max-width:440px;margin:0 auto}
+.achv-panel h2{margin:0;font-family:var(--brush);font-size:28px;font-weight:400;text-align:center}
+.achv-lead{margin:2px 0 12px;text-align:center;font-size:12.5px;font-weight:700;color:var(--sub)}
+.achv-grid{list-style:none;margin:0 0 16px;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.achv-grid li{min-height:66px;padding:7px 9px 8px;border-radius:10px;background:var(--bubble);border:1.5px solid var(--bubble-line);font-size:11.5px;font-weight:700;line-height:1.4;color:var(--bubble-sub)}
+.achv-grid li b{display:block;margin:1px 0 2px;font-size:13.5px;font-weight:900;color:var(--bubble-ink)}
+.achv-grid li.locked{background:var(--tray);border-style:dashed}
+.achv-grid li.locked b{color:var(--bubble-sub);letter-spacing:.2em}
+.achv-grid .no{font-size:10px;font-weight:700;color:var(--bubble-sub)}
+#achvClose{width:100%}
 .slip-stats{margin:0;padding-top:8px;border-top:1px dashed #C9B48E;display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:13.5px}
 .slip-stats dt{font-weight:700;color:#5A4838}
 .slip-stats dd{margin:0;text-align:right;font-weight:900;font-variant-numeric:tabular-nums}
@@ -236,7 +249,8 @@ button{font:inherit;color:inherit}
     <div class="title-mid"><span class="demo-chip">お手本デモ</span></div>
     <div class="title-bot">
       <button id="startBtn" class="btn primary" type="button">のれんを出す（開店）</button>
-      <p class="best">これまでの最高売上 <b id="bestTitle">¥0</b>　実績 <b id="achvCount">0/8</b></p>
+      <p class="best">これまでの最高売上 <b id="bestTitle">¥0</b></p>
+      <button id="achvBtn" class="btn-link achv-btn" type="button">実績 <b id="achvCount">0/0</b> を見る</button>
       <p class="ver" id="verLine"></p>
     </div>
   </section>
@@ -251,7 +265,7 @@ button{font:inherit;color:inherit}
       <p class="slip-title" id="resTitle"></p>
       <p class="slip-note" id="resNote"></p>
       <p class="slip-next" id="resNext"></p>
-      <div class="slip-achv" id="resAchv" hidden><p class="slip-lbl">今回の実績</p><ul class="achv-list" id="resAchvList"></ul></div>
+      <div class="slip-achv" id="resAchv" hidden><p class="slip-lbl">新しい実績</p><ul class="achv-list" id="resAchvList"></ul></div>
       <dl class="slip-stats" id="resStats"></dl>
       <div class="stamp" aria-hidden="true">毎度</div>
       <div class="stamp newbest" id="newBest" aria-hidden="true" hidden>新記録</div>
@@ -260,8 +274,17 @@ button{font:inherit;color:inherit}
       <button id="againBtn" class="btn primary" type="button">もう一度</button>
       <button id="shareBtn" class="btn" type="button">結果をシェア</button>
     </div>
-    <button id="toTitle" class="btn-link" type="button">タイトルへ</button>
+    <div><button id="achvBtn2" class="btn-link" type="button">実績 <b id="resAchvCount">0/0</b></button><button id="toTitle" class="btn-link" type="button">タイトルへ</button></div>
     <p class="sr-only" id="resLive" aria-live="polite"></p>
+  </section>
+
+  <section id="achvScreen" class="overlay achv-screen" hidden aria-labelledby="achvHead">
+    <div class="achv-panel">
+      <h2 id="achvHead">実績 <span id="achvHeadCount">0/0</span></h2>
+      <p class="achv-lead">解除するまで、名前も条件もひみつ。いろいろな遊び方を試してみよう。</p>
+      <ol class="achv-grid" id="achvGrid"></ol>
+      <button id="achvClose" class="btn primary" type="button">閉じる</button>
+    </div>
   </section>
 
   <div id="toast" role="status" aria-live="polite"></div>
@@ -273,7 +296,7 @@ button{font:inherit;color:inherit}
    おでん番
    ロジック（DOMに依存しない部分）
    ========================================================= */
-const VERSION = 'v4.0';
+const VERSION = 'v5.0';
 const DURATION = 60;        // 1回のプレイ時間（秒）
 const MELT = 9;             // 煮すぎになってから、溶けて消えるまでの秒数
 const NAMA_RATIO = 0.55;    // 食べ頃になる時刻のこの割合までは「生」
@@ -355,7 +378,8 @@ function newGame(opts){
     cells: new Array(CELLS).fill(null), seats: new Array(SEATS).fill(null),
     spawnCd: [0.4, 1.4, 2.6, 4.0, 5.4], score:0, uid:0, custCount:0, events:[], aiCd:0.8,
     stats: { served:0, best:0, good:0, nama:0, kata:0, ok:0, goku:0, kuta:0, makanai:0, melted:0, overFail:0,
-             crumble:0, whiteEgg:0, angry:0, happy:0, done:0, ojii:0, kid:0, tips:0, customers:0, loss:0, meltLoss:0 },
+             crumble:0, whiteEgg:0, angry:0, happy:0, done:0, ojii:0, kid:0, tips:0, customers:0, loss:0, meltLoss:0,
+             gokuBy:{}, full:0, maxFill:0, streak:0, maxStreak:0, perfectPlate:0, clutch:0, lastSec:0, kidKuta:0, ojiiNama:0 },
   };
   return g;
 }
@@ -385,7 +409,8 @@ function spawn(g, si){
   else n = r < 0.4 ? 2 : 3;
   let pref = 'normal';
   const r2 = g.rnd();
-  if (g.custCount >= 2){ if (r2 < 0.15) pref = 'kuta'; else if (r2 < 0.30) pref = 'kata'; }
+  // かため好きは早く出せて大喜びさせやすいので、くたくた好きより少なめにする
+  if (g.custCount >= 2){ if (r2 < 0.18) pref = 'kuta'; else if (r2 < 0.29) pref = 'kata'; }
   const order = [];
   for (let k=0; k<n; k++){
     const type = g.custCount === 0 ? (g.rnd() < 0.5 ? 'tamago' : 'konnyaku') : pickType(g);
@@ -453,8 +478,9 @@ function update(g, dt){
 function addItem(g, type){
   if (g.ended || !TYPES[type]) return -1;
   const idx = g.cells.indexOf(null);
-  if (idx < 0){ g.events.push({ k:'full' }); return -1; }
+  if (idx < 0){ g.stats.full++; g.events.push({ k:'full' }); return -1; }
   g.cells[idx] = mkItem(g, type, 0);
+  g.stats.maxFill = Math.max(g.stats.maxFill, g.cells.filter(Boolean).length);
   g.events.push({ k:'add', idx, type });
   return idx;
 }
@@ -484,7 +510,7 @@ function serveCell(g, idx){
   const wasted = st === 'kuta' && !(tk.c && tk.c.pref === 'kuta');
   if (st === 'kuta' && it.type === 'daikon') S.crumble++;
   if (!tk.c){
-    S.makanai++; if (wasted) S.overFail++;
+    S.makanai++; S.streak = 0; if (wasted) S.overFail++;
     const loss = takeLoss(g, it.type); S.loss += loss;
     g.events.push({ k:'makanai', idx, type:it.type, stage:st, t:it.t, seed:it.seed, loss });
     return { k:'makanai', loss };
@@ -500,6 +526,11 @@ function serveCell(g, idx){
   if (it.type === 'tamago' && (st === 'nama' || st === 'kata') && c.pref !== 'kata') S.whiteEgg++;
   if (c.pref === 'kuta' && v >= BEST) S.ojii++;
   if (c.pref === 'kata' && v >= BEST) S.kid++;
+  if (st === 'goku') S.gokuBy[it.type] = (S.gokuBy[it.type] || 0) + 1;
+  if (v >= BEST){ S.streak++; S.maxStreak = Math.max(S.maxStreak, S.streak); } else S.streak = 0;
+  if (g.timeLeft < 1) S.lastSec++;
+  if (c.pref === 'kata' && st === 'kuta') S.kidKuta++;
+  if (c.pref === 'kuta' && st === 'nama') S.ojiiNama++;
   c.mood = v >= BEST ? 'joy' : (v >= GOOD ? 'happy' : 'sad'); c.moodT = 1.1;
   g.events.push({ k:'serve', idx, seat:tk.si, row:tk.row, type:it.type, stage:st, value:v, yen, pref:c.pref, t:it.t, seed:it.seed });
   if (c.order.every(x => x.served)) completeCustomer(g, c, tk.si);
@@ -507,6 +538,8 @@ function serveCell(g, idx){
 }
 function completeCustomer(g, c, si){
   const allGood = c.order.every(o => o.value >= GOOD);
+  if (c.order.length >= 3 && c.order.every(o => o.stage === 'goku')) g.stats.perfectPlate++;
+  if (c.patience < 1) g.stats.clutch++;
   const tip = allGood ? 50*c.order.length : 0;
   g.score += tip; g.stats.tips += tip; g.stats.done++;
   if (allGood) g.stats.happy++;
@@ -579,18 +612,70 @@ function judge(g){
   const rk = rankOf(g.score);
   return { title:rk.title, note:rk.note };
 }
-// 実績：売上の称号とは別に、条件を満たすたびに出る（1回で複数出ることもある）
+// 実績：売上の称号とは別に、条件を満たすと解除される（1回で複数解除されることもある）。
+// 解除するまで名前も条件も見せない。desc は解除後に見せる説明
+// T：これまでの累計（今回の分を含む）{ plays, sales, best }
 const ACHV = [
-  { key:'makanai',  title:'まかない大臣',       test:s => s.makanai >= 8 && s.makanai > s.served, note:s => `お客さんより大将のほうが食べました（${s.makanai}個）` },
-  { key:'crumble',  title:'大根クラッシャー',   test:s => s.crumble >= 6,  note:s => `崩した大根は${s.crumble}本。出汁はとびきり濃くなりました` },
-  { key:'melt',     title:'煮込みの鬼',         test:s => s.melted >= 8,   note:s => `${s.melted}個の具が、出汁の中へ消えていきました` },
-  { key:'whiteEgg', title:'白たまご職人',       test:s => s.whiteEgg >= 4, note:s => `味のしみていない卵を${s.whiteEgg}個出しました` },
-  { key:'watch',    title:'鍋をながめる人',     test:s => s.served === 0 && s.makanai === 0, note:() => '湯気をながめているうちに、閉店の時間になりました' },
-  { key:'ojii',     title:'常連じいさんの推し', test:s => s.ojii >= 8,     note:s => `くたくたの具で、おじいさんを${s.ojii}回よろこばせました` },
-  { key:'kid',      title:'ちびっこの味方',     test:s => s.kid >= 8,      note:s => `かための具で、子どもを${s.kid}回よろこばせました` },
-  { key:'angry',    title:'閑古鳥の番人',       test:s => s.angry >= 8,    note:s => `${s.angry}人のお客さんが、待ちくたびれて帰りました` },
+  // はじめの一歩
+  { key:'open',      title:'開店初日',           desc:'はじめて屋台ののれんを出した',             test:(s,g,T) => T.plays >= 1 },
+  { key:'firstGoku', title:'はじめての極上',     desc:'★極上の具を出した',                         test:s => s.best >= 1 },
+  { key:'firstTip',  title:'心付けをもらった',   desc:'お客さんから心付けをもらった',               test:s => s.tips > 0 },
+  // 売上の節目
+  { key:'r5000',     title:'出汁を任された',     desc:'1回の売上が¥5,000に届いた',                 test:(s,g) => g.score >= 5000 },
+  { key:'r6500',     title:'一人前の証',         desc:'1回の売上が¥6,500に届いた',                 test:(s,g) => g.score >= 6500 },
+  { key:'r9500',     title:'大将の座',           desc:'1回の売上が¥9,500に届いた',                 test:(s,g) => g.score >= 9500 },
+  { key:'r13000',    title:'おでんの神域',       desc:'1回の売上が¥13,000に届いた',                test:(s,g) => g.score >= 13000 },
+  // 腕前
+  { key:'goku15',    title:'極上の目利き',       desc:'1回で★極上を15品出した',                    test:s => s.best >= 15 },
+  { key:'goku25',    title:'極上づくし',         desc:'1回で★極上を25品出した',                    test:s => s.best >= 25 },
+  { key:'goku35',    title:'極上の化身',         desc:'1回で★極上を35品出した',                    test:s => s.best >= 35 },
+  { key:'streak10',  title:'極上の十連',         desc:'★極上を10品続けて出した',                   test:s => s.maxStreak >= 10 },
+  { key:'streak20',  title:'極上の二十連',       desc:'★極上を20品続けて出した',                   test:s => s.maxStreak >= 20 },
+  { key:'noLoss',    title:'食品ロスゼロ',       desc:'20品以上出して、まかないも溶けた具もなかった', test:s => s.served >= 20 && s.makanai === 0 && s.melted === 0 },
+  { key:'noAngry',   title:'待たせない店',       desc:'20人以上来て、誰も待ちくたびれなかった',     test:s => s.customers >= 20 && s.angry === 0 },
+  { key:'happy15',   title:'満員御礼',           desc:'1回で20人を大満足させた',                    test:s => s.happy >= 20 },
+  { key:'tips1500',  title:'心付けの山',         desc:'1回で心付けを¥2,000もらった',                test:s => s.tips >= 2000 },
+  { key:'allTypes',  title:'六品そろい踏み',     desc:'6種類すべての具を★極上で出した',            test:s => Object.keys(s.gokuBy).length >= 6 },
+  { key:'daikon',    title:'大根ひとすじ',       desc:'1回で大根を極上で6本出した',                 test:s => (s.gokuBy.daikon || 0) >= 6 },
+  { key:'kinchaku',  title:'巾着の名手',         desc:'1回で餅巾着を極上で5個出した',               test:s => (s.gokuBy.kinchaku || 0) >= 5 },
+  { key:'hanpen',    title:'はんぺん早業',       desc:'1回ではんぺんを極上で5枚出した',             test:s => (s.gokuBy.hanpen || 0) >= 5 },
+  { key:'plate',     title:'完璧なひと皿',       desc:'3品の注文を、3品とも極上で出した',           test:s => s.perfectPlate >= 1 },
+  { key:'plate3',    title:'完璧なひと皿×3',     desc:'1回で、3品とも極上の注文を3人に出した',      test:s => s.perfectPlate >= 3 },
+  { key:'clutch',    title:'間一髪',             desc:'帰る寸前のお客さんに、最後の1品を間に合わせた', test:s => s.clutch >= 1 },
+  { key:'lastSec',   title:'閉店まぎわの一品',   desc:'閉店1秒前に具を出した',                      test:s => s.lastSec >= 1 },
+  { key:'fullPot',   title:'鍋いっぱい',         desc:'鍋の12マスを全部うめた',                     test:s => s.maxFill >= 12 },
+  // お客さん
+  { key:'ojii',      title:'常連じいさんの推し', desc:'くたくたの具で、おじいさんを10回よろこばせた', test:s => s.ojii >= 10 },
+  { key:'kid',       title:'ちびっこの味方',     desc:'かための具で、子どもを10回よろこばせた',     test:s => s.kid >= 10 },
+  { key:'both',      title:'世代をこえて',       desc:'1回で、おじいさんと子どもを5回ずつよろこばせた', test:s => s.ojii >= 5 && s.kid >= 5 },
+  // 変な遊び方
+  { key:'makanai',   title:'まかない大臣',       desc:'お客さんに出すより多く、まかないで食べた（8個以上）', test:s => s.makanai >= 8 && s.makanai > s.served },
+  { key:'makanai20', title:'大食いの大将',       desc:'1回でまかないを20個食べた',                  test:s => s.makanai >= 20 },
+  { key:'crumble',   title:'大根クラッシャー',   desc:'1回で大根を6本崩した',                       test:s => s.crumble >= 6 },
+  { key:'melt',      title:'煮込みの鬼',         desc:'1回で具を8個溶かした',                       test:s => s.melted >= 8 },
+  { key:'whiteEgg',  title:'白たまご職人',       desc:'味のしみていない卵を4個出した',              test:s => s.whiteEgg >= 4 },
+  { key:'nama',      title:'生煮え上等',         desc:'生の具を5品お客さんに出した',                test:s => s.nama >= 5 },
+  { key:'watch',     title:'鍋をながめる人',     desc:'1品も出さずに閉店した',                      test:s => s.served === 0 && s.makanai === 0 },
+  { key:'angry',     title:'閑古鳥の番人',       desc:'1回で8人を待ちくたびれさせた',               test:s => s.angry >= 8 },
+  { key:'stuffed',   title:'詰め込みすぎ',       desc:'いっぱいの鍋に、さらに10回具を入れようとした', test:s => s.full >= 10 },
+  { key:'reverse',   title:'あべこべ屋台',       desc:'子どもにくたくた、おじいさんに生の具を出した', test:s => s.kidKuta >= 1 && s.ojiiNama >= 1 },
+  // 通いつめる
+  { key:'plays10',   title:'常連の屋台',         desc:'10回開店した',                               test:(s,g,T) => T.plays >= 10 },
+  { key:'plays50',   title:'町の名物',           desc:'50回開店した',                               test:(s,g,T) => T.plays >= 50 },
+  { key:'sales100k', title:'屋台の財産',         desc:'売上の合計が¥100,000に届いた',               test:(s,g,T) => T.sales >= 100000 },
+  { key:'sales500k', title:'おでん長者',         desc:'売上の合計が¥500,000に届いた',               test:(s,g,T) => T.sales >= 500000 },
+  { key:'goku1000',  title:'極上を知る者',       desc:'★極上の合計が1,000品に届いた',               test:(s,g,T) => T.best >= 1000 },
+  // ほかの実績を集める
+  { key:'collect30', title:'実績コレクター',     desc:'実績を30個集めた',                           test:() => false },
 ];
-function achievementsOf(g){ return ACHV.filter(a => a.test(g.stats)).map(a => ({ key:a.key, title:a.title, note:a.note(g.stats) })); }
+// 今回の結果で条件を満たした実績（got：これまでに解除した実績のキー）
+function achievementsOf(g, T, got){
+  const hit = ACHV.filter(a => a.test(g.stats, g, T));
+  const keys = new Set((got || []).concat(hit.map(a => a.key)));
+  const col = ACHV.find(a => a.key === 'collect30');
+  if (!keys.has('collect30') && keys.size >= 30) hit.push(col);
+  return hit;
+}
 
 /* =========================================================
    保存・効果音
@@ -874,7 +959,9 @@ const LOOKS = {
 let state = 'title';            // 'title' → 'playing' → 'closing' → 'over'
 let game = null, demo = null;
 let best = parseInt(load('oden-best','0'), 10) || 0;
-let achvGot = [];   // これまでに取った実績のキー
+let totals = { plays:0, sales:0, best:0 };   // これまでの累計（開店回数・売上・★極上）
+try { const t = JSON.parse(load('oden-total','{}')); for (const k in totals) if (Number.isFinite(t[k])) totals[k] = t[k]; } catch (e){}
+let achvGot = [];   // これまでに解除した実績のキー
 try { const a = JSON.parse(load('oden-achv','[]')); if (Array.isArray(a)) achvGot = a.filter(k => ACHV.some(x => x.key === k)); } catch (e){}
 let reduce = false;
 let cv = null, ctx = null, W = 1, H = 1, DPR = 1, LAYOUT = null;
@@ -1433,17 +1520,20 @@ function showResult(){
   el.resYen.textContent = '¥' + sc.toLocaleString('ja-JP');
   el.resTitle.textContent = j.title;
   el.resNote.textContent = j.note;
-  const ach = achievementsOf(g), fresh = ach.filter(a => !achvGot.includes(a.key));
+  totals.plays++; totals.sales += sc; totals.best += s.best;
+  save('oden-total', JSON.stringify(totals));
+  const fresh = achievementsOf(g, totals, achvGot).filter(a => !achvGot.includes(a.key));
   if (fresh.length){ achvGot = achvGot.concat(fresh.map(a => a.key)); save('oden-achv', JSON.stringify(achvGot)); }
   el.resAchvList.innerHTML = '';
-  for (const a of ach){
+  for (const a of fresh){
     const li = document.createElement('li');
-    if (fresh.includes(a)){ const n = document.createElement('span'); n.className = 'achv-new'; n.textContent = 'NEW'; li.append(n); }
+    const n = document.createElement('span'); n.className = 'achv-new'; n.textContent = 'NEW';
     const b = document.createElement('span'); b.className = 'achv-name'; b.textContent = a.title;
-    li.append(b, a.note);
+    li.append(n, b, a.desc);
     el.resAchvList.append(li);
   }
-  el.resAchv.hidden = !ach.length;
+  el.resAchv.hidden = !fresh.length;
+  showAchvCount();
   const nx = nextRank(sc);
   el.resNext.textContent = nx ? `次の称号「${nx.title}」まで あと¥${(nx.min - sc).toLocaleString('ja-JP')}` : '売上の称号は、これがいちばん上です';
   const rows = [
@@ -1465,8 +1555,8 @@ function showResult(){
   const inner = el.slip.clientWidth - 40;
   el.resTitle.style.fontSize = Math.max(18, Math.min(34, Math.floor(inner/(j.title.length + 0.4)))) + 'px';
   el.resLive.textContent = `本日の売上 ${sc}円。称号は「${j.title}」。` + (isBest ? '自己ベスト更新。' : '') + el.resNext.textContent + '。'
-    + (ach.length ? `今回の実績は${ach.map(a => '「' + a.title + '」').join('')}。` : '');
-  lastResult = { score:sc, title:j.title, best:s.best, rate, achv:ach.map(a => a.title) };
+    + (fresh.length ? `新しい実績${fresh.map(a => '「' + a.title + '」').join('')}を解除。` : '');
+  lastResult = { score:sc, title:j.title, best:s.best, rate, achv:fresh.map(a => a.title) };
   setTimeout(() => { try { el.again.focus({ preventScroll:true }); } catch (e){} }, 60);
 }
 function goTitle(){
@@ -1475,11 +1565,32 @@ function goTitle(){
   el.bestTitle.textContent = '¥' + best.toLocaleString('ja-JP');
   showAchvCount();
 }
-function showAchvCount(){ el.achvCount.textContent = `${achvGot.length}/${ACHV.length}`; }
+function showAchvCount(){ const t = `${achvGot.length}/${ACHV.length}`; el.achvCount.textContent = t; el.resAchvCount.textContent = t; }
+let achvFrom = null;
+function openAchv(from){
+  achvFrom = from;
+  el.achvHeadCount.textContent = `${achvGot.length}/${ACHV.length}`;
+  el.achvGrid.innerHTML = '';
+  ACHV.forEach((a, i) => {
+    const li = document.createElement('li'), got = achvGot.includes(a.key);
+    const no = document.createElement('span'); no.className = 'no'; no.textContent = 'No.' + String(i + 1).padStart(2, '0');
+    const b = document.createElement('b'); b.textContent = got ? a.title : '？？？';
+    li.append(no, b);
+    if (got) li.append(a.desc); else { li.className = 'locked'; li.setAttribute('aria-label', `No.${i + 1} まだ解除していない実績`); }
+    el.achvGrid.append(li);
+  });
+  el.achvScreen.hidden = false; el.achvScreen.scrollTop = 0;
+  try { el.achvClose.focus({ preventScroll:true }); } catch (e){}
+}
+function closeAchv(){
+  el.achvScreen.hidden = true;
+  try { if (achvFrom) achvFrom.focus({ preventScroll:true }); } catch (e){}
+}
 function shareText(){
   const r = lastResult; if (!r) return '';
   const url = String(location.href).split('#')[0];
-  const ach = r.achv.length ? `実績${r.achv.map(t => '「' + t + '」').join('')}\n` : '';
+  const shown = r.achv.slice(0, 3).map(t => '「' + t + '」').join('') + (r.achv.length > 3 ? `ほか${r.achv.length - 3}個` : '');
+  const ach = r.achv.length ? `実績解除${shown}\n` : '';
   return `【おでん番】本日の売上 ¥${r.score.toLocaleString('ja-JP')}\n称号「${r.title}」\n${ach}★極上 ${r.best}品／食べ頃率 ${r.rate}%\n#おでん番\n${url}`;
 }
 async function share(){
@@ -1548,7 +1659,8 @@ function boot(){
   const $ = id => document.getElementById(id);
   el = { stage:$('stage'), cells:$('cells'), tray:$('tray'), hud:$('hud'), timeBox:$('timeBox'), timeVal:$('timeVal'), scoreVal:$('scoreVal'),
          timeFill:$('timeFill'), banner:$('banner'), title:$('titleScreen'), result:$('resultScreen'), slip:$('slip'), resYen:$('resYen'),
-         resTitle:$('resTitle'), resNote:$('resNote'), resNext:$('resNext'), resAchv:$('resAchv'), resAchvList:$('resAchvList'), achvCount:$('achvCount'), resStats:$('resStats'), newBest:$('newBest'), resLive:$('resLive'),
+         resTitle:$('resTitle'), resNote:$('resNote'), resNext:$('resNext'), resAchv:$('resAchv'), resAchvList:$('resAchvList'), achvCount:$('achvCount'), resAchvCount:$('resAchvCount'),
+         achvScreen:$('achvScreen'), achvGrid:$('achvGrid'), achvHeadCount:$('achvHeadCount'), achvClose:$('achvClose'), achvBtn:$('achvBtn'), achvBtn2:$('achvBtn2'), resStats:$('resStats'), newBest:$('newBest'), resLive:$('resLive'),
          again:$('againBtn'), share:$('shareBtn'), toTitle:$('toTitle'), start:$('startBtn'), mute:$('mute'), toast:$('toast'), bestTitle:$('bestTitle') };
   cv = $('cv'); ctx = cv.getContext('2d');
 
@@ -1591,6 +1703,10 @@ function boot(){
   el.again.addEventListener('click', startGame);
   el.share.addEventListener('click', share);
   el.toTitle.addEventListener('click', goTitle);
+  el.achvBtn.addEventListener('click', () => openAchv(el.achvBtn));
+  el.achvBtn2.addEventListener('click', () => openAchv(el.achvBtn2));
+  el.achvClose.addEventListener('click', closeAchv);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !el.achvScreen.hidden) closeAchv(); });
   el.mute.addEventListener('click', () => { ensureAudio(); setMuted(!muted); });
   setMuted(muted);
 
