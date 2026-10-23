@@ -109,6 +109,39 @@ body.is-title .hud{visibility:hidden}
 .btn.ghost:active{transform:translateY(2px);box-shadow:inset 0 0 0 2px var(--edge),0 2px 0 var(--edge)}
 .best{margin:10px 0 0;text-align:center;font-size:13px;color:var(--sub)}
 .ver{margin:8px 0 0;text-align:center;font-size:11px;color:var(--sub)}
+/* ---- 実績（共通の部品）。色は --a-* をゲームごとに指定する ---- */
+.achv-ov{position:fixed;inset:0;z-index:80;overflow-y:auto;overscroll-behavior:contain;background:var(--a-veil);color:var(--a-ink);padding:calc(env(safe-area-inset-top,0px) + 18px) 14px calc(env(safe-area-inset-bottom,0px) + 20px);font-family:var(--a-font)}
+.achv-panel{max-width:440px;margin:0 auto}
+.achv-panel h2{margin:0;font-size:24px;font-weight:900;text-align:center}
+.achv-lead{margin:2px 0 4px;text-align:center;font-size:12.5px;font-weight:700;color:var(--a-sub)}
+.achv-sub{margin:14px 0 6px;font-size:13px;font-weight:900;color:var(--a-sub)}
+.achv-stats{margin:0;padding:8px 12px;border-radius:10px;background:var(--a-card);border:1.5px solid var(--a-line);display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:12.5px;font-weight:700;color:var(--a-sub)}
+.achv-stats dd{margin:0;text-align:right;font-weight:900;color:var(--a-ink);font-variant-numeric:tabular-nums}
+.achv-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.achv-grid li,.achv-ladders li{min-height:62px;padding:7px 9px 8px;border-radius:10px;background:var(--a-card);border:1.5px solid var(--a-line);font-size:11.5px;font-weight:700;line-height:1.4;color:var(--a-sub)}
+.achv-grid li b,.achv-ladders li b{display:block;margin:1px 0 2px;font-size:13.5px;font-weight:900;color:var(--a-ink)}
+.achv-grid li.locked,.achv-ladders li.locked{background:var(--a-locked);border-style:dashed}
+.achv-grid li.locked b,.achv-ladders li.locked b{color:var(--a-sub);letter-spacing:.2em}
+.achv-ov .no{font-size:10px;font-weight:700}
+.achv-ov .when{display:block;margin-top:3px;font-size:10.5px;opacity:.85}
+.achv-ladders{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.achv-ladders .next{display:block;margin-top:4px;color:var(--a-ink)}
+.achv-ladders .bar{display:block;height:6px;margin-top:4px;border-radius:3px;background:var(--a-line);overflow:hidden}
+.achv-ladders .bar i{display:block;height:100%;background:var(--a-accent)}
+.achv-close{display:block;width:100%;min-height:50px;margin:16px 0 0;border:0;border-radius:12px;background:var(--a-accent);color:var(--a-accent-ink);font:inherit;font-size:16px;font-weight:900;cursor:pointer}
+.achv-close:focus-visible,.achv-open:focus-visible{outline:3px solid var(--a-accent);outline-offset:2px}
+.achv-open{min-height:40px;padding:4px 12px;border:0;background:none;color:var(--a-sub);font:inherit;font-size:13px;font-weight:700;text-decoration:underline;cursor:pointer}
+.achv-open b{color:var(--a-ink);font-weight:900}
+.achv-new-box{margin:10px 0 0;padding:8px 10px;border-radius:10px;background:var(--a-card);border:1.5px solid var(--a-line);text-align:left;color:var(--a-sub)}
+.achv-new-box > p{margin:0;font-size:12px;font-weight:900}
+.achv-new-list{list-style:none;margin:5px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.achv-new-list li{font-size:12px;font-weight:700;line-height:1.45}
+.achv-tag{display:inline-block;margin-right:6px;padding:0 4px;border-radius:3px;background:var(--a-accent);color:var(--a-accent-ink);font-size:10.5px;font-weight:900;vertical-align:2px}
+.achv-name{display:inline-block;margin-right:6px;padding:1px 7px;border:1.5px solid var(--a-accent);border-radius:4px;color:var(--a-ink);font-size:13.5px;font-weight:900}
+.achv-ov,.achv-new-box,.achv-open{--a-veil:var(--bg);--a-card:var(--panel);--a-line:var(--edge);--a-ink:var(--panel-ink);--a-sub:var(--sub);--a-accent:var(--go);--a-accent-ink:#FFFFFF;--a-locked:var(--bg);--a-font:inherit}
+.card .achv-open{display:block;margin:4px auto 0}
+#result > .achv-new-box{flex:none;width:min(100%,400px);margin:0}
+#result > .achv-open{flex:none;margin:0 auto;padding:4px 16px;border-radius:999px;background:var(--panel)}
 
 #result{justify-content:center;gap:12px;background:var(--dim);overflow-y:auto}
 .res-head{display:flex;align-items:center;gap:12px;width:min(100%,400px)}
@@ -193,6 +226,7 @@ body.is-title .hud{visibility:hidden}
     </ol>
     <button class="btn primary" id="startBtn" type="button">出勤する</button>
     <p class="best" id="bestLine" hidden></p>
+    <button id="achvBtn" class="achv-open" type="button">実績 <b id="achvCount">0/0</b> を見る</button>
     <p class="ver" id="verLine"></p>
   </div>
 </section>
@@ -215,19 +249,34 @@ body.is-title .hud{visibility:hidden}
     <div><span>スコア</span><b id="resScore">0</b><em class="newbest" id="resNew" hidden>ベスト更新！</em></div>
     <div><span>ベスト</span><b id="resBest">0</b></div>
   </div>
+  <div class="achv-new-box" id="achvNewBox" hidden><p>新しい実績</p><ul class="achv-new-list" id="achvNewList"></ul></div>
   <div class="btns">
     <button class="btn ghost" id="shareBtn" type="button">結果をシェア</button>
     <button class="btn primary" id="againBtn" type="button">もう一度</button>
   </div>
+  <button id="achvBtn2" class="achv-open" type="button">実績 <b id="achvCount2">0/0</b></button>
 </section>
 
 <div id="wipe" aria-hidden="true"><div class="wipe-plate"><div class="wipe-day" id="wipeDay">1日目<small>（月）</small></div><div class="wipe-sub" id="wipeSub">出勤スタート</div></div></div>
+<section id="achvOv" class="achv-ov" hidden aria-labelledby="achvOvHead">
+  <div class="achv-panel">
+    <h2 id="achvOvHead">実績 <span id="achvOvCount">0/0</span></h2>
+    <p class="achv-lead">解除するまで、名前も条件もひみつ。いろいろな遊び方を試してみよう。</p>
+    <h3 class="achv-sub">これまでの記録</h3>
+    <dl class="achv-stats" id="achvStats"></dl>
+    <h3 class="achv-sub">実績</h3>
+    <ol class="achv-grid" id="achvGrid"></ol>
+    <h3 class="achv-sub">積み重ね</h3>
+    <ol class="achv-ladders" id="achvLadders"></ol>
+    <button id="achvClose" class="achv-close" type="button">閉じる</button>
+  </div>
+</section>
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script>
 (() => {
 'use strict';
-const VERSION = 'v1.1';
+const VERSION = 'v2.0';
 
 // ==SIM START==
 // ---- world (1 unit ≒ 4cm). car-local x: 0..100 is the area around our door ----
@@ -300,7 +349,8 @@ function newState(demo) {
   return { demo, day:1, days:0, score:0, phase:'arrive', pt:0, time:0, carX:300, doorC:1,
     bodies:[], player:null, seated:[], decor:[], fx:[], events:[], input:{ hold:false, tx:50, ty:40 }, rects:[],
     D:diff(1), boardDur:6, exitLeft:0, ok:false, inRem:-1, warned:false, nextPuff:0, nextOuch:0, shake:0,
-    aiNext:0, aiT:[50,40], prepared:false, reason:'', lastGain:null, pinchGap:0 };
+    aiNext:0, aiT:[50,40], prepared:false, reason:'', lastGain:null, pinchGap:0,
+    cnt:{ giri:0, deep:0, smart:0 }, warnN:0 };
 }
 function setPhase(S, ph) { S.phase = ph; S.pt = 0; S.events.push({ t:'phase', ph }); }
 
@@ -533,6 +583,7 @@ function resolveClose(S) {
     else if (dp >= 45) label = '奥までスイスイ！';
     else if (sp >= 40) label = 'スマート乗車！';
     S.lastGain = { gain, sp, dp, label };
+    if (!S.demo){ if (label === 'ギリギリセーフ！') S.cnt.giri++; else if (label === '奥までスイスイ！') S.cnt.deep++; else if (label === 'スマート乗車！') S.cnt.smart++; }
     S.fx.push({ kind:'big', x:50, y:30, text:label, sub:'+' + gain, t:0, life:1.4 });
     S.events.push({ t:'success', gain, label });
   } else {
@@ -558,7 +609,7 @@ function trackPlayer(S) {
     S.events.push({ t:'puff', v:Math.min(1, p.press / 5) });
   }
   if (S.phase === 'board' && !S.warned && p.hitExit > .8 && S.input.hold) {
-    S.warned = true;
+    S.warned = true; S.warnN++;
     S.fx.push({ kind:'warn', x:p.x, y:p.y - 9, text:'降りる人が先！', t:0, life:1.2 });
     S.events.push({ t:'exitwarn' });
   }
@@ -1179,7 +1230,7 @@ function startGame() {
   state = 'play';
   document.body.classList.remove('is-title');
   titleEl.hidden = true; resultEl.hidden = true;
-  G.demo = false; G.day = 0; G.days = 0; G.score = 0; shownScore = 0; G.input.hold = false; G.prepared = false; G.events.length = 0;
+  G.demo = false; G.day = 0; G.days = 0; G.score = 0; G.cnt = { giri:0, deep:0, smart:0 }; G.warnN = 0; shownScore = 0; G.input.hold = false; G.prepared = false; G.events.length = 0;
   activePointer = null; keys.clear();
   setPhase(G, 'next');
   layout();
@@ -1210,7 +1261,10 @@ function showResult(reason) {
   $('resScore').textContent = score.toLocaleString('ja-JP');
   $('resBest').textContent = Math.max(prevBest, score).toLocaleString('ja-JP');
   $('resNew').hidden = !isNew || score === 0;
-  shareText = `ぎゅうぎゅう通勤｜${days}日連続で出勤して、${failDay}日目に${why}。称号「${T.name}」スコア${score.toLocaleString('ja-JP')}点\n#ぎゅうぎゅう通勤\n${location.href.split('#')[0]}`;
+  const fresh = ACH.record({ S:G, days, score, reason });
+  ACH.showNew(fresh); showAchvCount(); lastFresh = fresh.map(a => a.title);
+  const achTxt = lastFresh.length ? '実績解除' + lastFresh.slice(0, 3).map(t => '「' + t + '」').join('') + (lastFresh.length > 3 ? `ほか${lastFresh.length - 3}個` : '') + '\n' : '';
+  shareText = `ぎゅうぎゅう通勤｜${days}日連続で出勤して、${failDay}日目に${why}。称号「${T.name}」スコア${score.toLocaleString('ja-JP')}点\n${achTxt}#ぎゅうぎゅう通勤\n${location.href.split('#')[0]}`;
   resultEl.hidden = false;
   setTimeout(() => { try { $('againBtn').focus({ preventScroll:true }); } catch (e) {} }, 50);
 }
@@ -1227,10 +1281,157 @@ async function share() {
   try { await navigator.clipboard.writeText(text); toast('コピーしました'); } catch (e) { toast('コピーできませんでした'); }
 }
 
+/* =========================================================
+   実績（共通の部品）
+   解除するまで名前も条件も「？？？」。達成した回数・初めて達成した日・累計を端末に保存する
+   cfg = { prefix, singles:[{key,title,desc,test(ctx,T)}], ladders:[{label,unit,value(T),tiers:[{key,at,title}]}],
+           collectAt, totals:{...}, add(T,ctx), records(T) => [[項目,値],...] }
+   ========================================================= */
+function makeAchv(cfg){
+  const ls = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e){ return d; } };
+  const ss = (k, v) => { try { localStorage.setItem(k, v); } catch (e){} };
+  const fmt = (v, unit) => unit === '円' ? '¥' + v.toLocaleString('ja-JP') : v.toLocaleString('ja-JP') + unit;
+  const today = () => { const d = new Date(); return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`; };
+  const KA = cfg.prefix + '-achv', KT = cfg.prefix + '-total';
+  const tiers = [];
+  for (const L of cfg.ladders) for (const t of L.tiers){ t.ladder = L; t.desc = `${L.label}が${fmt(t.at, L.unit)}に届いた`; tiers.push(t); }
+  const collector = cfg.collectAt ? { key:'collect', title:'実績コレクター', desc:`実績を${cfg.collectAt}個集めた` } : null;
+  const ALL = cfg.singles.concat(tiers, collector ? [collector] : []);
+  const T = Object.assign({}, cfg.totals);
+  try { const t = JSON.parse(ls(KT, '{}')); for (const k in T) if (Number.isFinite(t[k])) T[k] = t[k]; } catch (e){}
+  const got = {};
+  try {
+    const a = JSON.parse(ls(KA, '{}'));
+    if (a && typeof a === 'object' && !Array.isArray(a)) for (const k in a) if (a[k] && ALL.some(x => x.key === k)) got[k] = { n:Math.max(1, a[k].n | 0), d:String(a[k].d || '') };
+  } catch (e){}
+  // 1回分の結果を記録し、初めて解除した実績を返す
+  function record(ctx){
+    cfg.add(T, ctx); ss(KT, JSON.stringify(T));
+    const fresh = [];
+    for (const a of cfg.singles) if (a.test(ctx, T)){ if (got[a.key]) got[a.key].n++; else { got[a.key] = { n:1, d:today() }; fresh.push(a); } }
+    for (const t of tiers) if (!got[t.key] && t.ladder.value(T) >= t.at){ got[t.key] = { n:1, d:today() }; fresh.push(t); }
+    if (collector && !got[collector.key] && Object.keys(got).length >= cfg.collectAt){ got[collector.key] = { n:1, d:today() }; fresh.push(collector); }
+    ss(KA, JSON.stringify(got));
+    return fresh;
+  }
+  const countText = () => `${Object.keys(got).length}/${ALL.length}`;
+  const $ = id => document.getElementById(id);
+  const when = (key, withCount) => `初達成 ${got[key].d || '記録なし'}` + (withCount ? `・${got[key].n.toLocaleString('ja-JP')}回` : '');
+  function render(){
+    $('achvOvCount').textContent = countText();
+    const st = $('achvStats'); st.innerHTML = '';
+    for (const [k, v] of cfg.records(T)){ const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = k; dd.textContent = v; st.append(dt, dd); }
+    const grid = $('achvGrid'); grid.innerHTML = '';
+    cfg.singles.concat(collector ? [collector] : []).forEach((a, i) => {
+      const li = document.createElement('li'), has = !!got[a.key];
+      const no = document.createElement('span'); no.className = 'no'; no.textContent = 'No.' + String(i + 1).padStart(2, '0');
+      const b = document.createElement('b'); b.textContent = has ? a.title : '？？？';
+      li.append(no, b);
+      if (has){ const w = document.createElement('span'); w.className = 'when'; w.textContent = when(a.key, a !== collector); li.append(a.desc, w); }
+      else { li.className = 'locked'; li.setAttribute('aria-label', `No.${i + 1} まだ解除していない実績`); }
+      grid.append(li);
+    });
+    const lad = $('achvLadders'); lad.innerHTML = '';
+    for (const L of cfg.ladders){
+      const li = document.createElement('li'), done = L.tiers.filter(t => got[t.key]), cur = done[done.length - 1], next = L.tiers.find(t => !got[t.key]);
+      const b = document.createElement('b');
+      if (!cur){ li.className = 'locked'; b.textContent = '？？？'; li.append(b); li.setAttribute('aria-label', 'まだ解除していない積み重ねの実績'); lad.append(li); continue; }
+      const lv = document.createElement('span'); lv.className = 'no'; lv.textContent = `${L.label}　${done.length}/${L.tiers.length}段`;
+      b.textContent = cur.title;
+      const w = document.createElement('span'); w.className = 'when'; w.textContent = when(cur.key, false);
+      li.append(lv, b, cur.desc, w);
+      const nx = document.createElement('span'); nx.className = 'next';
+      if (next){
+        const v = L.value(T);
+        nx.textContent = `次は「${next.title}」：${fmt(next.at, L.unit)}（いま ${fmt(v, L.unit)}）`;
+        const bar = document.createElement('span'); bar.className = 'bar'; const fill = document.createElement('i'); fill.style.width = (Math.min(1, v / next.at) * 100).toFixed(1) + '%'; bar.append(fill);
+        li.append(nx, bar);
+      } else { nx.textContent = 'すべての段を達成しました'; li.append(nx); }
+      lad.append(li);
+    }
+  }
+  let from = null;
+  function open(btn){
+    from = btn || null; render();
+    const ov = $('achvOv'); ov.hidden = false; ov.scrollTop = 0;
+    try { $('achvClose').focus({ preventScroll:true }); } catch (e){}
+  }
+  function close(){
+    $('achvOv').hidden = true;
+    try { if (from) from.focus({ preventScroll:true }); } catch (e){}
+  }
+  // 結果画面の「新しい実績」を作る
+  function showNew(fresh){
+    const list = $('achvNewList'); list.innerHTML = '';
+    for (const a of fresh){
+      const li = document.createElement('li');
+      const n = document.createElement('span'); n.className = 'achv-tag'; n.textContent = 'NEW';
+      const b = document.createElement('span'); b.className = 'achv-name'; b.textContent = a.title;
+      li.append(n, b, a.desc); list.append(li);
+    }
+    $('achvNewBox').hidden = !fresh.length;
+  }
+  $('achvClose').addEventListener('click', close);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('achvOv').hidden) close(); });
+  return { record, countText, open, close, showNew, totals:T, all:ALL };
+}
+
+// ---- 実績 ----
+// x = { S: その回の状態, days, score, reason }。遅刻した日の曜日は (days % 5)：0=月 … 4=金
+const ACH = makeAchv({
+  prefix: 'gyugyu',
+  singles: [
+    // はじめの一歩
+    { key:'first',   title:'初出勤',             desc:'はじめて駅のホームに立った',               test:() => true },
+    { key:'ride1',   title:'はじめての乗車',     desc:'電車に乗れた',                             test:x => x.days >= 1 },
+    // 連続出勤
+    { key:'d3',      title:'三日坊主',           desc:'3日連続で出勤した',                        test:x => x.days >= 3 },
+    { key:'d5',      title:'花金の生還者',       desc:'5日連続で出勤した',                        test:x => x.days >= 5 },
+    { key:'d10',     title:'つり革見習い',       desc:'10日連続で出勤した',                       test:x => x.days >= 10 },
+    { key:'d14',     title:'どこにでもいる会社員', desc:'14日連続で出勤した',                     test:x => x.days >= 14 },
+    { key:'d18',     title:'満員電車の常連',     desc:'18日連続で出勤した',                       test:x => x.days >= 18 },
+    { key:'d20',     title:'すき間の魔術師',     desc:'20日連続で出勤した',                       test:x => x.days >= 20 },
+    { key:'d22',     title:'押し屋いらず',       desc:'22日連続で出勤した',                       test:x => x.days >= 22 },
+    { key:'d24',     title:'通勤の鉄人',         desc:'24日連続で出勤した',                       test:x => x.days >= 24 },
+    { key:'d25',     title:'皆勤賞',             desc:'25日連続で出勤した',                       test:x => x.days >= 25 },
+    // 乗り方
+    { key:'smart10', title:'スマートな通勤',     desc:'1回でスマート乗車を10回した',              test:x => x.S.cnt.smart >= 10 },
+    { key:'smart15', title:'スマートの極み',     desc:'1回でスマート乗車を15回した',              test:x => x.S.cnt.smart >= 15 },
+    { key:'deep1',   title:'奥までスイスイ',     desc:'車内の奥まで一気に進んだ',                 test:x => x.S.cnt.deep >= 1 },
+    { key:'deep3',   title:'奥の住人',           desc:'1回で奥までスイスイを3回した',             test:x => x.S.cnt.deep >= 3 },
+    { key:'giri1',   title:'ギリギリセーフ',     desc:'ドアが閉まる直前に乗りこんだ',             test:x => x.S.cnt.giri >= 1 },
+    { key:'giri3',   title:'ギリギリの美学',     desc:'1回でギリギリセーフを3回した',             test:x => x.S.cnt.giri >= 3 },
+    { key:'sc3000',  title:'定期券の元を取った', desc:'1回で3,000点を取った',                     test:x => x.score >= 3000 },
+    { key:'sc3500',  title:'通勤マスター',       desc:'1回で3,500点を取った',                     test:x => x.score >= 3500 },
+    { key:'manner',  title:'マナーの良い乗客',   desc:'10日以上連続で出勤して、降りる人に一度もぶつからなかった', test:x => x.days >= 10 && x.S.warnN === 0 },
+    // 変な通勤
+    { key:'late0',   title:'初日から遅刻',       desc:'1日目に遅刻した',                          test:x => x.days === 0 },
+    { key:'pinch0',  title:'ドアの洗礼',         desc:'1日目にドアに挟まった',                    test:x => x.days === 0 && x.reason === 'pinch' },
+    { key:'miss',    title:'乗りそびれ',         desc:'車内に入れずに乗りそびれた',               test:x => x.reason === 'miss' },
+    { key:'warn3',   title:'降りる人が先です',   desc:'1回で3回以上、降りる人にぶつかって注意された', test:x => x.S.warnN >= 3 },
+    { key:'monday',  title:'ブルーマンデー',     desc:'5日以上出勤したあと、月曜日に遅刻した',    test:x => x.days >= 5 && x.days % 5 === 0 },
+    { key:'friday',  title:'花金の悲劇',         desc:'金曜日に遅刻した',                         test:x => x.days % 5 === 4 },
+  ],
+  ladders: [
+    { label:'出勤した回数',   unit:'回', value:T => T.plays, tiers:[ { key:'plays10', at:10, title:'定期券を買った' }, { key:'plays30', at:30, title:'定期券を更新した' }, { key:'plays60', at:60, title:'駅員さんと顔なじみ' }, { key:'plays100', at:100, title:'この路線の主' } ] },
+    { label:'出勤日数の合計', unit:'日', value:T => T.days,  tiers:[ { key:'days50', at:50, title:'通勤ひと月' }, { key:'days200', at:200, title:'通勤一年生' }, { key:'days500', at:500, title:'通勤のベテラン' }, { key:'days1000', at:1000, title:'通勤千日' } ] },
+    { label:'スコアの合計',   unit:'点', value:T => T.score, tiers:[ { key:'sc10k', at:10000, title:'通勤ポイント' }, { key:'sc40k', at:40000, title:'通勤ゴールド' }, { key:'sc100k', at:100000, title:'通勤プラチナ' }, { key:'sc200k', at:200000, title:'通勤ダイヤモンド' } ] },
+    { label:'スマート乗車の合計', unit:'回', value:T => T.smart, tiers:[ { key:'sm30', at:30, title:'すいすい乗車' }, { key:'sm150', at:150, title:'すべりこみ上手' }, { key:'sm400', at:400, title:'乗車の達人' }, { key:'sm800', at:800, title:'満員電車の流れを読む人' } ] },
+  ],
+  collectAt: 25,
+  totals: { plays:0, days:0, score:0, smart:0, giri:0, pinch:0 },
+  add: (T, x) => { T.plays++; T.days += x.days; T.score += x.score; T.smart += x.S.cnt.smart; T.giri += x.S.cnt.giri; if (x.reason === 'pinch') T.pinch++; },
+  records: T => [['出勤した回数', T.plays + '回'], ['最長の連続出勤', (+load('gyugyu-bestdays', 0) || 0) + '日'], ['ベストスコア', (+load('gyugyu-best', 0) || 0).toLocaleString('ja-JP') + '点'],
+                 ['出勤日数の合計', T.days.toLocaleString('ja-JP') + '日'], ['スコアの合計', T.score.toLocaleString('ja-JP') + '点'], ['スマート乗車の合計', T.smart.toLocaleString('ja-JP') + '回'],
+                 ['ギリギリセーフの合計', T.giri.toLocaleString('ja-JP') + '回'], ['ドアに挟まった回数', T.pinch.toLocaleString('ja-JP') + '回']],
+});
+let lastFresh = [];
+function showAchvCount() { $('achvCount').textContent = ACH.countText(); $('achvCount2').textContent = ACH.countText(); }
 function refreshBest() {
   const b = +load('gyugyu-best', 0) || 0, bd = +load('gyugyu-bestdays', 0) || 0;
   const el = $('bestLine');
   if (b > 0 || bd > 0) { el.textContent = `ベスト：${bd}日連続・${b.toLocaleString('ja-JP')}点`; el.hidden = false; } else el.hidden = true;
+  showAchvCount();
 }
 
 // ---- input ----
@@ -1270,6 +1471,8 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) { act
 $('startBtn').addEventListener('click', startGame);
 $('againBtn').addEventListener('click', startGame);
 $('shareBtn').addEventListener('click', share);
+$('achvBtn').addEventListener('click', () => ACH.open($('achvBtn')));
+$('achvBtn2').addEventListener('click', () => ACH.open($('achvBtn2')));
 $('verLine').textContent = VERSION;
 const muteBtn = $('muteBtn');
 function syncMute() {
