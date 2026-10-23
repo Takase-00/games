@@ -105,6 +105,38 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .rules li svg{flex:none;margin-top:1px}
 #titleBest{margin:11px 0 10px;font-size:13px;color:var(--sub);text-align:center}
 #ver{margin:8px 0 0;font-size:11px;color:var(--sub);text-align:center}
+/* ---- 実績（共通の部品）。色は --a-* をゲームごとに指定する ---- */
+.achv-ov{position:fixed;inset:0;z-index:80;overflow-y:auto;overscroll-behavior:contain;background:var(--a-veil);color:var(--a-ink);padding:calc(env(safe-area-inset-top,0px) + 18px) 14px calc(env(safe-area-inset-bottom,0px) + 20px);font-family:var(--a-font)}
+.achv-panel{max-width:440px;margin:0 auto}
+.achv-panel h2{margin:0;font-size:24px;font-weight:900;text-align:center}
+.achv-lead{margin:2px 0 4px;text-align:center;font-size:12.5px;font-weight:700;color:var(--a-sub)}
+.achv-sub{margin:14px 0 6px;font-size:13px;font-weight:900;color:var(--a-sub)}
+.achv-stats{margin:0;padding:8px 12px;border-radius:10px;background:var(--a-card);border:1.5px solid var(--a-line);display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:12.5px;font-weight:700;color:var(--a-sub)}
+.achv-stats dd{margin:0;text-align:right;font-weight:900;color:var(--a-ink);font-variant-numeric:tabular-nums}
+.achv-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.achv-grid li,.achv-ladders li{min-height:62px;padding:7px 9px 8px;border-radius:10px;background:var(--a-card);border:1.5px solid var(--a-line);font-size:11.5px;font-weight:700;line-height:1.4;color:var(--a-sub)}
+.achv-grid li b,.achv-ladders li b{display:block;margin:1px 0 2px;font-size:13.5px;font-weight:900;color:var(--a-ink)}
+.achv-grid li.locked,.achv-ladders li.locked{background:var(--a-locked);border-style:dashed}
+.achv-grid li.locked b,.achv-ladders li.locked b{color:var(--a-sub);letter-spacing:.2em}
+.achv-ov .no{font-size:10px;font-weight:700}
+.achv-ov .when{display:block;margin-top:3px;font-size:10.5px;opacity:.85}
+.achv-ladders{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.achv-ladders .next{display:block;margin-top:4px;color:var(--a-ink)}
+.achv-ladders .bar{display:block;height:6px;margin-top:4px;border-radius:3px;background:var(--a-line);overflow:hidden}
+.achv-ladders .bar i{display:block;height:100%;background:var(--a-accent)}
+.achv-close{display:block;width:100%;min-height:50px;margin:16px 0 0;border:0;border-radius:12px;background:var(--a-accent);color:var(--a-accent-ink);font:inherit;font-size:16px;font-weight:900;cursor:pointer}
+.achv-close:focus-visible,.achv-open:focus-visible{outline:3px solid var(--a-accent);outline-offset:2px}
+.achv-open{min-height:40px;padding:4px 12px;border:0;background:none;color:var(--a-sub);font:inherit;font-size:13px;font-weight:700;text-decoration:underline;cursor:pointer}
+.achv-open b{color:var(--a-ink);font-weight:900}
+.achv-new-box{margin:10px 0 0;padding:8px 10px;border-radius:10px;background:var(--a-card);border:1.5px solid var(--a-line);text-align:left;color:var(--a-sub)}
+.achv-new-box > p{margin:0;font-size:12px;font-weight:900}
+.achv-new-list{list-style:none;margin:5px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.achv-new-list li{font-size:12px;font-weight:700;line-height:1.45}
+.achv-tag{display:inline-block;margin-right:6px;padding:0 4px;border-radius:3px;background:var(--a-accent);color:var(--a-accent-ink);font-size:10.5px;font-weight:900;vertical-align:2px}
+.achv-name{display:inline-block;margin-right:6px;padding:1px 7px;border:1.5px solid var(--a-accent);border-radius:4px;color:var(--a-ink);font-size:13.5px;font-weight:900}
+.achv-ov,.achv-new-box,.achv-open{--a-veil:var(--bg);--a-card:var(--panel);--a-line:var(--line);--a-ink:var(--ink);--a-sub:var(--sub);--a-accent:var(--accent);--a-accent-ink:var(--accent-ink);--a-locked:var(--chip);--a-font:inherit}
+#titleCard .achv-open{display:block;margin:2px auto 0}
+#resultScr > .achv-new-box{width:min(340px,100%);margin:0}
 .primary{display:block;width:100%;min-height:54px;border:0;border-radius:16px;background:var(--accent);color:var(--accent-ink);font-weight:900;font-size:17px;letter-spacing:.04em}
 .secondary{display:block;width:100%;min-height:54px;border-radius:16px;border:2px solid var(--accent);background:var(--panel);color:var(--ink);font-weight:900;font-size:16px}
 
@@ -190,6 +222,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
       </ol>
       <p id="titleBest">ベスト記録はまだありません</p>
       <button id="startBtn" class="primary">おやすみなさい（スタート）</button>
+      <button id="achvBtn" class="achv-open" type="button">実績 <b id="achvCount">0/0</b> を見る</button>
       <p id="ver"></p>
     </div>
   </section>
@@ -207,13 +240,27 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
       <div class="srow"><span class="slbl">朝の寝姿</span><span class="bar"><i id="bar3"></i></span><b class="sval"><span id="val3">0</span><small>/20</small></b></div>
       <p id="resStats" class="rstats"></p>
     </div>
+    <div class="achv-new-box" id="achvNewBox" hidden><p>新しい実績</p><ul class="achv-new-list" id="achvNewList"></ul></div>
     <div class="btns">
       <button id="shareBtn" class="secondary">結果をシェア</button>
       <button id="againBtn" class="primary">もう一度</button>
     </div>
-    <p class="rfoot"><span id="collect"></span><button id="toTitle" class="linkbtn">タイトルへ</button></p>
+    <p class="rfoot"><button id="achvBtn2" class="achv-open" type="button">実績 <b id="achvCount2">0/0</b></button><button id="toTitle" class="linkbtn">タイトルへ</button></p>
     <p id="toast" role="status" hidden></p>
   </section>
+<section id="achvOv" class="achv-ov" hidden aria-labelledby="achvOvHead">
+  <div class="achv-panel">
+    <h2 id="achvOvHead">実績 <span id="achvOvCount">0/0</span></h2>
+    <p class="achv-lead">解除するまで、名前も条件もひみつ。いろいろな遊び方を試してみよう。</p>
+    <h3 class="achv-sub">これまでの記録</h3>
+    <dl class="achv-stats" id="achvStats"></dl>
+    <h3 class="achv-sub">実績</h3>
+    <ol class="achv-grid" id="achvGrid"></ol>
+    <h3 class="achv-sub">積み重ね</h3>
+    <ol class="achv-ladders" id="achvLadders"></ol>
+    <button id="achvClose" class="achv-close" type="button">閉じる</button>
+  </div>
+</section>
   <div id="flash" aria-hidden="true"></div>
 </div>
 
@@ -223,7 +270,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
    寝相コントロール
    座標はすべて「部屋のcm」。部屋 320×440、布団 120×214。
    ========================================================= */
-const VERSION = 'v3.1';
+const VERSION = 'v4.0';
 const ROOM = { w: 320, h: 440 };
 const FUTON = { x: 100, y: 118, w: 120, h: 214 };
 const PILLOW = { x: 129, y: 126, w: 62, h: 28 };
@@ -300,7 +347,7 @@ function newSim(demo) {
       spin: (Math.random() < .5 ? -1 : 1) * rand(.04, .12),  // 回りやすい向き
       slide: rand(.06, .16),                                  // ずり下がりやすさ
     },
-    stats: { rolls: 0, falls: 0, wallHits: 0, cushionHits: 0, kicks: 0, swats: 0, shoves: 0, wraps: 0, rot: 0, onSum: 0, onDur: 0 },
+    stats: { rolls: 0, falls: 0, wallHits: 0, cushionHits: 0, kicks: 0, swats: 0, shoves: 0, taps: 0, wraps: 0, rot: 0, onSum: 0, onDur: 0 },
     stuffy: false, stuffyMsg: -9, pinched: false, pinchMsg: -9, heat: 0, heatMax: rand(HEAT_MIN, HEAT_MAX), hotUntil: 0, torsoOn: true, onFrac: 1, lastBump: -9, fx: [], zT: 1, shake: 0, log: [], ai: { t: 1.2 },
   };
   S.poseFrom = S.cur.slice(); S.poseTo = S.cur.slice();
@@ -654,6 +701,7 @@ function inBlanket(b, x, y, m) {
 function handleTap(S, x, y, tool) {
   if (S.phase !== 'night') return 'none';
   if (x < 0 || y < 0 || x > ROOM.w || y > ROOM.h) return 'out';
+  S.stats.taps++;
   S.fx.push({ k: 'tap', x, y, t: 0, life: .45 });
   for (let i = S.cushions.length - 1; i >= 0; i--) {
     const c = S.cushions[i]; if (c.fly) continue;
@@ -1122,6 +1170,150 @@ function initUI() {
   let best = parseInt(load('nezo-score', '0'), 10) || 0;   // v1.0の nezo-best（2軸の合計）は使わない
   let titles = []; try { titles = JSON.parse(load('nezo-titles', '[]')) || []; if (!Array.isArray(titles)) titles = []; } catch (e) { titles = []; }
   titles = titles.filter(k => TITLES.some(t => t[0] === k));
+/* =========================================================
+     実績（共通の部品）
+     解除するまで名前も条件も「？？？」。達成した回数・初めて達成した日・累計を端末に保存する
+     cfg = { prefix, singles:[{key,title,desc,test(ctx,T)}], ladders:[{label,unit,value(T),tiers:[{key,at,title}]}],
+             collectAt, totals:{...}, add(T,ctx), records(T) => [[項目,値],...], migrate(got)（任意） }
+     ========================================================= */
+  function makeAchv(cfg){
+    const ls = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e){ return d; } };
+    const ss = (k, v) => { try { localStorage.setItem(k, v); } catch (e){} };
+    const fmt = (v, unit) => unit === '円' ? '¥' + v.toLocaleString('ja-JP') : v.toLocaleString('ja-JP') + unit;
+    const today = () => { const d = new Date(); return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`; };
+    const KA = cfg.prefix + '-achv', KT = cfg.prefix + '-total';
+    const tiers = [];
+    for (const L of cfg.ladders) for (const t of L.tiers){ t.ladder = L; t.desc = `${L.label}が${fmt(t.at, L.unit)}に届いた`; tiers.push(t); }
+    const collector = cfg.collectAt ? { key:'collect', title:'実績コレクター', desc:`実績を${cfg.collectAt}個集めた` } : null;
+    const ALL = cfg.singles.concat(tiers, collector ? [collector] : []);
+    const T = Object.assign({}, cfg.totals);
+    try { const t = JSON.parse(ls(KT, '{}')); for (const k in T) if (Number.isFinite(t[k])) T[k] = t[k]; } catch (e){}
+    const got = {};
+    try {
+      const a = JSON.parse(ls(KA, '{}'));
+      if (a && typeof a === 'object' && !Array.isArray(a)) for (const k in a) if (a[k] && ALL.some(x => x.key === k)) got[k] = { n:Math.max(1, a[k].n | 0), d:String(a[k].d || '') };
+    } catch (e){}
+    // 前の版の記録を実績に移す（移したら保存する）
+    if (cfg.migrate && cfg.migrate(got)) ss(KA, JSON.stringify(got));
+    // 1回分の結果を記録し、初めて解除した実績を返す
+    function record(ctx){
+      cfg.add(T, ctx); ss(KT, JSON.stringify(T));
+      const fresh = [];
+      for (const a of cfg.singles) if (a.test(ctx, T)){ if (got[a.key]) got[a.key].n++; else { got[a.key] = { n:1, d:today() }; fresh.push(a); } }
+      for (const t of tiers) if (!got[t.key] && t.ladder.value(T) >= t.at){ got[t.key] = { n:1, d:today() }; fresh.push(t); }
+      if (collector && !got[collector.key] && Object.keys(got).length >= cfg.collectAt){ got[collector.key] = { n:1, d:today() }; fresh.push(collector); }
+      ss(KA, JSON.stringify(got));
+      return fresh;
+    }
+    const countText = () => `${Object.keys(got).length}/${ALL.length}`;
+    const $ = id => document.getElementById(id);
+    const when = (key, withCount) => `初達成 ${got[key].d || '記録なし'}` + (withCount ? `・${got[key].n.toLocaleString('ja-JP')}回` : '');
+    function render(){
+      $('achvOvCount').textContent = countText();
+      const st = $('achvStats'); st.innerHTML = '';
+      for (const [k, v] of cfg.records(T)){ const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = k; dd.textContent = v; st.append(dt, dd); }
+      const grid = $('achvGrid'); grid.innerHTML = '';
+      cfg.singles.concat(collector ? [collector] : []).forEach((a, i) => {
+        const li = document.createElement('li'), has = !!got[a.key];
+        const no = document.createElement('span'); no.className = 'no'; no.textContent = 'No.' + String(i + 1).padStart(2, '0');
+        const b = document.createElement('b'); b.textContent = has ? a.title : '？？？';
+        li.append(no, b);
+        if (has){ const w = document.createElement('span'); w.className = 'when'; w.textContent = when(a.key, a !== collector); li.append(a.desc, w); }
+        else { li.className = 'locked'; li.setAttribute('aria-label', `No.${i + 1} まだ解除していない実績`); }
+        grid.append(li);
+      });
+      const lad = $('achvLadders'); lad.innerHTML = '';
+      for (const L of cfg.ladders){
+        const li = document.createElement('li'), done = L.tiers.filter(t => got[t.key]), cur = done[done.length - 1], next = L.tiers.find(t => !got[t.key]);
+        const b = document.createElement('b');
+        if (!cur){ li.className = 'locked'; b.textContent = '？？？'; li.append(b); li.setAttribute('aria-label', 'まだ解除していない積み重ねの実績'); lad.append(li); continue; }
+        const lv = document.createElement('span'); lv.className = 'no'; lv.textContent = `${L.label}　${done.length}/${L.tiers.length}段`;
+        b.textContent = cur.title;
+        const w = document.createElement('span'); w.className = 'when'; w.textContent = when(cur.key, false);
+        li.append(lv, b, cur.desc, w);
+        const nx = document.createElement('span'); nx.className = 'next';
+        if (next){
+          const v = L.value(T);
+          nx.textContent = `次は「${next.title}」：${fmt(next.at, L.unit)}（いま ${fmt(v, L.unit)}）`;
+          const bar = document.createElement('span'); bar.className = 'bar'; const fill = document.createElement('i'); fill.style.width = (Math.min(1, v / next.at) * 100).toFixed(1) + '%'; bar.append(fill);
+          li.append(nx, bar);
+        } else { nx.textContent = 'すべての段を達成しました'; li.append(nx); }
+        lad.append(li);
+      }
+    }
+    let from = null;
+    function open(btn){
+      from = btn || null; render();
+      const ov = $('achvOv'); ov.hidden = false; ov.scrollTop = 0;
+      try { $('achvClose').focus({ preventScroll:true }); } catch (e){}
+    }
+    function close(){
+      $('achvOv').hidden = true;
+      try { if (from) from.focus({ preventScroll:true }); } catch (e){}
+    }
+    // 結果画面の「新しい実績」を作る
+    function showNew(fresh){
+      const list = $('achvNewList'); list.innerHTML = '';
+      for (const a of fresh){
+        const li = document.createElement('li');
+        const n = document.createElement('span'); n.className = 'achv-tag'; n.textContent = 'NEW';
+        const b = document.createElement('span'); b.className = 'achv-name'; b.textContent = a.title;
+        li.append(n, b, a.desc); list.append(li);
+      }
+      $('achvNewBox').hidden = !fresh.length;
+    }
+    $('achvClose').addEventListener('click', close);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('achvOv').hidden) close(); });
+    return { record, countText, open, close, showNew, totals:T, all:ALL };
+  }
+
+  /* ---- 実績 ---- */
+  // x = { R: evaluate の結果, st: その夜の記録 }。朝の写真の称号17種も実績に含める
+  const ACH = makeAchv({
+    prefix: 'nezo',
+    singles: [
+      // はじめの一歩
+      { key:'first',    title:'はじめての夜',       desc:'はじめて寝相を見守った',                     test:() => true },
+      { key:'wrap1',    title:'はじめての毛布',     desc:'毛布にくるませた',                           test:x => x.st.wraps >= 1 },
+      // 安眠スコア
+      { key:'s60',      title:'安眠の入口',         desc:'安眠スコア60点以上',                         test:x => x.R.score >= 60 },
+      { key:'s80',      title:'快眠の夜',           desc:'安眠スコア80点以上',                         test:x => x.R.score >= 80 },
+      { key:'s90',      title:'熟睡の名人',         desc:'安眠スコア90点以上',                         test:x => x.R.score >= 90 },
+      { key:'s100',     title:'完全なる安眠',       desc:'安眠スコア100点',                            test:x => x.R.score >= 100 },
+      // 朝の写真
+    ].concat(TITLES.map(t => ({ key:'t_' + t[0], title:t[1], desc:`朝の写真の称号が「${t[1]}」になった`, test:x => x.R.titleKey === t[0] }))).concat([
+      // 見守りかた
+      { key:'calm',     title:'ぐっすり一晩',       desc:'一度も落ちず、壁にもぶつからなかった',       test:x => x.R.falls === 0 && x.R.wallHits === 0 },
+      { key:'stay',     title:'布団から出なかった夜', desc:'安眠度99%以上',                            test:x => x.R.onAvg >= .99 },
+      { key:'guard10',  title:'クッションの守り',   desc:'クッションで10回受け止めた',                 test:x => x.R.cushionHits >= 10 },
+      { key:'wrap3',    title:'毛布と一緒に',       desc:'一晩で3回、毛布にくるませた',                test:x => x.st.wraps >= 3 },
+      { key:'neat',     title:'まくらで朝を迎えた', desc:'あおむけで布団の上、まくらに頭をのせて朝7時', test:x => x.R.pillow && x.R.facing === 0 && x.R.on >= .85 && !x.R.wrapped },
+      // 変な夜
+      { key:'fall8',    title:'床の住人',           desc:'一晩で8回、布団から落ちた',                  test:x => x.R.falls >= 8 },
+      { key:'wall10',   title:'壁ドン十連発',       desc:'一晩で10回、壁にぶつかった',                 test:x => x.R.wallHits >= 10 },
+      { key:'swat5',    title:'クッションお断り',   desc:'顔のクッションを5回払いのけられた',          test:x => x.st.swats >= 5 },
+      { key:'shove3',   title:'寝苦しい夜',         desc:'挟んだクッションを3回押しのけられた',        test:x => x.st.shoves >= 3 },
+      { key:'kick5',    title:'キックの名手',       desc:'一晩で5回、物をけとばされた',                test:x => x.st.kicks >= 5 },
+      { key:'hands',    title:'放任主義',           desc:'一度も画面をさわらずに朝を迎えた',           test:x => x.st.taps === 0 },
+    ]),
+    ladders: [
+      { label:'見守った夜',         unit:'回', value:T => T.plays, tiers:[ { key:'plays10', at:10, title:'夜ふかしの見守り役' }, { key:'plays30', at:30, title:'寝室の番人' }, { key:'plays60', at:60, title:'夜の見張り番' }, { key:'plays100', at:100, title:'百夜の見守り' } ] },
+      { label:'安眠スコアの合計',   unit:'点', value:T => T.score, tiers:[ { key:'sc500', at:500, title:'ねむりの貯金' }, { key:'sc2000', at:2000, title:'ねむりの財産' }, { key:'sc5000', at:5000, title:'ねむりの資産家' }, { key:'sc8000', at:8000, title:'ねむりの大富豪' } ] },
+      { label:'クッションで受け止めた合計', unit:'回', value:T => T.guard, tiers:[ { key:'gd30', at:30, title:'ボヨンの手ほどき' }, { key:'gd100', at:100, title:'ボヨン使い' }, { key:'gd250', at:250, title:'ボヨンの達人' }, { key:'gd500', at:500, title:'クッションの守護者' } ] },
+      { label:'寝返りの合計',       unit:'回', value:T => T.rolls, tiers:[ { key:'rl100', at:100, title:'ゴロンの観察者' }, { key:'rl400', at:400, title:'寝返り研究家' }, { key:'rl800', at:800, title:'寝相の博士' }, { key:'rl1200', at:1200, title:'寝返りの生き字引' } ] },
+    ],
+    collectAt: 30,
+    totals: { plays:0, score:0, guard:0, rolls:0, falls:0, wraps:0 },
+    add: (T, x) => { T.plays++; T.score += x.R.score; T.guard += x.R.cushionHits; T.rolls += x.st.rolls; T.falls += x.R.falls; T.wraps += x.st.wraps; },
+    records: T => [['見守った夜', T.plays + '回'], ['ベスト', best + '点'], ['安眠スコアの合計', T.score.toLocaleString('ja-JP') + '点'],
+                   ['クッションで受け止めた合計', T.guard.toLocaleString('ja-JP') + '回'], ['寝返りの合計', T.rolls.toLocaleString('ja-JP') + '回'],
+                   ['毛布にくるませた合計', T.wraps.toLocaleString('ja-JP') + '回'], ['落下の合計', T.falls.toLocaleString('ja-JP') + '回']],
+    // v3.1までの「集めた称号」（nezo-titles）を、朝の写真の実績に移す
+    migrate: got => { let ch = false; for (const k of titles) if (!got['t_' + k]){ got['t_' + k] = { n:1, d:'' }; ch = true; } return ch; },
+  });
+  let lastFresh = [];
+  function showAchvCount() { $('achvCount').textContent = ACH.countText(); $('achvCount2').textContent = ACH.countText(); }
+
 
   const SVG_ON = '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.6 6a8.6 8.6 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
   const SVG_OFF = '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
@@ -1197,7 +1389,8 @@ function initUI() {
 
   function updateTitleInfo() {
     $('ver').textContent = VERSION;
-    $('titleBest').textContent = best > 0 ? `ベスト ${best}点　集めた称号 ${titles.length}/${TITLES.length}` : 'ベスト記録はまだありません';
+    $('titleBest').textContent = best > 0 ? `ベスト ${best}点` : 'ベスト記録はまだありません';
+    showAchvCount();
   }
   updateTitleInfo();
 
@@ -1216,6 +1409,8 @@ function initUI() {
   $('againBtn').addEventListener('click', start);
   $('toTitle').addEventListener('click', toTitle);
   $('shareBtn').addEventListener('click', share);
+  $('achvBtn').addEventListener('click', () => ACH.open($('achvBtn')));
+  $('achvBtn2').addEventListener('click', () => ACH.open($('achvBtn2')));
 
   function beginMorning() {
     state = 'morning'; morningT = 0; flashed = false;
@@ -1261,11 +1456,11 @@ function initUI() {
     const R = evaluate(sim); lastR = R;
     let isBest = false;
     if (R.score > best) { best = R.score; save('nezo-score', best); isBest = true; }
-    if (!titles.includes(R.titleKey)) { titles.push(R.titleKey); save('nezo-titles', JSON.stringify(titles)); }
     $('capTitle').textContent = R.title; $('capSub').textContent = R.sub;
     $('newBest').hidden = !isBest;
     $('resStats').textContent = `安眠度 ${Math.round(R.onAvg * 100)}%（布団からはみ出すほど下がる）\n落下${R.falls}回、壁ドン${R.wallHits}回、クッションで受け止めた${R.cushionHits}回` + (R.swats ? `、顔のクッションを払いのけた${R.swats}回` : '');
-    $('collect').textContent = `集めた称号 ${titles.length}/${TITLES.length}`;
+    const fresh = ACH.record({ R, st: { ...sim.stats } });
+    ACH.showNew(fresh); showAchvCount(); lastFresh = fresh.map(a => a.title);
     $('photo').setAttribute('aria-label', `朝の写真。${FACING[sim.facing]}で${R.poseName}。${R.on >= .85 ? '布団の上' : R.on >= .45 ? '布団からはみ出している' : '布団の外'}`);
     resultScr.hidden = false; resultScr.scrollTop = 0;
     renderPhoto();
@@ -1298,7 +1493,8 @@ function initUI() {
     if (!lastR) return;
     const R = lastR;
     const pageUrl = location.href.split('#')[0];
-    const text = `寝相コントロールで安眠スコア${R.score}点。\n朝7時の寝姿は「${R.title}」でした（落下${R.falls}回、壁ドン${R.wallHits}回）\n#寝相コントロール\n${pageUrl}`;
+    const ach = lastFresh.length ? '実績解除' + lastFresh.slice(0, 3).map(t => '「' + t + '」').join('') + (lastFresh.length > 3 ? `ほか${lastFresh.length - 3}個` : '') + '\n' : '';
+    const text = `寝相コントロールで安眠スコア${R.score}点。\n朝7時の寝姿は「${R.title}」でした（落下${R.falls}回、壁ドン${R.wallHits}回）\n${ach}#寝相コントロール\n${pageUrl}`;
     // 写真を添付して共有（対応していない端末では文章だけ）。画像はダウンロードしない
     let withPhoto = false;
     try { withPhoto = !!(shareFile && navigator.canShare && navigator.canShare({ files: [shareFile] })); } catch (e) {}
