@@ -153,6 +153,7 @@ button{font:inherit;color:inherit}
 .slip-yen{margin:0;font-size:44px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.1}
 .slip-title{margin:2px 0 0;font-family:var(--brush);font-size:34px;line-height:1.25;white-space:nowrap}
 .slip-note{margin:4px 0 10px;font-size:13px;font-weight:700;line-height:1.55;color:#4A3A2C}
+.slip-next{margin:-6px 0 10px;font-size:12.5px;font-weight:700;color:#B8321C}
 .slip-stats{margin:0;padding-top:8px;border-top:1px dashed #C9B48E;display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:13.5px}
 .slip-stats dt{font-weight:700;color:#5A4838}
 .slip-stats dd{margin:0;text-align:right;font-weight:900;font-variant-numeric:tabular-nums}
@@ -244,6 +245,7 @@ button{font:inherit;color:inherit}
       <p class="slip-lbl">称号</p>
       <p class="slip-title" id="resTitle"></p>
       <p class="slip-note" id="resNote"></p>
+      <p class="slip-next" id="resNext"></p>
       <dl class="slip-stats" id="resStats"></dl>
       <div class="stamp" aria-hidden="true">毎度</div>
       <div class="stamp newbest" id="newBest" aria-hidden="true" hidden>新記録</div>
@@ -265,7 +267,7 @@ button{font:inherit;color:inherit}
    おでん番
    ロジック（DOMに依存しない部分）
    ========================================================= */
-const VERSION = 'v3.0';
+const VERSION = 'v3.1';
 const DURATION = 60;        // 1回のプレイ時間（秒）
 const MELT = 9;             // 煮すぎになってから、溶けて消えるまでの秒数
 const NAMA_RATIO = 0.55;    // 食べ頃になる時刻のこの割合までは「生」
@@ -296,8 +298,22 @@ const PREF_LABEL = { normal:'ご注文', kuta:'くたくた好き', kata:'かた
 const LOOK_KINDS = ['salary','ol','gakusei','obachan','worker'];
 const SKINS = ['#F2D3B3','#E9C29E','#D9A77C','#C68B60'];
 
-// 称号の基準（売上）
-const RANK_S = 13000, RANK_A = 9500, RANK_B = 6500, RANK_C = 4000;
+// 売上の称号（高い順）。上の2つは失敗系の称号より先に判定する
+const RANKS = [
+  { min:13000, title:'おでんの神様',     note:'出汁の香りだけで客が集まる、伝説の屋台です。' },
+  { min:9500,  title:'おでん屋の大将',   note:'食べ頃を見きわめる目は、もう一人前以上です。' },
+  { min:8000,  title:'のれん分け目前',   note:'そろそろ自分の屋台を、という話が出てきました。' },
+  { min:6500,  title:'一人前の鍋番',     note:'大将の背中が見えてきました。' },
+  { min:5000,  title:'出汁番',           note:'出汁の味見を任されるようになりました。' },
+  { min:4000,  title:'屋台の見習い',     note:'鍋の前に立つ姿が、さまになってきました。' },
+  { min:3000,  title:'仕込み手伝い',     note:'大根の面取りを任されるようになりました。' },
+  { min:2000,  title:'からし係',         note:'からしを添える手つきは、もうばっちりです。' },
+  { min:0,     title:'鍋の見張り番',     note:'まずは湯気をよく見るところから。' },
+];
+const TOP_RANKS = 2;
+function rankOf(sc){ return RANKS.find(r => sc >= r.min); }
+// 次に目指す売上の称号（いちばん上ならnull）
+function nextRank(sc){ const i = RANKS.findIndex(r => sc >= r.min); return i > 0 ? RANKS[i - 1] : null; }
 
 function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
 function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
@@ -557,8 +573,8 @@ function aiAct(g){
 function judge(g){
   const s = g.stats, sc = g.score;
   if (s.makanai >= 8 && s.makanai > s.served) return { title:'まかない大臣', note:`お客さんより大将のほうが食べました（${s.makanai}個）。` };
-  if (sc >= RANK_S) return { title:'おでんの神様', note:'出汁の香りだけで客が集まる、伝説の屋台です。' };
-  if (sc >= RANK_A) return { title:'おでん屋の大将', note:'食べ頃を見きわめる目は、もう一人前以上です。' };
+  const rk = rankOf(sc);
+  if (RANKS.indexOf(rk) < TOP_RANKS) return { title:rk.title, note:rk.note };
   if (s.crumble >= 6) return { title:'大根クラッシャー', note:`崩した大根は${s.crumble}本。出汁はとびきり濃くなりました。` };
   if (s.melted >= 8) return { title:'煮込みの鬼', note:`${s.melted}個の具が、出汁の中へ消えていきました。` };
   if (s.whiteEgg >= 4) return { title:'白たまご職人', note:`味のしみていない卵を${s.whiteEgg}個出しました。` };
@@ -566,9 +582,7 @@ function judge(g){
   if (s.ojii >= 8) return { title:'常連じいさんの推し', note:`くたくたの具で、おじいさんを${s.ojii}回よろこばせました。` };
   if (s.kid >= 8) return { title:'ちびっこの味方', note:`かための具で、子どもを${s.kid}回よろこばせました。` };
   if (s.angry >= 8) return { title:'閑古鳥の番人', note:`${s.angry}人のお客さんが、待ちくたびれて帰りました。` };
-  if (sc >= RANK_B) return { title:'一人前の鍋番', note:'大将の背中が見えてきました。' };
-  if (sc >= RANK_C) return { title:'屋台の見習い', note:'鍋の前に立つ姿が、さまになってきました。' };
-  return { title:'鍋の見張り番', note:'まずは湯気をよく見るところから。' };
+  return { title:rk.title, note:rk.note };
 }
 
 /* =========================================================
@@ -1410,6 +1424,8 @@ function showResult(){
   el.resYen.textContent = '¥' + sc.toLocaleString('ja-JP');
   el.resTitle.textContent = j.title;
   el.resNote.textContent = j.note;
+  const nx = nextRank(sc);
+  el.resNext.textContent = nx ? `次の称号「${nx.title}」まで あと¥${(nx.min - sc).toLocaleString('ja-JP')}` : '売上の称号は、これがいちばん上です';
   const rows = [
     ['出した品数', `${s.served}品（★極上 ${s.best}）`],
     ['食べ頃率', `${rate}%`],
@@ -1428,7 +1444,7 @@ function showResult(){
   el.result.hidden = false; el.result.scrollTop = 0;
   const inner = el.slip.clientWidth - 40;
   el.resTitle.style.fontSize = Math.max(18, Math.min(34, Math.floor(inner/(j.title.length + 0.4)))) + 'px';
-  el.resLive.textContent = `本日の売上 ${sc}円。称号は「${j.title}」。` + (isBest ? '自己ベスト更新。' : '');
+  el.resLive.textContent = `本日の売上 ${sc}円。称号は「${j.title}」。` + (isBest ? '自己ベスト更新。' : '') + el.resNext.textContent + '。';
   lastResult = { score:sc, title:j.title, best:s.best, rate };
   setTimeout(() => { try { el.again.focus({ preventScroll:true }); } catch (e){} }, 60);
 }
@@ -1508,7 +1524,7 @@ function boot(){
   const $ = id => document.getElementById(id);
   el = { stage:$('stage'), cells:$('cells'), tray:$('tray'), hud:$('hud'), timeBox:$('timeBox'), timeVal:$('timeVal'), scoreVal:$('scoreVal'),
          timeFill:$('timeFill'), banner:$('banner'), title:$('titleScreen'), result:$('resultScreen'), slip:$('slip'), resYen:$('resYen'),
-         resTitle:$('resTitle'), resNote:$('resNote'), resStats:$('resStats'), newBest:$('newBest'), resLive:$('resLive'),
+         resTitle:$('resTitle'), resNote:$('resNote'), resNext:$('resNext'), resStats:$('resStats'), newBest:$('newBest'), resLive:$('resLive'),
          again:$('againBtn'), share:$('shareBtn'), toTitle:$('toTitle'), start:$('startBtn'), mute:$('mute'), toast:$('toast'), bestTitle:$('bestTitle') };
   cv = $('cv'); ctx = cv.getContext('2d');
 
