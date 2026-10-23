@@ -172,6 +172,20 @@ button{font:inherit;color:inherit}
 .achv-grid li.locked b{color:var(--bubble-sub);letter-spacing:.2em}
 .achv-grid .no{font-size:10px;font-weight:700;color:var(--bubble-sub)}
 #achvClose{width:100%}
+.achv-sub{margin:14px 0 6px;font-size:13px;font-weight:900;color:var(--sub)}
+.achv-stats{margin:0;padding:8px 12px;border-radius:10px;background:var(--bubble);border:1.5px solid var(--bubble-line);display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:12.5px;font-weight:700;color:var(--bubble-sub)}
+.achv-stats dd{margin:0;text-align:right;font-weight:900;color:var(--bubble-ink);font-variant-numeric:tabular-nums}
+.achv-grid .when{display:block;margin-top:3px;font-size:10.5px;color:var(--bubble-sub);opacity:.85}
+.achv-ladders{list-style:none;margin:0 0 16px;padding:0;display:flex;flex-direction:column;gap:8px}
+.achv-ladders li{padding:8px 10px 9px;border-radius:10px;background:var(--bubble);border:1.5px solid var(--bubble-line);font-size:11.5px;font-weight:700;line-height:1.45;color:var(--bubble-sub)}
+.achv-ladders li b{display:block;margin:1px 0 2px;font-size:14px;font-weight:900;color:var(--bubble-ink)}
+.achv-ladders li.locked{background:var(--tray);border-style:dashed}
+.achv-ladders li.locked b{color:var(--bubble-sub);letter-spacing:.2em}
+.achv-ladders .no{font-size:10.5px;font-weight:700}
+.achv-ladders .when{display:block;font-size:10.5px;opacity:.85}
+.achv-ladders .next{display:block;margin-top:4px;color:var(--bubble-ink)}
+.achv-ladders .bar{display:block;height:6px;margin-top:4px;border-radius:3px;background:var(--bubble-line);overflow:hidden}
+.achv-ladders .bar i{display:block;height:100%;background:var(--accent)}
 .slip-stats{margin:0;padding-top:8px;border-top:1px dashed #C9B48E;display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:13.5px}
 .slip-stats dt{font-weight:700;color:#5A4838}
 .slip-stats dd{margin:0;text-align:right;font-weight:900;font-variant-numeric:tabular-nums}
@@ -282,7 +296,12 @@ button{font:inherit;color:inherit}
     <div class="achv-panel">
       <h2 id="achvHead">実績 <span id="achvHeadCount">0/0</span></h2>
       <p class="achv-lead">解除するまで、名前も条件もひみつ。いろいろな遊び方を試してみよう。</p>
+      <h3 class="achv-sub">これまでの記録</h3>
+      <dl class="achv-stats" id="achvStats"></dl>
+      <h3 class="achv-sub">実績</h3>
       <ol class="achv-grid" id="achvGrid"></ol>
+      <h3 class="achv-sub">積み重ね</h3>
+      <ol class="achv-ladders" id="achvLadders"></ol>
       <button id="achvClose" class="btn primary" type="button">閉じる</button>
     </div>
   </section>
@@ -296,7 +315,7 @@ button{font:inherit;color:inherit}
    おでん番
    ロジック（DOMに依存しない部分）
    ========================================================= */
-const VERSION = 'v5.0';
+const VERSION = 'v5.1';
 const DURATION = 60;        // 1回のプレイ時間（秒）
 const MELT = 9;             // 煮すぎになってから、溶けて消えるまでの秒数
 const NAMA_RATIO = 0.55;    // 食べ頃になる時刻のこの割合までは「生」
@@ -659,21 +678,42 @@ const ACHV = [
   { key:'angry',     title:'閑古鳥の番人',       desc:'1回で8人を待ちくたびれさせた',               test:s => s.angry >= 8 },
   { key:'stuffed',   title:'詰め込みすぎ',       desc:'いっぱいの鍋に、さらに10回具を入れようとした', test:s => s.full >= 10 },
   { key:'reverse',   title:'あべこべ屋台',       desc:'子どもにくたくた、おじいさんに生の具を出した', test:s => s.kidKuta >= 1 && s.ojiiNama >= 1 },
-  // 通いつめる
-  { key:'plays10',   title:'常連の屋台',         desc:'10回開店した',                               test:(s,g,T) => T.plays >= 10 },
-  { key:'plays50',   title:'町の名物',           desc:'50回開店した',                               test:(s,g,T) => T.plays >= 50 },
-  { key:'sales100k', title:'屋台の財産',         desc:'売上の合計が¥100,000に届いた',               test:(s,g,T) => T.sales >= 100000 },
-  { key:'sales500k', title:'おでん長者',         desc:'売上の合計が¥500,000に届いた',               test:(s,g,T) => T.sales >= 500000 },
-  { key:'goku1000',  title:'極上を知る者',       desc:'★極上の合計が1,000品に届いた',               test:(s,g,T) => T.best >= 1000 },
-  // ほかの実績を集める
-  { key:'collect30', title:'実績コレクター',     desc:'実績を30個集めた',                           test:() => false },
 ];
+// 積み重ねの実績：累計で段階的に解除される。1段目を解除すると、次の段の条件と進み具合が見えるようになる
+// T：これまでの累計（今回の分を含む）
+const LADDERS = [
+  { key:'plays', label:'開店回数', unit:'回', value:T => T.plays, tiers:[
+    { key:'plays10',   at:10,      title:'常連の屋台' },
+    { key:'plays30',   at:30,      title:'顔なじみの屋台' },
+    { key:'plays50',   at:50,      title:'町の名物' },
+    { key:'plays100',  at:100,     title:'老舗の屋台' } ] },
+  { key:'sales', label:'売上の合計', unit:'円', value:T => T.sales, tiers:[
+    { key:'sales100k', at:100000,  title:'屋台の財産' },
+    { key:'sales300k', at:300000,  title:'屋台の蓄え' },
+    { key:'sales500k', at:500000,  title:'おでん長者' },
+    { key:'sales1m',   at:1000000, title:'おでん百万長者' } ] },
+  { key:'goku', label:'★極上の合計', unit:'品', value:T => T.best, tiers:[
+    { key:'goku100',   at:100,     title:'極上の味見役' },
+    { key:'goku500',   at:500,     title:'極上の常連' },
+    { key:'goku1000',  at:1000,    title:'極上を知る者' },
+    { key:'goku2500',  at:2500,    title:'極上の求道者' } ] },
+  { key:'happy', label:'大満足させたお客さんの合計', unit:'人', value:T => T.happy, tiers:[
+    { key:'happy50',   at:50,      title:'笑顔の屋台' },
+    { key:'happy200',  at:200,     title:'ひいき客の多い店' },
+    { key:'happy500',  at:500,     title:'行列のできる屋台' },
+    { key:'happy1200', at:1200,    title:'町いちばんの屋台' } ] },
+];
+function fmtAmount(v, unit){ return unit === '円' ? '¥' + v.toLocaleString('ja-JP') : v.toLocaleString('ja-JP') + unit; }
+for (const L of LADDERS) for (const t of L.tiers){ t.ladder = L; t.desc = `${L.label}が${fmtAmount(t.at, L.unit)}に届いた`; t.test = (s,g,T) => L.value(T) >= t.at; }
+// ほかの実績を集める
+const COLLECT_AT = 40;
+const COLLECTOR = { key:'collect40', title:'実績コレクター', desc:`実績を${COLLECT_AT}個集めた`, test:() => false };
+const ACHV_ALL = ACHV.concat(LADDERS.flatMap(L => L.tiers), [COLLECTOR]);
 // 今回の結果で条件を満たした実績（got：これまでに解除した実績のキー）
 function achievementsOf(g, T, got){
-  const hit = ACHV.filter(a => a.test(g.stats, g, T));
+  const hit = ACHV_ALL.filter(a => a.test(g.stats, g, T));
   const keys = new Set((got || []).concat(hit.map(a => a.key)));
-  const col = ACHV.find(a => a.key === 'collect30');
-  if (!keys.has('collect30') && keys.size >= 30) hit.push(col);
+  if (!keys.has(COLLECTOR.key) && keys.size >= COLLECT_AT) hit.push(COLLECTOR);
   return hit;
 }
 
@@ -959,10 +999,18 @@ const LOOKS = {
 let state = 'title';            // 'title' → 'playing' → 'closing' → 'over'
 let game = null, demo = null;
 let best = parseInt(load('oden-best','0'), 10) || 0;
-let totals = { plays:0, sales:0, best:0 };   // これまでの累計（開店回数・売上・★極上）
+// これまでの累計（開店回数・売上・★極上・大満足させた客・出した品数・来客）
+let totals = { plays:0, sales:0, best:0, happy:0, served:0, customers:0 };
 try { const t = JSON.parse(load('oden-total','{}')); for (const k in totals) if (Number.isFinite(t[k])) totals[k] = t[k]; } catch (e){}
-let achvGot = [];   // これまでに解除した実績のキー
-try { const a = JSON.parse(load('oden-achv','[]')); if (Array.isArray(a)) achvGot = a.filter(k => ACHV.some(x => x.key === k)); } catch (e){}
+// 解除した実績：{ キー: { n:達成した回数, d:初めて達成した日 } }。v5.0まではキーの配列だった
+let achv = {};
+try {
+  const a = JSON.parse(load('oden-achv','{}'));
+  const valid = k => ACHV_ALL.some(x => x.key === k);
+  if (Array.isArray(a)){ for (const k of a) if (valid(k)) achv[k] = { n:1, d:'' }; }
+  else if (a && typeof a === 'object'){ for (const k in a) if (valid(k) && a[k]) achv[k] = { n:Math.max(1, a[k].n | 0), d:String(a[k].d || '') }; }
+} catch (e){}
+function today(){ const d = new Date(); return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`; }
 let reduce = false;
 let cv = null, ctx = null, W = 1, H = 1, DPR = 1, LAYOUT = null;
 let COL = {};
@@ -1520,10 +1568,15 @@ function showResult(){
   el.resYen.textContent = '¥' + sc.toLocaleString('ja-JP');
   el.resTitle.textContent = j.title;
   el.resNote.textContent = j.note;
-  totals.plays++; totals.sales += sc; totals.best += s.best;
+  totals.plays++; totals.sales += sc; totals.best += s.best; totals.happy += s.happy; totals.served += s.served; totals.customers += s.customers;
   save('oden-total', JSON.stringify(totals));
-  const fresh = achievementsOf(g, totals, achvGot).filter(a => !achvGot.includes(a.key));
-  if (fresh.length){ achvGot = achvGot.concat(fresh.map(a => a.key)); save('oden-achv', JSON.stringify(achvGot)); }
+  // 達成した回数を数える（積み重ねとコレクターは一度きり）
+  const hits = achievementsOf(g, totals, Object.keys(achv)), fresh = [];
+  for (const a of hits){
+    if (!achv[a.key]){ achv[a.key] = { n:1, d:today() }; fresh.push(a); }
+    else if (!a.ladder && a !== COLLECTOR) achv[a.key].n++;
+  }
+  save('oden-achv', JSON.stringify(achv));
   el.resAchvList.innerHTML = '';
   for (const a of fresh){
     const li = document.createElement('li');
@@ -1565,20 +1618,51 @@ function goTitle(){
   el.bestTitle.textContent = '¥' + best.toLocaleString('ja-JP');
   showAchvCount();
 }
-function showAchvCount(){ const t = `${achvGot.length}/${ACHV.length}`; el.achvCount.textContent = t; el.resAchvCount.textContent = t; }
+function achvText(){ return `${Object.keys(achv).length}/${ACHV_ALL.length}`; }
+function showAchvCount(){ const t = achvText(); el.achvCount.textContent = t; el.resAchvCount.textContent = t; }
+function firstLine(key, withCount){
+  const r = achv[key];
+  return `初達成 ${r.d || '記録なし'}` + (withCount ? `・${r.n.toLocaleString('ja-JP')}回` : '');
+}
 let achvFrom = null;
 function openAchv(from){
   achvFrom = from;
-  el.achvHeadCount.textContent = `${achvGot.length}/${ACHV.length}`;
+  el.achvHeadCount.textContent = achvText();
+  // これまでの記録
+  el.achvStats.innerHTML = '';
+  const recs = [['開店回数', `${totals.plays.toLocaleString('ja-JP')}回`], ['最高売上', '¥' + best.toLocaleString('ja-JP')], ['売上の合計', '¥' + totals.sales.toLocaleString('ja-JP')],
+    ['★極上の合計', `${totals.best.toLocaleString('ja-JP')}品`], ['出した品数の合計', `${totals.served.toLocaleString('ja-JP')}品`], ['大満足させたお客さん', `${totals.happy.toLocaleString('ja-JP')}人`]];
+  for (const [k, v] of recs){ const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = k; dd.textContent = v; el.achvStats.append(dt, dd); }
+  // 実績（解除するまで「？？？」）
   el.achvGrid.innerHTML = '';
-  ACHV.forEach((a, i) => {
-    const li = document.createElement('li'), got = achvGot.includes(a.key);
+  ACHV.concat([COLLECTOR]).forEach((a, i) => {
+    const li = document.createElement('li'), got = !!achv[a.key];
     const no = document.createElement('span'); no.className = 'no'; no.textContent = 'No.' + String(i + 1).padStart(2, '0');
     const b = document.createElement('b'); b.textContent = got ? a.title : '？？？';
     li.append(no, b);
-    if (got) li.append(a.desc); else { li.className = 'locked'; li.setAttribute('aria-label', `No.${i + 1} まだ解除していない実績`); }
+    if (got){ const d = document.createElement('span'); d.className = 'when'; d.textContent = firstLine(a.key, a !== COLLECTOR); li.append(a.desc, d); }
+    else { li.className = 'locked'; li.setAttribute('aria-label', `No.${i + 1} まだ解除していない実績`); }
     el.achvGrid.append(li);
   });
+  // 積み重ね（1段目を解除すると、次の段の条件と進み具合が見える）
+  el.achvLadders.innerHTML = '';
+  for (const L of LADDERS){
+    const li = document.createElement('li'), done = L.tiers.filter(t => achv[t.key]), cur = done[done.length - 1], next = L.tiers.find(t => !achv[t.key]);
+    const b = document.createElement('b');
+    if (!cur){ li.className = 'locked'; b.textContent = '？？？'; li.append(b); li.setAttribute('aria-label', 'まだ解除していない積み重ねの実績'); el.achvLadders.append(li); continue; }
+    const lv = document.createElement('span'); lv.className = 'no'; lv.textContent = `${L.label}　${done.length}/${L.tiers.length}段`;
+    b.textContent = cur.title;
+    const d = document.createElement('span'); d.className = 'when'; d.textContent = firstLine(cur.key, false);
+    li.append(lv, b, cur.desc, d);
+    const nx = document.createElement('span'); nx.className = 'next';
+    if (next){
+      const v = L.value(totals), r = Math.min(1, v / next.at);
+      nx.textContent = `次は「${next.title}」：${fmtAmount(next.at, L.unit)}（いま ${fmtAmount(v, L.unit)}）`;
+      const bar = document.createElement('span'); bar.className = 'bar'; const fill = document.createElement('i'); fill.style.width = (r * 100).toFixed(1) + '%'; bar.append(fill);
+      li.append(nx, bar);
+    } else { nx.textContent = 'すべての段を達成しました'; li.append(nx); }
+    el.achvLadders.append(li);
+  }
   el.achvScreen.hidden = false; el.achvScreen.scrollTop = 0;
   try { el.achvClose.focus({ preventScroll:true }); } catch (e){}
 }
@@ -1660,7 +1744,7 @@ function boot(){
   el = { stage:$('stage'), cells:$('cells'), tray:$('tray'), hud:$('hud'), timeBox:$('timeBox'), timeVal:$('timeVal'), scoreVal:$('scoreVal'),
          timeFill:$('timeFill'), banner:$('banner'), title:$('titleScreen'), result:$('resultScreen'), slip:$('slip'), resYen:$('resYen'),
          resTitle:$('resTitle'), resNote:$('resNote'), resNext:$('resNext'), resAchv:$('resAchv'), resAchvList:$('resAchvList'), achvCount:$('achvCount'), resAchvCount:$('resAchvCount'),
-         achvScreen:$('achvScreen'), achvGrid:$('achvGrid'), achvHeadCount:$('achvHeadCount'), achvClose:$('achvClose'), achvBtn:$('achvBtn'), achvBtn2:$('achvBtn2'), resStats:$('resStats'), newBest:$('newBest'), resLive:$('resLive'),
+         achvScreen:$('achvScreen'), achvGrid:$('achvGrid'), achvStats:$('achvStats'), achvLadders:$('achvLadders'), achvHeadCount:$('achvHeadCount'), achvClose:$('achvClose'), achvBtn:$('achvBtn'), achvBtn2:$('achvBtn2'), resStats:$('resStats'), newBest:$('newBest'), resLive:$('resLive'),
          again:$('againBtn'), share:$('shareBtn'), toTitle:$('toTitle'), start:$('startBtn'), mute:$('mute'), toast:$('toast'), bestTitle:$('bestTitle') };
   cv = $('cv'); ctx = cv.getContext('2d');
 
