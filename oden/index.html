@@ -265,7 +265,7 @@ button{font:inherit;color:inherit}
    おでん番
    ロジック（DOMに依存しない部分）
    ========================================================= */
-const VERSION = 'v2.1';
+const VERSION = 'v2.2';
 const DURATION = 60;        // 1回のプレイ時間（秒）
 const MELT = 9;             // 煮すぎになってから、溶けて消えるまでの秒数
 const NAMA_RATIO = 0.55;    // 食べ頃になる時刻のこの割合までは「生」
@@ -297,7 +297,7 @@ const LOOK_KINDS = ['salary','ol','gakusei','obachan','worker'];
 const SKINS = ['#F2D3B3','#E9C29E','#D9A77C','#C68B60'];
 
 // 称号の基準（売上）
-const RANK_S = 7000, RANK_A = 4600, RANK_B = 2800, RANK_C = 1400;
+const RANK_S = 12000, RANK_A = 8500, RANK_B = 5500, RANK_C = 3000;
 
 function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
 function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
@@ -563,8 +563,8 @@ function judge(g){
   if (s.melted >= 8) return { title:'煮込みの鬼', note:`${s.melted}個の具が、出汁の中へ消えていきました。` };
   if (s.whiteEgg >= 4) return { title:'白たまご職人', note:`味のしみていない卵を${s.whiteEgg}個出しました。` };
   if (s.served === 0 && s.makanai === 0) return { title:'鍋をながめる人', note:'湯気をながめているうちに、閉店の時間になりました。' };
-  if (s.ojii >= 5) return { title:'常連じいさんの推し', note:`くたくたの具で、おじいさんを${s.ojii}回よろこばせました。` };
-  if (s.kid >= 5) return { title:'ちびっこの味方', note:`かための具で、子どもを${s.kid}回よろこばせました。` };
+  if (s.ojii >= 8) return { title:'常連じいさんの推し', note:`くたくたの具で、おじいさんを${s.ojii}回よろこばせました。` };
+  if (s.kid >= 8) return { title:'ちびっこの味方', note:`かための具で、子どもを${s.kid}回よろこばせました。` };
   if (s.angry >= 8) return { title:'閑古鳥の番人', note:`${s.angry}人のお客さんが、待ちくたびれて帰りました。` };
   if (sc >= RANK_B) return { title:'一人前の鍋番', note:'大将の背中が見えてきました。' };
   if (sc >= RANK_C) return { title:'屋台の見習い', note:'鍋の前に立つ姿が、さまになってきました。' };
