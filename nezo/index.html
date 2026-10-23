@@ -185,7 +185,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
     <div id="titleCard">
       <ol class="rules">
         <li><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M13.6 2.4A7.5 7.5 0 1 0 17.6 12a6 6 0 0 1-4-9.6z" fill="#6C62B8"/></svg><span>夜11時から朝7時まで、寝返りする人を見守る</span></li>
-        <li><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="16" height="16" rx="4.5" fill="#4E9C95"/><circle cx="10" cy="10" r="1.8" fill="#2D6A64"/></svg><span><b>クッション</b>で体を止めて（顔に当てると息苦しい）、<b>毛布</b>で引き寄せる（体にかけると静かになる）</span></li>
+        <li><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="2" y="2" width="16" height="16" rx="4.5" fill="#4E9C95"/><circle cx="10" cy="10" r="1.8" fill="#2D6A64"/></svg><span><b>クッション</b>で寝返りを止めて（顔に当てたり挟んだりすると寝苦しい）、<b>毛布</b>で引き寄せる（体にかけると静かになる）</span></li>
         <li><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="2.5" width="15" height="15" rx="1.5" fill="#FBFAF5" stroke="#8C847A"/><rect x="4.5" y="4.5" width="11" height="8.5" fill="#C9BB7E"/></svg><span>布団の上で眠れた時間と、落ちずにぐっすり眠れたかで<b>安眠スコア</b>を採点</span></li>
       </ol>
       <p id="titleBest">ベスト記録はまだありません</p>
@@ -223,7 +223,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
    寝相コントロール
    座標はすべて「部屋のcm」。部屋 320×440、布団 120×214。
    ========================================================= */
-const VERSION = 'v3.0';
+const VERSION = 'v3.1';
 const ROOM = { w: 320, h: 440 };
 const FUTON = { x: 100, y: 118, w: 120, h: 214 };
 const PILLOW = { x: 129, y: 126, w: 62, h: 28 };
@@ -234,6 +234,12 @@ const CUSH_R = 17, BL_W = 64, BL_H = 48;
 const FACE_R = 13 + CUSH_R + 5;    // 頭の中心からこの距離にクッションがあると「顔に当たっている」
 const FACE_Q = .35;                // 顔にクッションが当たっているあいだの眠りの質の倍率（息苦しい）
 const SWAT_P = .6;                 // 動くときに、顔の近くのクッションを払いのける確率
+const PINCH_Q = .5;                // 胴体を左右両側からクッションに挟まれているあいだの眠りの質の倍率（寝苦しい）
+const PINCH_P = .5;                // 動くときに、挟んでいるクッションを押しのける確率
+/* 毛布の暑さは寝ている人の側にたまる。はがしてかけ直しても減らない */
+const HEAT_MIN = 12, HEAT_MAX = 17; // 毛布にくるまっていられる秒数（けとばすたびに選び直す）
+const HEAT_COOL = .5;              // 毛布から出ているあいだ、暑さが1秒あたりに冷める量
+const HOT_SEC = 8;                 // 毛布をけとばしたあと、毛布をいやがる秒数
 const G = { headY: 58, headR: 13, shX: 17, shY: 33, hipX: 9, hipY: -14, ua: 24, fa: 22, th: 38, sh: 37 };
 const DEG = Math.PI / 180, TAU = Math.PI * 2;
 
@@ -294,8 +300,8 @@ function newSim(demo) {
       spin: (Math.random() < .5 ? -1 : 1) * rand(.04, .12),  // 回りやすい向き
       slide: rand(.06, .16),                                  // ずり下がりやすさ
     },
-    stats: { rolls: 0, falls: 0, wallHits: 0, cushionHits: 0, kicks: 0, swats: 0, wraps: 0, rot: 0, onSum: 0, onDur: 0 },
-    stuffy: false, stuffyMsg: -9, torsoOn: true, onFrac: 1, lastBump: -9, fx: [], zT: 1, shake: 0, log: [], ai: { t: 1.2 },
+    stats: { rolls: 0, falls: 0, wallHits: 0, cushionHits: 0, kicks: 0, swats: 0, shoves: 0, wraps: 0, rot: 0, onSum: 0, onDur: 0 },
+    stuffy: false, stuffyMsg: -9, pinched: false, pinchMsg: -9, heat: 0, heatMax: rand(HEAT_MIN, HEAT_MAX), hotUntil: 0, torsoOn: true, onFrac: 1, lastBump: -9, fx: [], zT: 1, shake: 0, log: [], ai: { t: 1.2 },
   };
   S.poseFrom = S.cur.slice(); S.poseTo = S.cur.slice();
   return S;
@@ -441,6 +447,22 @@ function faceCushion(S, extra) {
   }
   return best;
 }
+/* 胴体（胸・お腹・腰）に触れているクッションを、体の左右に分けて返す */
+function pinchCushions(S) {
+  const C = core(S).slice(1, 4), s = Math.sin(S.ang), c = Math.cos(S.ang), L = [], R = [];
+  for (const k of S.cushions) {
+    if (k.fly) continue;
+    if (!C.some(q => Math.hypot(k.x - q[0], k.y - q[1]) < q[2] + CUSH_R + 4)) continue;
+    const lx = (k.x - S.x) * c + (k.y - S.y) * s;   // 体の右がプラス
+    (lx < 0 ? L : R).push(k);
+  }
+  return L.length && R.length ? L.concat(R) : null;
+}
+function pushAway(S, k) {
+  const a = Math.atan2(k.y - S.y, k.x - S.x) + rand(-.3, .3), d = rand(30, 50);
+  k.fly = { fx: k.x, fy: k.y, tx: clamp(k.x + Math.cos(a) * d, CUSH_R, ROOM.w - CUSH_R), ty: clamp(k.y + Math.sin(a) * d, CUSH_R, ROOM.h - CUSH_R), p: 0, dur: .4, spin: rand(-5, 5) };
+  k.ai = undefined;
+}
 function swatCushion(S, c) {
   const h = toW(S, 0, G.headY);
   const a = Math.atan2(c.y - h[1], c.x - h[0]) + rand(-.4, .4), d = rand(55, 90);
@@ -458,6 +480,7 @@ function kickBlanket(S, b) {
   const bel = toW(S, 0, 6), a = rand(0, TAU), d = rand(75, 115);
   const tx = clamp(bel[0] + Math.cos(a) * d, 34, ROOM.w - 34), ty = clamp(bel[1] + Math.sin(a) * d, 28, ROOM.h - 28);
   b.wrapped = false; b.fly = { fx: bel[0], fy: bel[1], tx, ty, p: 0, dur: .55, spin: rand(-5, 5) }; b.noWrap = S.t + 3;
+  S.heat = 0; S.heatMax = rand(HEAT_MIN, HEAT_MAX); S.hotUntil = S.t + HOT_SEC;
   S.stats.kicks++; emit(S, 'kickb');
   S.ev = { type: 'kick', dur: .35, p: 0, dx: rand(-4, 4), dy: rand(-4, 4), da: rand(-.1, .1), ax: 0, ay: 0, aa: 0 };
   setPose(S, choosePose(S, true));
@@ -477,8 +500,12 @@ function startEvent(S) {
   if (bl) { const dx = bl.x - S.x, dy = bl.y - S.y, m = Math.hypot(dx, dy) || 1; vr = (dx * rx + dy * ry) / m; vh = (dx * hx + dy * hy) / m; bw = m < 40 ? .3 : 1; }
   const ev = { type: '', dur: .5, p: 0, dx: 0, dy: 0, da: 0, ax: 0, ay: 0, aa: 0 };
   let poseP = .7, kind = '';
-  const fc = faceCushion(S, 8), kc = nearFeetCushion(S), r = Math.random();
-  if (fc && Math.random() < SWAT_P) {
+  const fc = faceCushion(S, 8), kc = nearFeetCushion(S), pc = pinchCushions(S), r = Math.random();
+  if (pc && Math.random() < PINCH_P) {
+    ev.type = 'shove'; ev.dur = .45; ev.dx = rand(-3, 3); ev.dy = rand(-3, 3); ev.da = rand(-.1, .1);
+    for (const k of pc) pushAway(S, k);
+    S.stats.shoves++; kind = 'shovec'; poseP = 1;
+  } else if (fc && Math.random() < SWAT_P) {
     ev.type = 'swat'; ev.dur = .4; ev.dx = rand(-3, 3); ev.dy = rand(-3, 3); ev.da = rand(-.1, .1);
     swatCushion(S, fc); S.stats.swats++; kind = 'swatc'; poseP = 1;
   } else if (kc && Math.random() < .4) {
@@ -573,11 +600,12 @@ function update(S, dt) {
   settle(S);
 
   S.onFrac = onFracOf(S);
-  const stuffy = !!faceCushion(S, 0);
+  const stuffy = !!faceCushion(S, 0), pinched = !!pinchCushions(S);
   if (stuffy && !S.stuffy && S.t - S.stuffyMsg > 3) { S.stuffyMsg = S.t; emit(S, 'stuffy'); }
-  S.stuffy = stuffy;
-  // 安眠度＝眠りの質の平均。顔にクッションが当たっていると息苦しくて眠りが浅くなる
-  if (S.t <= NIGHT_SEC) { S.stats.onSum += sleepQ(S.onFrac) * (stuffy ? FACE_Q : 1) * dt; S.stats.onDur += dt; }
+  if (pinched && !S.pinched && S.t - S.pinchMsg > 3) { S.pinchMsg = S.t; emit(S, 'pinch'); }
+  S.stuffy = stuffy; S.pinched = pinched;
+  // 安眠度＝眠りの質の平均。顔にクッションが当たっている（息苦しい）、胴体を両側から挟まれている（寝苦しい）と眠りが浅くなる
+  if (S.t <= NIGHT_SEC) { S.stats.onSum += sleepQ(S.onFrac) * (stuffy ? FACE_Q : 1) * (pinched ? PINCH_Q : 1) * dt; S.stats.onDur += dt; }
   const bel = toW(S, 0, 6), on = inFuton(bel[0], bel[1], 0);
   if (S.torsoOn && !on) { S.stats.falls++; emit(S, 'fall'); S.shake = .35; }
   else if (!S.torsoOn && on) emit(S, 'back');
@@ -591,15 +619,17 @@ function update(S, dt) {
       continue;
     }
     if (b.wrapped) {
-      b.x = bel[0]; b.y = bel[1]; b.wrapT -= dt;
-      if (b.wrapT <= 0 && !S.ev && S.t < NIGHT_SEC - .3) kickBlanket(S, b);
+      b.x = bel[0]; b.y = bel[1]; S.heat += dt;
+      if (S.heat >= S.heatMax && !S.ev && S.t < NIGHT_SEC - .3) kickBlanket(S, b);
       continue;
     }
-    if (S.t >= b.noWrap && Math.hypot(bel[0] - b.x, bel[1] - b.y) < 30) {
-      b.wrapped = true; b.wrapT = rand(12, 17); S.stats.wraps++; emit(S, 'wrap');
+    if (S.t >= b.noWrap && S.t >= S.hotUntil && Math.hypot(bel[0] - b.x, bel[1] - b.y) < 30) {
+      b.wrapped = true; S.stats.wraps++; emit(S, 'wrap');
       setPose(S, { key: S.facing % 2 ? 'maru' : 'kiotsuke', mir: S.facing === 3 });
     }
   }
+
+  if (!isWrapped(S)) S.heat = Math.max(0, S.heat - HEAT_COOL * dt);
 
   S.zT -= dt;
   if (S.zT <= 0) {
@@ -649,8 +679,8 @@ function handleTap(S, x, y, tool) {
   let moved = false;
   if (S.blankets.length >= MAX_BLANKET) { const o = S.blankets.shift(); if (!o.wrapped) S.fx.push({ k: 'poof', x: o.x, y: o.y, t: 0, life: .4 }); moved = true; }
   const bel = toW(S, 0, 6), onBody = Math.hypot(bel[0] - nx, bel[1] - ny) < 30;
-  S.blankets.push({ x: nx, y: ny, rot: rand(-.3, .3), wrapped: false, wrapT: 0, fly: null, noWrap: 0, id: ++S.seq });
-  emit(S, onBody ? 'cover_b' : (moved ? 'move_b' : 'place_b')); return moved ? 'move' : 'place';
+  S.blankets.push({ x: nx, y: ny, rot: rand(-.3, .3), wrapped: false, fly: null, noWrap: 0, id: ++S.seq });
+  emit(S, onBody ? (S.t < S.hotUntil ? 'hot_b' : 'cover_b') : (moved ? 'move_b' : 'place_b')); return moved ? 'move' : 'place';
 }
 
 /* ---- お手本デモのCPU ---- */
@@ -1056,12 +1086,14 @@ const LOGMAP = {
   scootdown: ['ズリズリ…（足のほうへずれた）', 1, 'scoot'], scootup: ['ズリズリ…（頭のほうへずれた）', 1, 'scoot'],
   fidget: ['ムニャムニャ…', 0, 'fidget'],
   kickc: ['ポーン！クッションをけとばした', 2, 'kickc'], swatc: ['ペシッ！顔のクッションを払いのけた', 2, 'kickc'],
-  stuffy: ['むぎゅ…顔にクッションが当たって息苦しい', 2, 'fidget'], kickb: ['バサッ！毛布をけとばした', 2, 'kickb'],
+  stuffy: ['むぎゅ…顔にクッションが当たって息苦しい', 2, 'fidget'],
+  pinch: ['ぎゅう…クッションに挟まれて寝苦しい', 2, 'fidget'], shovec: ['グイッ！挟んでいたクッションを押しのけた', 2, 'kickc'], kickb: ['バサッ！毛布をけとばした', 2, 'kickb'],
   bounce: ['ボヨン！クッションで止まった', 2, 'bounce'], wall: ['ゴンッ！壁にぶつかった', 2, 'wall'],
   fall: ['ドスン！布団から落ちた', 3, 'fall'], back: ['もぞもぞ…布団に戻った', 2, 'back'],
   wrap: ['ぬくぬく…毛布でおとなしくなった', 2, 'wrap'],
   place_c: ['クッションを置いた', 2, 'place'], move_c: ['いちばん古いクッションを動かした', 2, 'place'],
   place_b: ['毛布を置いた。寝ている人が寄ってくる', 2, 'placeb'], move_b: ['毛布を動かした', 2, 'placeb'], cover_b: ['毛布をかけた', 2, 'placeb'],
+  hot_b: ['あつい…（しばらく毛布をいやがる）', 2, 'invalid'],
   pick_c: ['クッションを回収した', 2, 'pick'], pick_b: ['毛布を回収した', 2, 'pick'], peel_b: ['毛布をはがした', 2, 'pick'],
   invalid: ['体の上にクッションは置けません（毛布はかけられます）', 3, 'invalid'],
 };
@@ -1305,13 +1337,15 @@ function initUI() {
       say(text, m[1], now);
       const f = SFX[m[2]]; if (f) f();
       if (k === 'fall' && navigator.vibrate) { try { navigator.vibrate(40); } catch (e) {} }
-      if (k.startsWith('kick') || k === 'swatc' || k === 'bounce') updateTray();
+      if (k.startsWith('kick') || k === 'swatc' || k === 'shovec' || k === 'bounce') updateTray();
     }
   }
   function idleText() {
     if (isWrapped(sim)) return 'ぬくぬく…';
     if (!sim.torsoOn) return 'さむい…（布団の外）';
     if (sim.stuffy) return 'むぎゅ…息苦しい';
+    if (sim.pinched) return 'ぎゅう…寝苦しい';
+    if (sim.t < sim.hotUntil) return 'あつい…';
     return 'スヤスヤ…';
   }
   function updateHud(now) {
