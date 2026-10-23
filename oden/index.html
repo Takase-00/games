@@ -315,7 +315,7 @@ button{font:inherit;color:inherit}
    おでん番
    ロジック（DOMに依存しない部分）
    ========================================================= */
-const VERSION = 'v5.1';
+const VERSION = 'v5.2';
 const DURATION = 60;        // 1回のプレイ時間（秒）
 const MELT = 9;             // 煮すぎになってから、溶けて消えるまでの秒数
 const NAMA_RATIO = 0.55;    // 食べ頃になる時刻のこの割合までは「生」
@@ -348,7 +348,7 @@ const SKINS = ['#F2D3B3','#E9C29E','#D9A77C','#C68B60'];
 
 // 売上の称号（高い順）
 const RANKS = [
-  { min:13000, title:'おでんの神様',     note:'出汁の香りだけで客が集まる、伝説の屋台です。' },
+  { min:12800, title:'おでんの神様',     note:'出汁の香りだけで客が集まる、伝説の屋台です。' },
   { min:9500,  title:'おでん屋の大将',   note:'食べ頃を見きわめる目は、もう一人前以上です。' },
   { min:8000,  title:'のれん分け目前',   note:'そろそろ自分の屋台を、という話が出てきました。' },
   { min:6500,  title:'一人前の鍋番',     note:'大将の背中が見えてきました。' },
@@ -643,7 +643,7 @@ const ACHV = [
   { key:'r5000',     title:'出汁を任された',     desc:'1回の売上が¥5,000に届いた',                 test:(s,g) => g.score >= 5000 },
   { key:'r6500',     title:'一人前の証',         desc:'1回の売上が¥6,500に届いた',                 test:(s,g) => g.score >= 6500 },
   { key:'r9500',     title:'大将の座',           desc:'1回の売上が¥9,500に届いた',                 test:(s,g) => g.score >= 9500 },
-  { key:'r13000',    title:'おでんの神域',       desc:'1回の売上が¥13,000に届いた',                test:(s,g) => g.score >= 13000 },
+  { key:'r13000',    title:'おでんの神域',       desc:'1回の売上が¥12,800に届いた',                test:(s,g) => g.score >= RANKS[0].min },   // キーは v5.1 までの基準（¥13,000）のまま
   // 腕前
   { key:'goku15',    title:'極上の目利き',       desc:'1回で★極上を15品出した',                    test:s => s.best >= 15 },
   { key:'goku25',    title:'極上づくし',         desc:'1回で★極上を25品出した',                    test:s => s.best >= 25 },
