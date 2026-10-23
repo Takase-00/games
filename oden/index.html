@@ -265,12 +265,12 @@ button{font:inherit;color:inherit}
    おでん番
    ロジック（DOMに依存しない部分）
    ========================================================= */
-const VERSION = 'v2.2';
+const VERSION = 'v3.0';
 const DURATION = 60;        // 1回のプレイ時間（秒）
 const MELT = 9;             // 煮すぎになってから、溶けて消えるまでの秒数
 const NAMA_RATIO = 0.55;    // 食べ頃になる時刻のこの割合までは「生」
 const GOKU_BAND = 0.2;      // 食べ頃の窓の中央 ±20% が「極上」
-const SEATS = 4, COLS = 4, ROWS = 3, CELLS = COLS*ROWS;
+const SEATS = 5, COLS = 4, ROWS = 3, CELLS = COLS*ROWS;
 const GOOD = 0.9, BEST = 1.5;
 const LOSS_RATE = 1.0;      // 食品ロス（まかない・煮すぎて溶けた具）は、値段のこの割合を売上から引く
 
@@ -297,7 +297,7 @@ const LOOK_KINDS = ['salary','ol','gakusei','obachan','worker'];
 const SKINS = ['#F2D3B3','#E9C29E','#D9A77C','#C68B60'];
 
 // 称号の基準（売上）
-const RANK_S = 12000, RANK_A = 8500, RANK_B = 5500, RANK_C = 3000;
+const RANK_S = 13000, RANK_A = 9500, RANK_B = 6500, RANK_C = 4000;
 
 function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
 function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
@@ -332,7 +332,7 @@ function newGame(opts){
     rnd: mulberry32(seed), demo: !!opts.demo,
     t:0, duration:dur, timeLeft:dur, ended:false,
     cells: new Array(CELLS).fill(null), seats: new Array(SEATS).fill(null),
-    spawnCd: [0.4, 1.4, 2.6, 4.0], score:0, uid:0, custCount:0, events:[], aiCd:0.8,
+    spawnCd: [0.4, 1.4, 2.6, 4.0, 5.4], score:0, uid:0, custCount:0, events:[], aiCd:0.8,
     stats: { served:0, best:0, good:0, nama:0, kata:0, ok:0, goku:0, kuta:0, makanai:0, melted:0, overFail:0,
              crumble:0, whiteEgg:0, angry:0, happy:0, done:0, ojii:0, kid:0, tips:0, customers:0, loss:0, meltLoss:0 },
   };
@@ -897,12 +897,21 @@ function layout(){
 
 function bubbleGeom(si){
   const L = LAYOUT;
-  const x = si*L.seatW + 4, y = 6, w = L.seatW - 8, h = L.bubbleH;
-  const pad = 5, headH = Math.round(clamp(h*0.17,14,19)), barH = 6;
+  const x = si*L.seatW + 2, y = 6, w = L.seatW - 4, h = L.bubbleH;
+  const pad = 4, headH = Math.round(clamp(h*0.17,14,19)), barH = 6;
   const rowsTop = y + pad + headH + 3;
   const rowH = (h - pad*2 - headH - 3 - barH - 4)/3;
-  const ic = Math.max(10, Math.floor(Math.min(rowH - 1, 26)));
+  const ic = Math.max(10, Math.floor(Math.min(rowH - 1, 26, w*0.26)));   // 幅が狭いときは絵を小さくして、名前の幅を空ける
   return { x, y, w, h, pad, headH, barH, rowsTop, rowH, ic };
+}
+// 幅に収まらない文字は、まず横だけ縮め（7割まで）、それでも入らなければ文字を小さくする
+function fitText(c, text, x, y, maxW, fs, weight, minFs){
+  c.font = `${weight} ${fs}px ${FONT}`;
+  let tw = c.measureText(text).width;
+  if (tw > maxW / 0.7 && maxW > 0){ fs = Math.max(minFs, fs * maxW / (tw * 0.7)); c.font = `${weight} ${fs}px ${FONT}`; tw = c.measureText(text).width; }
+  const sx = tw > maxW && maxW > 0 ? maxW / tw : 1;
+  c.save(); c.translate(x, y); c.scale(sx, 1); c.fillText(text, 0, 0); c.restore();
+  return tw * sx;
 }
 function headR(){
   const L = LAYOUT;
@@ -1186,18 +1195,14 @@ function drawBubble(g, cu, si){
   c.beginPath(); c.moveTo(cx - 7,b.y + b.h - 1); c.lineTo(cx,b.y + b.h + 7); c.lineTo(cx + 7,b.y + b.h - 1); c.fillStyle = COL.bubble; c.fill();
   c.beginPath(); c.moveTo(cx - 7,b.y + b.h); c.lineTo(cx,b.y + b.h + 7); c.lineTo(cx + 7,b.y + b.h); c.stroke();
   // 見出し（好み）
-  const t0 = PREF_LABEL[cu.pref], maxT = b.w - b.pad*2 - (cu.pref === 'normal' ? 0 : 10);
-  let hf = Math.round(b.headH*0.72);
-  c.font = `700 ${hf}px ${FONT}`;
-  const tw0 = c.measureText(t0).width;
-  if (tw0 > maxT){ hf = Math.max(8, Math.floor(hf*maxT/tw0)); c.font = `700 ${hf}px ${FONT}`; }
+  const t0 = PREF_LABEL[cu.pref], hf = Math.round(b.headH*0.72), hy = b.y + b.pad + b.headH/2 + 0.5;
   c.textBaseline = 'middle'; c.textAlign = 'left';
   if (cu.pref === 'normal'){
-    c.fillStyle = COL.bubbleSub; c.fillText(t0, b.x + b.pad, b.y + b.pad + b.headH/2 + 0.5, b.w - b.pad*2);
+    c.fillStyle = COL.bubbleSub; fitText(c, t0, b.x + b.pad, hy, b.w - b.pad*2, hf, 700, 9);
   } else {
-    const t = t0, tw = c.measureText(t).width, chipW = Math.min(b.w - b.pad*2 + 2, tw + 12);
+    const chipW = b.w - b.pad*2 + 2;
     rr(c,b.x + b.pad - 2,b.y + b.pad,chipW,b.headH,b.headH/2); c.fillStyle = cu.pref === 'kuta' ? '#6B3F1D' : '#2F6A8A'; c.fill();
-    c.fillStyle = '#FFF8EE'; c.fillText(t, b.x + b.pad + 4, b.y + b.pad + b.headH/2 + 0.5, chipW - 10);
+    c.fillStyle = '#FFF8EE'; fitText(c, t0, b.x + b.pad + 3, hy, chipW - 8, hf, 700, 9);
   }
   // 注文の行
   cu.order.forEach((o,j) => {
@@ -1207,13 +1212,9 @@ function drawBubble(g, cu, si){
     c.globalAlpha = a*(o.served ? 0.5 : 1);
     c.drawImage(getIcon(o.type, stg, b.ic), ix, midY - b.ic/2, b.ic, b.ic);
     const name = TYPES[o.type].name;
-    const avail = b.w - b.pad*2 - b.ic;
-    let fs = Math.min(14, b.rowH*0.62);
-    c.font = `700 ${fs}px ${FONT}`;
-    const tw = c.measureText(name).width;
-    if (tw > avail && avail > 0){ fs = Math.max(8, fs*avail/tw); c.font = `700 ${fs}px ${FONT}`; }
+    const avail = b.w - b.pad*2 - b.ic + 1;
     c.fillStyle = COL.bubbleInk; c.textAlign = 'left';
-    c.fillText(name, b.x + b.pad + b.ic, midY + 1);
+    fitText(c, name, b.x + b.pad + b.ic - 1, midY + 1, avail, Math.min(14, b.rowH*0.62), 700, 9);
     if (o.served){
       c.globalAlpha = a;
       const mk = valueMark(o.value), mx = ix + b.ic*0.55;
