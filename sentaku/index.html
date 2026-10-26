@@ -240,7 +240,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 (function(){
 'use strict';
 const TEST = typeof window !== 'undefined' && !!window.__SENTAKU_TEST;
-const VERSION = 'v2.0';
+const VERSION = 'v2.1';
 
 /* ================= 定数 ================= */
 const W = 390, H = 760;          // 論理サイズ
@@ -249,8 +249,8 @@ const POLE_Y = 230, POLE_L = 16, POLE_R = 374;
 const BASKET = { x: 195, y: 690, w: 176, h: 86 };
 const TC = [195, 392];           // たたむ台の中心
 const HANG_TIME = 16, FOLD_TIME = 26;
-const PIN_PERF = 1.5, PIN_TAU = 8;      // とめ：ぴったり許容(px) / 0点になるまでの幅
-const FOLD_PERF = 1.5, FOLD_TAU = 10;   // 折り：ぴったり許容 / 0点になるまでの幅
+const PIN_PERF = 2.5, PIN_Q0 = 1.5, PIN_TAU = 8;      // とめ：ぴったり許容(px) / 点が減りはじめるずれ / 0点になるまでの幅
+const FOLD_PERF = 2.5, FOLD_Q0 = 1.5, FOLD_TAU = 10;  // 折り：ぴったり許容 / 点が減りはじめるずれ / 0点になるまでの幅
 const PIN_EXP = 1, FOLD_EXP = 2;        // 1枚のしあがり = とめ^1 × 折り^2
 const FOLD_ARM = 35;                    // 角度のずれを測る範囲（点線の中心から±px）
 const DAYS = [
@@ -574,7 +574,7 @@ function pinAttempt(G, x) {
   const outLim = T.outMiss !== null ? T.outMiss : T.outSleeve;
   const miss = e < -outLim || e > T.inMiss;
   const ae = Math.abs(e);
-  const q = miss ? 0 : clamp(1 - (ae - PIN_PERF) / PIN_TAU, 0, 1);
+  const q = miss ? 0 : ae <= PIN_PERF ? 1 : clamp(1 - (ae - PIN_Q0) / PIN_TAU, 0, 1);
   const hDen = (e < 0 && T.outMiss !== null) ? T.outMiss + 2 : 22;
   const h = miss ? 0 : clamp(1 - ae / hDen, 0, 1);
   g.pins.push({ side, e, miss, x, q, h });
@@ -652,7 +652,7 @@ function commitFold(G) {
     const ang = Math.acos(Math.min(1, dot));
     const off = Math.abs((SM[0] - M[0]) * n[0] + (SM[1] - M[1]) * n[1]);
     D = ang > 1.2 ? 999 : off + Math.min(sp.len / 2, FOLD_ARM) * Math.tan(ang);
-    q = clamp(1 - (D - FOLD_PERF) / FOLD_TAU, 0, 1);
+    q = D <= FOLD_PERF ? 1 : clamp(1 - (D - FOLD_Q0) / FOLD_TAU, 0, 1);
     if (D <= FOLD_PERF) { label = '◎ ぴったり'; G.stats.foldPerfect++; }
     else if (D <= 4) label = '○ おしい';
     else if (D <= 9) label = '△ ずれ';
