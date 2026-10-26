@@ -221,7 +221,7 @@ body.is-title .hud{visibility:hidden}
   <div class="card">
     <p class="tag">毎朝どんどん混んでいく満員電車。<br>何日連続で出勤できる？</p>
     <ol class="rules">
-      <li><span class="n">1</span><span>降りる人がいなくなるまで、ドアの横で待つ</span></li>
+      <li><span class="n">1</span><span>降りる人がいなくなるまで、ドアの横で待つ<br>（割りこむと足止め）</span></li>
       <li><span class="n">2</span><span>画面を長押しすると、指の方へぐいぐい進む</span></li>
       <li><span class="n">3</span><span>ドアが閉まるまでに車内に入れないと遅刻</span></li>
     </ol>
@@ -277,7 +277,7 @@ body.is-title .hud{visibility:hidden}
 <script>
 (() => {
 'use strict';
-const VERSION = 'v2.0';
+const VERSION = 'v3.0';
 
 // ==SIM START==
 // ---- world (1 unit ≒ 4cm). car-local x: 0..100 is the area around our door ----
@@ -287,6 +287,7 @@ const CAR_X0 = -70, CAR_X1 = 620;
 const T_ARRIVE = .8, T_OPEN = .3, T_WARN = .9, T_CLOSE = .45, T_DEPART = .9, T_NEXT = 1.1;
 const K1 = 70, K3 = 10, KW = 520, KW3 = 40, DAMP = 6.5, MAXV = 70;
 const P_R = 5.4, P_M = 1.2, P_F = 200;
+const STUN = 1.4;  // 降りる人がいるうちにドアの正面へ出たり、ぶつかったりしたとき、押せなくなる秒数
 const NPC_F = 175, EXIT_F = 320, EXIT_F2 = 200;
 const QY = 84, QY2 = 94;
 const CTL = { arrive:1, open:1, board:1, warn:1, close:1 };
@@ -299,11 +300,14 @@ const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const ease = k => k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
 
+// 乗車時間（秒）：序盤のうちに短くなり、2.2秒で下げ止まる
+function boardTime(d) { return d <= 8 ? 3.6 - 0.16 * (d - 1) : Math.max(2.2, 2.5 - 0.02 * (d - 8)); }
 function diff(d) {
   return {
-    crowd: Math.min(70, Math.round(d <= 10 ? 10 + 2.3 * (d - 1) : 30.7 + 1.3 * (d - 10))),
-    board: Math.max(2.8, 6 - 0.15 * (d - 1)),
-    exits: d === 1 ? 2 : ri(d < 6 ? 1 : 0, d < 12 ? 3 : 2),
+    // 混雑：7日目までに一気に増え、その後はゆっくり、17日目からは少し速く増える
+    crowd: Math.min(70, Math.round(d <= 7 ? 14 + 2.2 * (d - 1) : 27.2 + 0.35 * (d - 7) + 0.5 * Math.max(0, d - 16))),
+    board: boardTime(d),
+    exits: d === 1 ? 2 : ri(1, d < 12 ? 3 : 2),   // 毎日だれかが降りる（降りる人を待つ判断が毎日いる）
     npcs: d < 4 ? 0 : d === 4 ? 1 : d < 8 ? ri(0, 1) : d < 14 ? ri(1, 2) : ri(1, 3),
     pBack: d >= 3 ? Math.min(.3, .08 + .015 * (d - 3)) : 0,
     pBig: d >= 6 ? Math.min(.15, .04 + .01 * (d - 6)) : 0,
@@ -349,7 +353,7 @@ function mk(kind, x, y, r, m) {
 function newState(demo) {
   return { demo, day:1, days:0, score:0, phase:'arrive', pt:0, time:0, carX:300, doorC:1,
     bodies:[], player:null, seated:[], decor:[], fx:[], events:[], input:{ hold:false, tx:50, ty:40 }, rects:[],
-    D:diff(1), boardDur:6, exitLeft:0, ok:false, inRem:-1, warned:false, nextPuff:0, nextOuch:0, shake:0,
+    D:diff(1), boardDur:6, exitLeft:0, ok:false, inRem:-1, stunT:0, nextPuff:0, nextOuch:0, shake:0,
     aiNext:0, aiT:[50,40], prepared:false, reason:'', lastGain:null, pinchGap:0,
     cnt:{ giri:0, deep:0, smart:0 }, warnN:0 };
 }
@@ -431,7 +435,7 @@ function npcForce(S, b) {
 function behave(S, b) {
   switch (b.kind) {
     case 'crowd': crowdForce(S, b); break;
-    case 'player': if (S.input.hold && CTL[S.phase]) push(b, S.input.tx, S.input.ty, P_F, 4); break;
+    case 'player': if (S.input.hold && CTL[S.phase] && S.time >= S.stunT) push(b, S.input.tx, S.input.ty, P_F, 4); break;
     case 'npc': npcForce(S, b); break;
     case 'exit': exitForce(S, b); break;
   }
@@ -527,7 +531,7 @@ function genDecor(S) {
   }
 }
 function setupDay(S) {
-  S.D = diff(S.day); S.boardDur = S.D.board; S.carX = 300; S.doorC = 1; S.ok = false; S.inRem = -1; S.warned = false;
+  S.D = diff(S.day); S.boardDur = S.D.board; S.carX = 300; S.doorC = 1; S.ok = false; S.inRem = -1; S.stunT = 0;
   S.fx = []; S.shake = 0; S.exitLeft = 0; S.aiT = [50, 40]; S.aiNext = 0; S.input.hold = false; S.pinchGap = 0;
   genCrowd(S);
   const side = Math.random() < .5 ? -1 : 1;
@@ -575,13 +579,15 @@ function resolveClose(S) {
   if (p.y < 63) {
     S.ok = true; S.days++;
     const depth = 63 - p.y;
-    const sp = Math.round(clamp((S.inRem < 0 ? 0 : S.inRem) * 12, 0, 60));
+    // 早さボーナス：その日の持ち時間（乗車時間＋発車ベル＋ドアが閉まるまで）のうち、残して入った割合で決まる
+    const win = S.boardDur + T_WARN + T_CLOSE;
+    const sp = Math.round(clamp((S.inRem < 0 ? 0 : S.inRem) / win * 100, 0, 60));
     const dp = Math.round(clamp((depth - 6) * 2.4, 0, 60));
     const gain = 100 + sp + dp;
     if (!S.demo) S.score += gain;
     let label = '乗車成功！';
     if (S.inRem >= 0 && S.inRem < .7) label = 'ギリギリセーフ！';
-    else if (dp >= 45) label = '奥までスイスイ！';
+    else if (dp >= 36) label = '奥までスイスイ！';
     else if (sp >= 40) label = 'スマート乗車！';
     S.lastGain = { gain, sp, dp, label };
     if (!S.demo){ if (label === 'ギリギリセーフ！') S.cnt.giri++; else if (label === '奥までスイスイ！') S.cnt.deep++; else if (label === 'スマート乗車！') S.cnt.smart++; }
@@ -603,15 +609,17 @@ function trackPlayer(S) {
   const p = S.player; if (!p) return;
   const rem = remaining(S);
   if (rem >= 0) { if (p.y < 62.5) { if (S.inRem < 0) S.inRem = rem; } else S.inRem = -1; }
-  if (CTL[S.phase] && S.input.hold && p.press > 2.2 && S.time > S.nextPuff) {
+  if (CTL[S.phase] && S.input.hold && S.time >= S.stunT && p.press > 2.2 && S.time > S.nextPuff) {
     S.nextPuff = S.time + .42 + Math.random() * .2;
     let dx = S.input.tx - p.x, dy = S.input.ty - p.y; const d = Math.hypot(dx, dy) || 1; dx /= d; dy /= d;
     S.fx.push({ kind:'puff', x:p.x + dx * p.r * 1.1 + rnd(-2, 2), y:p.y + dy * p.r * 1.1 - 3, text:pick(PUFFS), t:0, life:.8 });
     S.events.push({ t:'puff', v:Math.min(1, p.press / 5) });
   }
-  if (S.phase === 'board' && !S.warned && p.hitExit > .8 && S.input.hold) {
-    S.warned = true; S.warnN++;
-    S.fx.push({ kind:'warn', x:p.x, y:p.y - 9, text:'降りる人が先！', t:0, life:1.2 });
+  // 降りる人がいるうちに、押しながらドアの正面へ出たり降りる人にぶつかったりすると、注意されて少しのあいだ押せなくなる
+  const cutIn = S.exitLeft > 0 && Math.abs(p.x - 50) < 14 && p.y < 80;
+  if (S.phase === 'board' && S.input.hold && S.time >= S.stunT && (p.hitExit > .8 || cutIn)) {
+    S.stunT = S.time + STUN; S.warnN++;
+    S.fx.push({ kind:'warn', x:p.x, y:p.y - 9, text:'降りる人が先！', t:0, life:STUN });
     S.events.push({ t:'exitwarn' });
   }
   if (S.time > S.nextOuch && (S.phase === 'board' || S.phase === 'warn')) {
@@ -1189,7 +1197,7 @@ function hintFor(d) {
   if (d === 8) return 'ドア前から動かない人がいる…';
   if (d === 12) return 'せっかちな人に気をつけて';
   if (d === 14) return '動かない人が2人に…';
-  if (d % 3 === 0) return 'ドアが閉まるのが早くなった';
+  if (d % 3 === 0 && boardTime(d) < boardTime(d - 3)) return 'ドアが閉まるのが早くなった';
   return pick(['今日も満員', '昨日より混んでいる…', 'ぎゅうぎゅうの予感', '乗車率がさらにアップ']);
 }
 function runWipe(day) {
@@ -1404,12 +1412,12 @@ const ACH = makeAchv({
     { key:'giri3',   title:'ギリギリの美学',     desc:'1回でギリギリセーフを3回した',             test:x => x.S.cnt.giri >= 3 },
     { key:'sc3000',  title:'定期券の元を取った', desc:'1回で3,000点を取った',                     test:x => x.score >= 3000 },
     { key:'sc3500',  title:'通勤マスター',       desc:'1回で3,500点を取った',                     test:x => x.score >= 3500 },
-    { key:'manner',  title:'マナーの良い乗客',   desc:'10日以上連続で出勤して、降りる人に一度もぶつからなかった', test:x => x.days >= 10 && x.S.warnN === 0 },
+    { key:'manner',  title:'マナーの良い乗客',   desc:'10日以上連続で出勤して、降りる人がいるときに一度も注意されなかった', test:x => x.days >= 10 && x.S.warnN === 0 },
     // 変な通勤
     { key:'late0',   title:'初日から遅刻',       desc:'1日目に遅刻した',                          test:x => x.days === 0 },
     { key:'pinch0',  title:'ドアの洗礼',         desc:'1日目にドアに挟まった',                    test:x => x.days === 0 && x.reason === 'pinch' },
     { key:'miss',    title:'乗りそびれ',         desc:'車内に入れずに乗りそびれた',               test:x => x.reason === 'miss' },
-    { key:'warn3',   title:'降りる人が先です',   desc:'1回で3回以上、降りる人にぶつかって注意された', test:x => x.S.warnN >= 3 },
+    { key:'warn3',   title:'降りる人が先です',   desc:'1回で3回以上、降りる人のじゃまをして注意された', test:x => x.S.warnN >= 3 },
     { key:'monday',  title:'ブルーマンデー',     desc:'5日以上出勤したあと、月曜日に遅刻した',    test:x => x.days >= 5 && x.days % 5 === 0 },
     { key:'friday',  title:'花金の悲劇',         desc:'金曜日に遅刻した',                         test:x => x.days % 5 === 4 },
   ],
